@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Venue;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class VenueController extends Controller
 {
     public function index()
     {
+        Log::info('Log test: Laravel log file created.');
         $venues = Venue::all();
         return view('venues.index', compact('venues'));
     }
@@ -23,16 +25,12 @@ class VenueController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'ownership' => 'required|in:club,third_party,private',
-            'address' => 'required|string',
+            'address' => 'required|string|max:500',
         ]);
 
         Venue::create($request->all());
-        return redirect()->route('venues.index')->with('success', 'Venue created successfully.');
-    }
 
-    public function show(string $id)
-    {
-        //
+        return redirect()->route('venues.index')->with('success', 'Venue berhasil ditambahkan.');
     }
 
     public function edit(Venue $venue)
@@ -45,16 +43,11 @@ class VenueController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'ownership' => 'required|in:club,third_party,private',
-            'address' => 'required|string',
+            'address' => 'required|string|max:500',
         ]);
 
         $venue->update($request->all());
-        return redirect()->route('venues.index')->with('success', 'Venue updated successfully.');
-    }
 
-    public function destroy(Venue $venue)
-    {
-        $venue->delete();
-        return redirect()->route('venues.index')->with('success', 'Venue deleted successfully.');
+        return redirect()->route('venues.index')->with('success', 'Venue berhasil diperbarui.');
     }
 }

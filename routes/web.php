@@ -5,6 +5,7 @@ use App\Http\Controllers\Apps\RoleManagementController;
 use App\Http\Controllers\Apps\UserManagementController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\VenueController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,11 +19,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'index']);
-
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::name('user-management.')->group(function () {
         Route::resource('/user-management/users', UserManagementController::class);
@@ -30,6 +29,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('/user-management/permissions', PermissionManagementController::class);
     });
 
+    Route::group(['middleware' => ['role:Super Admin|Admin']], function () {
+        Route::resource('venues', VenueController::class);
+    });
 });
 
 Route::middleware(['role:Super Admin'])->group(function () {
@@ -40,7 +42,6 @@ Route::middleware(['role:Pelatih'])->group(function () {
     Route::get('/trainer/dashboard', [TrainerController::class, 'index']);
 });
 
-Route::resource('venues', VenueController::class)->middleware('role:Super Admin|Admin');
 Route::resource('courses', CourseController::class)->middleware('role:Super Admin|Admin');
 Route::resource('trainers', TrainerController::class)->middleware('role:Super Admin|Admin');
 Route::resource('students', StudentController::class)->middleware('role:Super Admin|Admin');
@@ -50,5 +51,7 @@ Route::get('/error', function () {
 });
 
 Route::get('/auth/redirect/{provider}', [SocialiteController::class, 'redirect']);
+
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
 
 require __DIR__ . '/auth.php';

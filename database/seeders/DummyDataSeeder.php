@@ -56,5 +56,13 @@ class DummyDataSeeder extends Seeder
         $students->each(function ($student) use ($courses) {
             $student->courses()->attach($courses->random(2)->pluck('id')); // Relasi many-to-many
         });
+
+        // Tambahkan di bagian atas seeder
+        User::create([
+            'name' => 'Super Admin',
+            'email' => 'superadmin@example.com', // Ganti dengan email yang Anda inginkan
+            'password' => Hash::make('password123'), // Ganti dengan password yang Anda inginkan
+            'type' => 'member',
+        ])->assignRole('Super Admin');
     }
 }
