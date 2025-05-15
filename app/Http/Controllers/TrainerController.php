@@ -16,19 +16,19 @@ class TrainerController extends Controller
 
     public function create()
     {
-        $users = User::whereDoesntHave('roles')->get(); // Hanya user tanpa role
+        $users = User::doesntHave('trainer')->get(); // Hanya user tanpa relasi trainer
         return view('trainers.create', compact('users'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'user_id' => 'required|exists:users,id|unique:trainers,user_id',
             'type' => 'required|in:venue,club',
         ]);
 
         Trainer::create($request->all());
-        return redirect()->route('trainers.index')->with('success', 'Trainer created successfully.');
+        return redirect()->route('trainers.index')->with('success', 'Trainer berhasil ditambahkan.');
     }
 
     public function edit(Trainer $trainer)
@@ -40,17 +40,17 @@ class TrainerController extends Controller
     public function update(Request $request, Trainer $trainer)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'user_id' => 'required|exists:users,id|unique:trainers,user_id,' . $trainer->id,
             'type' => 'required|in:venue,club',
         ]);
 
         $trainer->update($request->all());
-        return redirect()->route('trainers.index')->with('success', 'Trainer updated successfully.');
+        return redirect()->route('trainers.index')->with('success', 'Trainer berhasil diperbarui.');
     }
 
     public function destroy(Trainer $trainer)
     {
         $trainer->delete();
-        return redirect()->route('trainers.index')->with('success', 'Trainer deleted successfully.');
+        return redirect()->route('trainers.index')->with('success', 'Trainer berhasil dihapus.');
     }
 }

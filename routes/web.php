@@ -6,6 +6,8 @@ use App\Http\Controllers\Apps\UserManagementController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\VenueController;
+use App\Http\Controllers\TrainerController;
+use App\Http\Controllers\StudentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -45,6 +47,10 @@ Route::middleware(['role:Pelatih'])->group(function () {
 Route::resource('courses', CourseController::class)->middleware('role:Super Admin|Admin');
 Route::resource('trainers', TrainerController::class)->middleware('role:Super Admin|Admin');
 Route::resource('students', StudentController::class)->middleware('role:Super Admin|Admin');
+Route::resource('payments', PaymentController::class)->middleware('role:Super Admin|Admin');
+
+// Tambahkan rute untuk payments murid
+Route::get('students/{student}/payments', [StudentController::class, 'payments'])->name('students.payments');
 
 Route::get('/error', function () {
     abort(500);

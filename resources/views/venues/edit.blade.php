@@ -2,6 +2,16 @@
     
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
         <div class="container-xxl" id="kt_content_container">
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <div class="card card-custom">
                 <div class="card-header">
                     <h3 class="card-title">Edit Venue</h3>

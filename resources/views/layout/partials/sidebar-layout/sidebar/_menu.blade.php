@@ -61,11 +61,30 @@
 			<!--end:Menu item-->
 
 			<!--begin:Menu item-->
-			<div class="menu-item">
-				<a class="menu-link {{ request()->routeIs('students.*') ? 'active' : '' }}" href="{{ route('students.index') }}">
+			<div class="menu-item menu-accordion {{ request()->routeIs('students.*', 'payments.*') ? 'here show' : '' }}">
+				<span class="menu-link">
 					<span class="menu-icon">{!! getIcon('users', 'fs-2') !!}</span>
-					<span class="menu-title">Students</span>
-				</a>
+					<span class="menu-title">Manajemen Murid</span>
+					<span class="menu-arrow"></span>
+				</span>
+				<div class="menu-sub menu-sub-accordion">
+					<div class="menu-item">
+						<a class="menu-link {{ request()->routeIs('students.*') ? 'active' : '' }}" href="{{ route('students.index') }}">
+							<span class="menu-bullet">
+								<span class="bullet bullet-dot"></span>
+							</span>
+							<span class="menu-title">Students</span>
+						</a>
+					</div>
+					<div class="menu-item">
+						<a class="menu-link {{ request()->routeIs('payments.*') ? 'active' : '' }}" href="{{ route('payments.index') }}">
+							<span class="menu-bullet">
+								<span class="bullet bullet-dot"></span>
+							</span>
+							<span class="menu-title">Payments</span>
+						</a>
+					</div>
+				</div>
 			</div>
 			<!--end:Menu item-->
 
@@ -103,6 +122,7 @@
 				</a>
 			</div>
 			<!--end:Menu item-->
+
 		</div>
 		<!--end::Menu-->
 	</div>

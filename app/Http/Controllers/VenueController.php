@@ -23,7 +23,7 @@ class VenueController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:venues,name',
             'ownership' => 'required|in:club,third_party,private',
             'address' => 'required|string|max:500',
         ]);
@@ -41,7 +41,7 @@ class VenueController extends Controller
     public function update(Request $request, Venue $venue)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:venues,name,' . $venue->id,
             'ownership' => 'required|in:club,third_party,private',
             'address' => 'required|string|max:500',
         ]);

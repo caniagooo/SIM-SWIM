@@ -91,4 +91,13 @@
         <!--end::Col-->
     </div>
     <!--end::Row-->
+
+    <div class="col-md-3">
+        <a href="{{ route('payments.index') }}" class="card card-custom bg-primary text-white">
+            <div class="card-body">
+                <h4 class="card-title">Payments</h4>
+                <p>Kelola pembayaran murid</p>
+            </div>
+        </a>
+    </div>
 </x-default-layout>
