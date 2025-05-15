@@ -61,4 +61,10 @@ Route::get('/auth/redirect/{provider}', [SocialiteController::class, 'redirect']
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
 
+// Profil User
+Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+
+// Logout
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
 require __DIR__ . '/auth.php';

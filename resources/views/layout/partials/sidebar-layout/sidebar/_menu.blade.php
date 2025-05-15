@@ -70,6 +70,45 @@
                 </a>
             </div>
             <!--end:Menu item-->
+
+            <!--begin:Menu item-->
+            <div class="menu-item menu-accordion {{ request()->routeIs('user-management.*') ? 'here show' : '' }}" data-kt-menu-trigger="click">
+                <span class="menu-link">
+                    <span class="menu-icon">{!! getIcon('abstract-28', 'fs-2') !!}</span>
+                    <span class="menu-title">User Management</span>
+                    <span class="menu-arrow"></span>
+                </span>
+                <div class="menu-sub menu-sub-accordion">
+                    <!-- Menu Users -->
+                    <div class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('user-management.users.*') ? 'active' : '' }}" href="{{ route('user-management.users.index') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Users</span>
+                        </a>
+                    </div>
+                    <!-- Menu Roles -->
+                    <div class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('user-management.roles.*') ? 'active' : '' }}" href="{{ route('user-management.roles.index') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Roles</span>
+                        </a>
+                    </div>
+                    <!-- Menu Permissions -->
+                    <div class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('user-management.permissions.*') ? 'active' : '' }}" href="{{ route('user-management.permissions.index') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Permissions</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!--end:Menu item-->
         </div>
         <!--end::Menu-->
     </div>
