@@ -9,7 +9,11 @@ use App\Http\Controllers\VenueController;
 use App\Http\Controllers\TrainerController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseMaterialController;
 use Illuminate\Support\Facades\Route;
+use App\Models\CourseMaterial;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +53,7 @@ Route::resource('courses', CourseController::class)->middleware('role:Super Admi
 Route::resource('trainers', TrainerController::class)->middleware('role:Super Admin|Admin');
 Route::resource('students', StudentController::class)->middleware('role:Super Admin|Admin');
 Route::resource('payments', PaymentController::class)->middleware('role:Super Admin|Admin');
+Route::resource('course-materials', CourseMaterialController::class)->middleware('role:Super Admin|Admin');
 
 // Tambahkan rute untuk payments murid
 Route::get('students/{student}/payments', [StudentController::class, 'payments'])->name('students.payments');
@@ -66,5 +71,15 @@ Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show')
 
 // Logout
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+Route::get('/api/materials', function (Request $request) {
+    $level = $request->query('level'); // Menggunakan instance Request
+    \Log::info('Level:', ['level' => $level]);
+
+    $materials = CourseMaterial::where('level', $level)->get();
+    \Log::info('Materials:', $materials->toArray());
+
+    return $materials;
+});
 
 require __DIR__ . '/auth.php';

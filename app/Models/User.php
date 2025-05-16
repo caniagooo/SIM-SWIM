@@ -71,7 +71,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function trainer()
     {
-        return $this->hasOne(Trainer::class);
+        return $this->hasOne(Trainer::class, 'user_id');
     }
 
     public function student()
