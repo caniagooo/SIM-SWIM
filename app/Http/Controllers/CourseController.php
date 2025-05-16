@@ -30,14 +30,22 @@ class CourseController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|in:private,group,organization',
+            'type' => 'required|string',
+            'venue_id' => 'required|exists:venues,id',
+            'trainer_id' => 'required|exists:trainers,id',
             'sessions' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
             'basic_skills' => 'required|string',
         ]);
 
-        Course::create($request->all());
+        // Simpan data ke database
+        Course::create([
+            'type' => $request->type,
+            'venue_id' => $request->venue_id,
+            'sessions' => $request->sessions,
+            'price' => $request->price,
+            'basic_skills' => $request->basic_skills,
+        ]);
 
         return redirect()->route('courses.index')->with('success', 'Course created successfully.');
     }
