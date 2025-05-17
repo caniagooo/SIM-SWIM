@@ -3,25 +3,64 @@
         <h1 class="mb-4">Add Course</h1>
         <form action="{{ route('courses.store') }}" method="POST">
             @csrf
-            <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" name="name" id="name" class="form-control" value="{{ old('name') }}" required>
-            </div>
+
+            <!-- Tipe Kursus -->
             <div class="mb-3">
                 <label for="type" class="form-label">Type</label>
                 <select name="type" id="type" class="form-control" required>
+                    <option value="">Select Course Type</option>
                     <option value="private" {{ old('type') == 'private' ? 'selected' : '' }}>Private</option>
                     <option value="group" {{ old('type') == 'group' ? 'selected' : '' }}>Group</option>
                     <option value="organization" {{ old('type') == 'organization' ? 'selected' : '' }}>Organization</option>
                 </select>
             </div>
+
+            <!-- Tabel Murid -->
             <div class="mb-3">
-                <label for="sessions" class="form-label">Sessions</label>
-                <input type="number" name="sessions" id="sessions" class="form-control" value="{{ old('sessions') }}" required>
+                <label class="form-label">Selected Students</label>
+                <button type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#groupStudentModal">
+                    Select Students
+                </button>
+                <table class="table table-bordered" id="students-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="no-students-row">
+                            <td colspan="3" class="text-center text-muted">No students selected.</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
+            <!-- Tabel Materi -->
+            <div class="mb-3">
+                <label class="form-label">Selected Materials</label>
+                <button type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#materialsModal">
+                    Select Materials
+                </button>
+                <table class="table table-bordered" id="materials-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Material Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="no-materials-row">
+                            <td colspan="2" class="text-center text-muted">No materials selected.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Lokasi Latihan -->
             <div class="mb-3">
                 <label for="venue_id" class="form-label">Venue</label>
-                <select name="venue_id" id="venue_id" class="form-control">
+                <select name="venue_id" id="venue_id" class="form-control" required>
                     <option value="">Select Venue</option>
                     @foreach ($venues as $venue)
                         <option value="{{ $venue->id }}" {{ old('venue_id') == $venue->id ? 'selected' : '' }}>
@@ -30,115 +69,146 @@
                     @endforeach
                 </select>
             </div>
+
+            <!-- Pelatih Utama -->
             <div class="mb-3">
-                <label for="level" class="form-label">Level</label>
-                <select id="level" class="form-control">
-                    <option value="">Select Level</option>
-                    <option value="Beginner">Beginner</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Advanced">Advanced</option>
+                <label for="trainer_id" class="form-label">Assigned Trainer</label>
+                <select name="trainer_id" id="trainer_id" class="form-control" required>
+                    <option value="">Select Trainer</option>
+                    @foreach ($trainers as $trainer)
+                        <option value="{{ $trainer->id }}" {{ old('trainer_id') == $trainer->id ? 'selected' : '' }}>
+                            {{ $trainer->user->name }}
+                        </option>
+                    @endforeach
                 </select>
             </div>
+
+            <!-- Jumlah Sesi -->
             <div class="mb-3">
-                <button type="button" class="btn btn-secondary" id="select-materials-btn" data-bs-toggle="modal" data-bs-target="#materialsModal" disabled>
-                    Select Materials
-                </button>
+                <label for="sessions" class="form-label">Sessions</label>
+                <input type="number" name="sessions" id="sessions" class="form-control" value="{{ old('sessions') }}" required>
             </div>
-            <div id="selected-materials">
-                <!-- Hidden inputs for selected materials -->
+
+            <!-- Harga -->
+            <div class="mb-3">
+                <label for="price" class="form-label">Price</label>
+                <input type="number" name="price" id="price" class="form-control" value="{{ old('price') }}" required>
             </div>
+
+            <!-- Catatan Kemampuan Dasar -->
+            <div class="mb-3">
+                <label for="basic_skills" class="form-label">Basic Skills Notes</label>
+                <textarea name="basic_skills" id="basic_skills" class="form-control" rows="4" required>{{ old('basic_skills') }}</textarea>
+            </div>
+
             <button type="submit" class="btn btn-primary">Save</button>
         </form>
     </div>
 
-    <!-- Modal Box -->
-    <div class="modal fade" id="materialsModal" tabindex="-1" aria-labelledby="materialsModalLabel" aria-hidden="true">
+    <!-- Modal Box untuk Group -->
+    <div class="modal fade" id="groupStudentModal" tabindex="-1" aria-labelledby="groupStudentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <!-- Modal Header -->
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="materialsModalLabel">
-                        Select Materials for <span id="selected-level" class="fw-bold">[Level]</span>
-                    </h5>
-                    <button type="button" class="btn btn-icon btn-sm btn-light btn-active-light-primary" data-bs-dismiss="modal" aria-label="Close">
-                        <i class="bi bi-x fs-2"></i>
-                    </button>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="groupStudentModalLabel">Select Students</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
-                <!-- Modal Body -->
                 <div class="modal-body">
-                    <div id="materials-list" class="d-flex flex-column gap-3">
-                        <!-- Materials will be loaded here dynamically -->
-                        <p class="text-muted">Please select a level to view materials.</p>
+                    <div id="student-list">
+                        @foreach ($students as $student)
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input student-checkbox" id="student-{{ $student->id }}" value="{{ $student->id }}">
+                                <label class="form-check-label" for="student-{{ $student->id }}">
+                                    {{ $student->user->name }} ({{ $student->age }} tahun)
+                                </label>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-
-                <!-- Modal Footer -->
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="save-materials-btn" data-bs-dismiss="modal">
-                        <i class="bi bi-check-circle"></i> Save Selection
-                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-students-btn" data-bs-dismiss="modal">Save Selection</button>
                 </div>
             </div>
         </div>
     </div>
-</x-default-layout>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const levelSelect = document.getElementById('level');
-        const selectMaterialsBtn = document.getElementById('select-materials-btn');
-        const materialsList = document.getElementById('materials-list');
-        const selectedMaterialsContainer = document.getElementById('selected-materials');
-        const saveMaterialsBtn = document.getElementById('save-materials-btn');
-        const selectedLevelDisplay = document.getElementById('selected-level'); // Elemen untuk menampilkan level yang dipilih
-
-        let selectedMaterials = [];
-
-        // Enable the "Select Materials" button when a level is selected
-        levelSelect.addEventListener('change', function () {
-            if (levelSelect.value) {
-                selectMaterialsBtn.disabled = false;
-                selectedLevelDisplay.textContent = levelSelect.value; // Perbarui level yang dipilih di modal
-                loadMaterials(levelSelect.value);
-            } else {
-                selectMaterialsBtn.disabled = true;
-                selectedLevelDisplay.textContent = '[Level]'; // Reset level di modal
-                materialsList.innerHTML = '<p class="text-muted">Please select a level to view materials.</p>';
-            }
-        });
-
-        // Load materials based on the selected level
-        function loadMaterials(level) {
-            fetch(`/api/materials?level=${level}`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Materials:', data); // Debugging
-                    if (data.length > 0) {
-                        materialsList.innerHTML = data.map(material => `
-                            <div>
-                                <input type="checkbox" id="material-${material.id}" value="${material.id}" class="form-check-input" ${selectedMaterials.includes(material.id) ? 'checked' : ''}>
-                                <label for="material-${material.id}" class="form-check-label">${material.name} (Sessions: ${material.estimated_sessions}, Min Score: ${material.minimum_score})</label>
+    <!-- Modal Box untuk Materials -->
+    <div class="modal fade" id="materialsModal" tabindex="-1" aria-labelledby="materialsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="materialsModalLabel">Select Materials</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="materials-list">
+                        @foreach ($materials as $material)
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input material-checkbox" id="material-{{ $material->id }}" value="{{ $material->id }}">
+                                <label class="form-check-label" for="material-{{ $material->id }}">
+                                    {{ $material->name }}
+                                </label>
                             </div>
-                        `).join('');
-                    } else {
-                        materialsList.innerHTML = '<p class="text-muted">No materials available for this level.</p>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching materials:', error); // Debugging
-                });
-        }
+                        @endforeach
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-materials-btn" data-bs-dismiss="modal">Save Selection</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // Save selected materials when the modal is closed
-        saveMaterialsBtn.addEventListener('click', function () {
-            selectedMaterials = Array.from(materialsList.querySelectorAll('input[type="checkbox"]:checked')).map(input => input.value);
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const studentsTable = document.getElementById('students-table').querySelector('tbody');
+            const materialsTable = document.getElementById('materials-table').querySelector('tbody');
+            const saveStudentsBtn = document.getElementById('save-students-btn');
+            const saveMaterialsBtn = document.getElementById('save-materials-btn');
 
-            // Update hidden inputs for selected materials
-            selectedMaterialsContainer.innerHTML = selectedMaterials.map(id => `
-                <input type="hidden" name="materials[]" value="${id}">
-            `).join('');
+            // Save selected students
+            saveStudentsBtn.addEventListener('click', function () {
+                const selectedCheckboxes = document.querySelectorAll('.student-checkbox:checked');
+                studentsTable.innerHTML = '';
+
+                if (selectedCheckboxes.length === 0) {
+                    studentsTable.innerHTML = '<tr id="no-students-row"><td colspan="3" class="text-center text-muted">No students selected.</td></tr>';
+                } else {
+                    selectedCheckboxes.forEach((checkbox, index) => {
+                        const label = checkbox.nextElementSibling.textContent.trim();
+                        const age = label.match(/\((\d+) tahun\)/)?.[1] || '-';
+                        studentsTable.innerHTML += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${label.split(' (')[0]}</td>
+                                <td>${age}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            });
+
+            // Save selected materials
+            saveMaterialsBtn.addEventListener('click', function () {
+                const selectedCheckboxes = document.querySelectorAll('.material-checkbox:checked');
+                materialsTable.innerHTML = '';
+
+                if (selectedCheckboxes.length === 0) {
+                    materialsTable.innerHTML = '<tr id="no-materials-row"><td colspan="2" class="text-center text-muted">No materials selected.</td></tr>';
+                } else {
+                    selectedCheckboxes.forEach((checkbox, index) => {
+                        const label = checkbox.nextElementSibling.textContent.trim();
+                        materialsTable.innerHTML += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${label}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            });
         });
-    });
-</script>
+    </script>
+</x-default-layout>

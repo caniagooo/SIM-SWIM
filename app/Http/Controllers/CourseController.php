@@ -8,12 +8,14 @@ use App\Models\CourseMaterial;
 use App\Models\Student; // Import model Student
 use App\Models\Trainer; // Import model Trainer
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log; // Import Log facade
 
 class CourseController extends Controller
 {
     public function index()
     {
-        $courses = Course::with('venue')->get();
+        $courses = Course::with(['venue', 'trainers', 'students', 'materials'])->get();
         return view('courses.index', compact('courses'));
     }
 
@@ -29,24 +31,38 @@ class CourseController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'type' => 'required|string',
-            'venue_id' => 'required|exists:venues,id',
-            'trainer_id' => 'required|exists:trainers,id',
+        // Validasi data yang diterima
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:private,group',
             'sessions' => 'required|integer|min:1',
+            'venue_id' => 'required|exists:venues,id',
             'price' => 'required|numeric|min:0',
-            'basic_skills' => 'required|string',
+            'basic_skills' => 'nullable|string',
+            'students' => 'required|array', // Harus berupa array
+            'students.*' => 'exists:students,id', // Setiap elemen harus ada di tabel students
+            'materials' => 'nullable|array', // Bisa kosong
+            'materials.*' => 'exists:course_materials,id', // Setiap elemen harus ada di tabel course_materials
+            'trainers' => 'required|array', // Harus berupa array
+            'trainers.*' => 'exists:trainers,id', // Setiap elemen harus ada di tabel trainers
         ]);
 
-        // Simpan data ke database
-        Course::create([
-            'type' => $request->type,
-            'venue_id' => $request->venue_id,
-            'sessions' => $request->sessions,
-            'price' => $request->price,
-            'basic_skills' => $request->basic_skills,
+        // Simpan data course ke database
+        $course = Course::create([
+            'name' => $validatedData['name'],
+            'type' => $validatedData['type'],
+            'sessions' => $validatedData['sessions'],
+            'venue_id' => $validatedData['venue_id'],
+            'price' => $validatedData['price'],
+            'basic_skills' => $validatedData['basic_skills'] ?? null,
         ]);
 
+        // Simpan relasi ke tabel pivot
+        $course->students()->sync($validatedData['students']);
+        $course->materials()->sync($validatedData['materials'] ?? []); // Kosongkan jika tidak ada materi
+        $course->trainers()->sync($validatedData['trainers']);
+
+        // Redirect ke halaman index dengan pesan sukses
         return redirect()->route('courses.index')->with('success', 'Course created successfully.');
     }
 
@@ -68,7 +84,7 @@ class CourseController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|string',
             'sessions' => 'required|integer|min:1',
-            'venue_id' => 'nullable|exists:venues,id',
+            'venue_id' => 'required|exists:venues,id',
             'materials' => 'nullable|array',
             'materials.*' => 'exists:course_materials,id',
         ]);

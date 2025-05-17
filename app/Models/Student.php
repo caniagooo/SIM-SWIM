@@ -27,4 +27,9 @@ class Student extends Model
     {
         return Carbon::parse($this->birth_date)->age;
     }
+
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'course_student', 'student_id', 'course_id');
+    }
 }

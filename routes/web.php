@@ -83,3 +83,7 @@ Route::get('/api/materials', function (Request $request) {
 });
 
 require __DIR__ . '/auth.php';
+
+Route::middleware(['web'])->group(function () {
+    Route::resource('courses', CourseController::class);
+});

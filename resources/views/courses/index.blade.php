@@ -1,4 +1,3 @@
-
 <x-default-layout>
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -20,14 +19,16 @@
                 <h3 class="card-title">Course List</h3>
             </div>
             <div class="card-body">
-                <table class="table table-striped table-hover align-middle">
+                <table class="table table-bordered table-striped table-hover align-middle">
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
                             <th>Name</th>
                             <th>Type</th>
-                            <th>Sessions</th>
                             <th>Venue</th>
+                            <th>Trainers</th>
+                            <th>Students</th>
+                            <th>Materials</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -39,8 +40,22 @@
                                 <td>
                                     <span class="badge bg-info text-dark">{{ ucfirst($course->type) }}</span>
                                 </td>
-                                <td>{{ $course->sessions }}</td>
                                 <td>{{ $course->venue->name ?? 'N/A' }}</td>
+                                <td>
+                                    @foreach ($course->trainers as $trainer)
+                                        {{ $trainer->user->name }}<br>
+                                    @endforeach
+                                </td>
+                                <td>
+                                    @foreach ($course->students as $student)
+                                        {{ $student->user->name }}<br>
+                                    @endforeach
+                                </td>
+                                <td>
+                                    @foreach ($course->materials as $material)
+                                        {{ $material->name }}<br>
+                                    @endforeach
+                                </td>
                                 <td>
                                     <div class="d-flex gap-2">
                                         <a href="{{ route('courses.edit', $course->id) }}" class="btn btn-warning btn-sm">
@@ -58,7 +73,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted">No courses available.</td>
+                                <td colspan="8" class="text-center text-muted">No courses available.</td>
                             </tr>
                         @endforelse
                     </tbody>

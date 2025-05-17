@@ -12,6 +12,6 @@ class Venue extends Model
 
     public function courses()
     {
-        return $this->hasMany(Course::class);
+        return $this->hasMany(Course::class, 'venue_id');
     }
 }

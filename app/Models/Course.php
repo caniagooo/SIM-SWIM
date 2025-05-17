@@ -9,27 +9,33 @@ class Course extends Model
     use HasFactory;
 
     protected $fillable = [
+        'name',
         'type',
-        'venue_id',
-        'trainer_id', // Pelatih utama
         'sessions',
         'price',
         'basic_skills',
+        'venue_id',
     ];
 
-    // Relasi ke pelatih utama
-    public function trainer()
+    // Relasi ke murid (many-to-many)
+    public function students()
     {
-        return $this->belongsTo(Trainer::class, 'trainer_id');
+        return $this->belongsToMany(Student::class, 'course_student');
     }
 
-    // Relasi ke pelatih tambahan (jika ada tabel pivot)
-    public function additionalTrainers()
+    // Relasi ke materi (many-to-many)
+    public function materials()
     {
-        return $this->belongsToMany(Trainer::class, 'course_trainer', 'course_id', 'trainer_id');
+        return $this->belongsToMany(CourseMaterial::class, 'course_course_material');
     }
 
-    // Relasi ke venue
+    // Relasi ke pelatih (many-to-many)
+    public function trainers()
+    {
+        return $this->belongsToMany(Trainer::class, 'course_trainer');
+    }
+
+    // Relasi ke venue (one-to-many)
     public function venue()
     {
         return $this->belongsTo(Venue::class, 'venue_id');
