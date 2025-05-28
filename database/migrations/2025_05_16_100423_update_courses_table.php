@@ -14,6 +14,7 @@ class UpdateCoursesTable extends Migration
         Schema::table('courses', function (Blueprint $table) {
             $table->decimal('price', 10, 2);
             $table->text('basic_skills');
+            
         });
     }
 

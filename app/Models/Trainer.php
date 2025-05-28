@@ -19,4 +19,14 @@ class Trainer extends Model
     {
         return $this->belongsToMany(Course::class, 'course_trainer', 'trainer_id', 'course_id');
     }
+    
+    public function sessions()
+    {
+        return $this->belongsToMany(CourseSession::class, 'course_session_trainer');
+    }
+    
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
 }

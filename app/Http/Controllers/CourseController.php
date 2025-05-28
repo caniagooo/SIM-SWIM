@@ -10,12 +10,23 @@ use App\Models\Trainer; // Import model Trainer
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log; // Import Log facade
+use Carbon\Carbon; // Import Carbon untuk manipulasi tanggal
+use App\Models\CourseSession; // Import model CourseSession
+use App\Models\Attendance; // Import model Attendance
+use app\Models\Payment; // Import model Payment
 
 class CourseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $courses = Course::with(['venue', 'trainers', 'students', 'materials'])->get();
+        $query = Course::query();
+
+        if ($request->has('type') && $request->type) {
+            $query->where('type', $request->type);
+        }
+
+        $courses = $query->with(['venue', 'trainers.user', 'students.user'])->get();
+
         return view('courses.index', compact('courses'));
     }
 
@@ -31,51 +42,58 @@ class CourseController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi data yang diterima
+        // Validasi data
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|in:private,group',
-            'sessions' => 'required|integer|min:1',
             'venue_id' => 'required|exists:venues,id',
+            'start_date' => 'required|date|after_or_equal:today',
+            'duration_days' => 'required|integer|min:1',
+            'max_sessions' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
-            'basic_skills' => 'nullable|string',
-            'students' => 'required|array', // Harus berupa array
-            'students.*' => 'exists:students,id', // Setiap elemen harus ada di tabel students
-            'materials' => 'nullable|array', // Bisa kosong
-            'materials.*' => 'exists:course_materials,id', // Setiap elemen harus ada di tabel course_materials
-            'trainers' => 'required|array', // Harus berupa array
-            'trainers.*' => 'exists:trainers,id', // Setiap elemen harus ada di tabel trainers
+            'students' => 'required|array',
+            'students.*' => 'exists:students,id',
+            'trainers' => 'required|array',
+            'trainers.*' => 'exists:trainers,id',
         ]);
 
-        // Simpan data course ke database
-        $course = Course::create([
-            'name' => $validatedData['name'],
-            'type' => $validatedData['type'],
-            'sessions' => $validatedData['sessions'],
-            'venue_id' => $validatedData['venue_id'],
-            'price' => $validatedData['price'],
-            'basic_skills' => $validatedData['basic_skills'] ?? null,
-        ]);
+        // Simpan kursus
+        $course = Course::create($validatedData);
 
-        // Simpan relasi ke tabel pivot
+        // Hubungkan murid dan pelatih
         $course->students()->sync($validatedData['students']);
-        $course->materials()->sync($validatedData['materials'] ?? []); // Kosongkan jika tidak ada materi
         $course->trainers()->sync($validatedData['trainers']);
 
-        // Redirect ke halaman index dengan pesan sukses
-        return redirect()->route('courses.index')->with('success', 'Course created successfully.');
+        // Generate jadwal sesi otomatis
+        $startDate = Carbon::parse($validatedData['start_date']);
+        $sessions = $validatedData['max_sessions'];
+        $duration = $validatedData['duration_days'];
+
+        for ($i = 0; $i < $sessions; $i++) {
+            $sessionDate = $startDate->copy()->addDays($i * floor($duration / $sessions));
+            $course->sessions()->create([
+                'session_date' => $sessionDate,
+                'start_time' => '10:00:00', // Default waktu mulai
+                'end_time' => '12:00:00',  // Default waktu selesai
+                'status' => 'scheduled',
+            ]);
+        }
+
+        return redirect()->route('courses.index')->with('success', 'Course created successfully with sessions.');
     }
 
-    public function show(string $id)
+    public function show(Course $course)
     {
-        //
+        // Muat relasi sessions sebagai koleksi
+        $course->load(['sessions', 'students.user', 'materials', 'trainers.user']);
+        
+        return view('courses.show', compact('course'));
     }
 
     public function edit(Course $course)
     {
-        $venues = Venue::all();
-        $materials = CourseMaterial::all();
-        return view('courses.edit', compact('course', 'venues', 'materials'));
+        $course->load(['students', 'trainers']);
+        return view('courses.edit', compact('course'));
     }
 
     public function update(Request $request, Course $course)
@@ -83,7 +101,7 @@ class CourseController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|string',
-            'sessions' => 'required|integer|min:1',
+            'max_sessions' => 'required|integer|min:1',
             'venue_id' => 'required|exists:venues,id',
             'materials' => 'nullable|array',
             'materials.*' => 'exists:course_materials,id',

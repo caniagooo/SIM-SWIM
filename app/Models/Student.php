@@ -32,4 +32,19 @@ class Student extends Model
     {
         return $this->belongsToMany(Course::class, 'course_student', 'student_id', 'course_id');
     }
+    
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function sessions()
+    {
+        return $this->belongsToMany(CourseSession::class, 'course_session_student');
+    }
+    
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
 }

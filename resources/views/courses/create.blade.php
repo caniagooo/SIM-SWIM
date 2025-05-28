@@ -44,7 +44,8 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="mb-3">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
                             <label for="venue_id" class="form-label">Select Venue</label>
                             <select name="venue_id" id="venue_id" class="form-control" required>
                                 <option value="">Select Venue</option>
@@ -54,6 +55,27 @@
                                     </option>
                                 @endforeach
                             </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="price" class="form-label">Course Price</label>
+                                <input type="number" name="price" id="price" class="form-control" value="{{ old('price') }}" required>
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="start_date" class="form-label">Start Date</label>
+                                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date') }}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="duration_days" class="form-label">Duration (Days)</label>
+                                <input type="number" name="duration_days" id="duration_days" class="form-control" value="{{ old('duration_days') }}" required min="1">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="max_sessions" class="form-label">Max Sessions</label>
+                                <input type="number" name="max_sessions" id="max_sessions" class="form-control" value="{{ old('max_sessions') }}" required>
+                            </div>
                         </div>
                     </div>
 
@@ -107,20 +129,11 @@
 
                     <!-- Step 5: Additional Details -->
                     <div class="step step-5 d-none">
-                        <h4 class="mb-3">Additional Details</h4>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="sessions" class="form-label">Number of Sessions</label>
-                                <input type="number" name="sessions" id="sessions" class="form-control" value="{{ old('sessions') }}" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="price" class="form-label">Course Price</label>
-                                <input type="number" name="price" id="price" class="form-control" value="{{ old('price') }}" required>
-                            </div>
-                        </div>
+                        <h4 class="mb-3">Catatan tambahan</h4>
+                        
                         <div class="mb-3">
-                            <label for="notes" class="form-label">Notes</label>
-                            <textarea name="notes" id="notes" class="form-control" rows="4">{{ old('basic_skills') }}</textarea>
+                            
+                            <textarea name="basic_skills" id="basic_skills" class="form-control" rows="4">{{ old('basic_skills') }}</textarea>
                         </div>
                     </div>
 

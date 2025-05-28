@@ -15,7 +15,20 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Jadwalkan tugas untuk dijalankan setiap hari pada pukul 00:00
+        $schedule->call(function () {
+            // Ambil semua course yang akan berakhir dalam 3 hari
+            $courses = \App\Models\Course::where('valid_until', '<=', now()->addDays(3))
+                ->where('valid_until', '>=', now())
+                ->get();
+
+            foreach ($courses as $course) {
+                // Kirim notifikasi ke murid yang terdaftar di course
+                foreach ($course->students as $student) {
+                    $student->notify(new \App\Notifications\CourseExpiringNotification($course));
+                }
+            }
+        })->dailyAt('00:00'); // Jalankan setiap hari pada pukul 00:00
     }
 
     /**
