@@ -13,6 +13,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseMaterialController;
 use App\Http\Controllers\CourseSessionController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\GeneralScheduleController;
 use Illuminate\Support\Facades\Route;
 use App\Models\CourseMaterial;
 use Illuminate\Http\Request;
@@ -85,8 +86,8 @@ Route::get('/api/materials', function (Request $request) {
 });
 
 // Route untuk menyimpan dan menghapus sesi kursus
-Route::post('/courses/{course}/sessions', [CourseSessionController::class, 'store'])->name('courses.sessions.store');
-Route::delete('/courses/{course}/sessions/{session}', [CourseSessionController::class, 'destroy'])->name('courses.sessions.destroy');
+//Route::post('/courses/{course}/sessions', [CourseSessionController::class, 'store'])->name('courses.sessions.store');
+//Route::delete('/courses/{course}/sessions/{session}', [CourseSessionController::class, 'destroy'])->name('courses.sessions.destroy');
 
 // Route untuk menyimpan kehadiran sesi
 Route::post('/sessions/{session}/attendance', [AttendanceController::class, 'store'])->name('sessions.attendance.store');
@@ -100,11 +101,22 @@ Route::middleware(['web'])->group(function () {
 });
 
 Route::prefix('courses/{course}/sessions')->group(function () {
-    Route::get('/', [CourseSessionController::class, 'index'])->name('sessions.index');
-    Route::get('/create', [CourseSessionController::class, 'create'])->name('sessions.create');
-    Route::post('/', [CourseSessionController::class, 'store'])->name('sessions.store');
-    Route::get('/{session}/edit', [CourseSessionController::class, 'edit'])->name('sessions.edit');
-    Route::put('/{session}', [CourseSessionController::class, 'update'])->name('sessions.update');
-    Route::delete('/{session}', [CourseSessionController::class, 'destroy'])->name('sessions.destroy');
+    Route::get('/', [CourseSessionController::class, 'index'])->name('sessions.index'); // Menampilkan daftar sesi
+    Route::get('/create', [CourseSessionController::class, 'create'])->name('sessions.create'); // Form tambah sesi
+    Route::post('/', [CourseSessionController::class, 'store'])->name('sessions.store'); // Simpan sesi baru
+    Route::get('/{session}/edit', [CourseSessionController::class, 'edit'])->name('sessions.edit'); // Form edit sesi
+    Route::put('/{session}', [CourseSessionController::class, 'update'])->name('sessions.update'); // Update sesi
+    Route::delete('/{session}', [CourseSessionController::class, 'destroy'])->name('sessions.destroy'); // Hapus sesi
 });
+
+Route::prefix('sessions/{session}/attendances')->group(function () {
+    Route::get('/', [AttendanceController::class, 'index'])->name('attendances.index');
+    Route::post('/', [AttendanceController::class, 'store'])->name('attendances.store');
+    Route::put('/{attendance}', [AttendanceController::class, 'update'])->name('attendances.update');
+    Route::delete('/{attendance}', [AttendanceController::class, 'destroy'])->name('attendances.destroy');
+});
+
+Route::get('/general-schedule', [GeneralScheduleController::class, 'index'])->name('general-schedule.index');
+Route::get('/general-schedule/export', [GeneralScheduleController::class, 'export'])->name('general-schedule.export');
+Route::get('/general-schedule/export-pdf', [GeneralScheduleController::class, 'exportPdf'])->name('general-schedule.export-pdf');
 

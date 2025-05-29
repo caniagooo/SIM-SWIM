@@ -8,39 +8,35 @@ class AttendanceController extends Controller
 {
     public function index(CourseSession $session)
     {
-        $attendances = $session->attendances()->with(['student.user', 'trainer.user'])->get();
+        $attendances = $session->attendances()->get();
         return view('attendances.index', compact('session', 'attendances'));
     }
 
     public function store(Request $request, CourseSession $session)
     {
-        $request->validate([
-            'students' => 'nullable|array',
-            'students.*' => 'exists:students,id',
-            'trainers' => 'nullable|array',
-            'trainers.*' => 'exists:trainers,id',
+        $validated = $request->validate([
+            'student_id' => 'nullable|exists:students,id',
+            'trainer_id' => 'nullable|exists:trainers,id',
+            'status' => 'required|in:present,late,absent',
         ]);
 
-        // Simpan kehadiran murid
-        if ($request->has('students')) {
-            foreach ($request->students as $studentId) {
-                $session->attendances()->updateOrCreate(
-                    ['student_id' => $studentId],
-                    ['status' => 'present']
-                );
-            }
-        }
+        $session->attendances()->create($validated);
+        return redirect()->route('attendances.index', $session->id)->with('success', 'Attendance recorded successfully.');
+    }
 
-        // Simpan kehadiran pelatih
-        if ($request->has('trainers')) {
-            foreach ($request->trainers as $trainerId) {
-                $session->attendances()->updateOrCreate(
-                    ['trainer_id' => $trainerId],
-                    ['status' => 'present']
-                );
-            }
-        }
+    public function update(Request $request, CourseSession $session, Attendance $attendance)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:present,late,absent',
+        ]);
 
-        return redirect()->route('courses.show', $session->course_id)->with('success', 'Attendance saved successfully.');
+        $attendance->update($validated);
+        return redirect()->route('attendances.index', $session->id)->with('success', 'Attendance updated successfully.');
+    }
+
+    public function destroy(CourseSession $session, Attendance $attendance)
+    {
+        $attendance->delete();
+        return redirect()->route('attendances.index', $session->id)->with('success', 'Attendance deleted successfully.');
     }
 }

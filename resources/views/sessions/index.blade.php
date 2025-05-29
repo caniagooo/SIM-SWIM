@@ -27,6 +27,7 @@
                         <td>{{ $session->end_time }}</td>
                         <td>{{ ucfirst($session->status) }}</td>
                         <td>
+                            <a href="{{ route('attendances.index', $session->id) }}" class="btn btn-info btn-sm">Manage Attendance</a>
                             <a href="{{ route('sessions.edit', [$course->id, $session->id]) }}" class="btn btn-warning btn-sm">Edit</a>
                             <form action="{{ route('sessions.destroy', [$course->id, $session->id]) }}" method="POST" style="display:inline;">
                                 @csrf

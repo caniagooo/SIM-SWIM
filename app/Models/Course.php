@@ -12,7 +12,6 @@ class Course extends Model
     protected $fillable = [
         'name',
         'type',
-        'sessions',
         'price',
         'basic_skills',
         'start_date',
@@ -30,19 +29,19 @@ class Course extends Model
     // Relasi ke murid (many-to-many)
     public function students()
     {
-        return $this->belongsToMany(Student::class, 'course_student');
+        return $this->belongsToMany(Student::class, 'course_student','course_id', 'student_id');
     }
 
     // Relasi ke materi (many-to-many)
     public function materials()
     {
-        return $this->belongsToMany(CourseMaterial::class, 'course_course_material');
+        return $this->belongsToMany(CourseMaterial::class, 'course_course_material', 'course_id', 'course_material_id');
     }
 
     // Relasi ke pelatih (many-to-many)
     public function trainers()
     {
-        return $this->belongsToMany(Trainer::class, 'course_trainer');
+        return $this->belongsToMany(Trainer::class, 'course_trainer', 'course_id', 'trainer_id');
     }
 
     // Relasi ke venue (one-to-many)
@@ -54,7 +53,7 @@ class Course extends Model
     // Relasi ke sesi (one-to-many)
     public function sessions()
     {
-        return $this->hasMany(CourseSession::class);
+        return $this->hasMany(CourseSession::class, 'course_id', 'id');
     }
 
     public function isValid()

@@ -109,6 +109,15 @@
                 </div>
             </div>
             <!--end:Menu item-->
+
+            <!--begin:Menu item-->
+            <div class="menu-item">
+                <a class="menu-link {{ request()->routeIs('general-schedule.index') ? 'active' : '' }}" href="{{ route('general-schedule.index') }}">
+                    <span class="menu-icon">{!! getIcon('calendar', 'fs-2') !!}</span>
+                    <span class="menu-title">General Schedule</span>
+                </a>
+            </div>
+            <!--end:Menu item-->
         </div>
         <!--end::Menu-->
     </div>

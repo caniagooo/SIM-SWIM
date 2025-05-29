@@ -31,10 +31,7 @@
                     <div class="step step-1">
                         <h4 class="mb-3">Basic Information</h4>
                         <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="name" class="form-label">Course Name</label>
-                                <input type="text" name="name" id="name" class="form-control" value="{{ old('name') }}" required>
-                            </div>
+                            
                             <div class="col-md-6">
                                 <label for="type" class="form-label">Course Type</label>
                                 <select name="type" id="type" class="form-control" required>
@@ -75,6 +72,16 @@
                             <div class="col-md-3">
                                 <label for="max_sessions" class="form-label">Max Sessions</label>
                                 <input type="number" name="max_sessions" id="max_sessions" class="form-control" value="{{ old('max_sessions') }}" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="valid_until" class="form-label">Valid Until</label>
+                                <input type="date" name="valid_until" id="valid_until" class="form-control" value="{{ old('valid_until') }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="basic_skills" class="form-label">Basic Skills</label>
+                                <textarea name="basic_skills" id="basic_skills" class="form-control" rows="3">{{ old('basic_skills') }}</textarea>
                             </div>
                         </div>
                     </div>

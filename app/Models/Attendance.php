@@ -18,16 +18,16 @@ class Attendance extends Model
 
     public function session()
     {
-        return $this->belongsTo(CourseSession::class, 'course_session_id');
+        return $this->belongsTo(CourseSession::class, 'course_session_id', 'id');
     }
 
     public function student()
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Student::class, 'student_id', 'id');
     }
 
     public function trainer()
     {
-        return $this->belongsTo(Trainer::class);
+        return $this->belongsTo(Trainer::class, 'trainer_id', 'id');
     }
 }
