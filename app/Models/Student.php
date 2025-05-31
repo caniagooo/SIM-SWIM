@@ -47,4 +47,10 @@ class Student extends Model
     {
         return $this->hasMany(Attendance::class);
     }
+
+    public function materialScores()
+    {
+        return $this->belongsToMany(CourseMaterial::class, 'course_session_material_student', 'student_id', 'material_id')
+                    ->withPivot('score', 'remarks');
+    }
 }

@@ -120,3 +120,12 @@ Route::get('/general-schedule', [GeneralScheduleController::class, 'index'])->na
 Route::get('/general-schedule/export', [GeneralScheduleController::class, 'export'])->name('general-schedule.export');
 Route::get('/general-schedule/export-pdf', [GeneralScheduleController::class, 'exportPdf'])->name('general-schedule.export-pdf');
 
+Route::prefix('attendance')->group(function () {
+    Route::get('/{sessionId}', [AttendanceController::class, 'show'])->name('attendance.show');
+    Route::post('/{sessionId}/materials', [AttendanceController::class, 'saveMaterials'])->name('attendance.materials');
+    Route::post('/{sessionId}', [AttendanceController::class, 'store'])->name('attendance.store');
+    Route::post('/{sessionId}/scores', [AttendanceController::class, 'saveScores'])->name('attendance.scores');
+});
+
+Route::get('/courses/{courseId}', [CourseController::class, 'show'])->name('courses.show');
+

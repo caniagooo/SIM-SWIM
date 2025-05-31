@@ -22,7 +22,7 @@ class Trainer extends Model
     
     public function sessions()
     {
-        return $this->belongsToMany(CourseSession::class, 'course_session_trainer');
+        return $this->hasMany(CourseSession::class, 'trainer_id');
     }
     
     public function attendances()

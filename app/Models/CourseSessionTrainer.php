@@ -1,37 +1,32 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Attendance extends Model
+class CourseSessionTrainer extends Model
 {
     use HasFactory;
+    protected $table = 'course_session_trainer';
 
     protected $fillable = [
         'course_session_id',
-        'student_id',
         'trainer_id',
-        'status',
     ];
-    
+    public $timestamps = true;
 
-    // Relasi ke sesi
-    public function session()
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    public function sessions()
     {
         return $this->belongsTo(CourseSession::class, 'course_session_id');
     }
 
-    // Relasi ke murid
-    public function student()
-    {
-        return $this->belongsTo(Student::class, 'student_id');
-    }
-
-    // Relasi ke pelatih
     public function trainer()
     {
-        return $this->belongsTo(Trainer::class, 'trainer_id');
+        return $this->belongsTo(Trainer::class);
     }
 }

@@ -83,10 +83,12 @@ class CourseController extends Controller
         return redirect()->route('courses.index')->with('success', 'Course created successfully.');
     }
 
-    public function show(Course $course)
+    public function show($courseId, Request $request)
     {
-        $course->load(['sessions', 'students.user', 'trainers.user']); // Pastikan sessions dimuat
-        return view('courses.show', compact('course'));
+        $course = Course::with(['sessions', 'materials'])->findOrFail($courseId);
+        $activeTab = $request->get('tab', 'overview'); // Default tab adalah 'overview'
+
+        return view('courses.show', compact('course', 'activeTab'));
     }
 
     public function edit(Course $course)
