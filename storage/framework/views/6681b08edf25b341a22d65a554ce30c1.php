@@ -11,7 +11,6 @@
     <div class="container mt-5">
         <!-- Row Pertama: Informasi Sesi dan Kursus -->
         <div class="row mb-4">
-            <!-- Kolom Gabungan: Session Info dan Course Info -->
             <div class="col-md-6">
                 <div class="card shadow-sm">
                     <div class="card-header bg-primary text-white">
@@ -71,17 +70,22 @@
                                                 <?php endif; ?>
                                             </p>
                                             <div class="btn-group mt-2" role="group" aria-label="Attendance Status">
-                                                <input type="radio" class="btn-check" name="attendance[<?php echo e($student->id); ?>][status]" id="hadir-<?php echo e($student->id); ?>" value="hadir" autocomplete="off">
+                                                <input type="radio" class="btn-check" name="attendance[<?php echo e($student->id); ?>][status]" id="hadir-<?php echo e($student->id); ?>" value="hadir" autocomplete="off" 
+                                                    <?php echo e($student->attendance && $student->attendance->status === 'hadir' ? 'checked' : ''); ?>>
                                                 <label class="btn btn-outline-primary btn-sm" for="hadir-<?php echo e($student->id); ?>">Hadir</label>
 
-                                                <input type="radio" class="btn-check" name="attendance[<?php echo e($student->id); ?>][status]" id="tidak-hadir-<?php echo e($student->id); ?>" value="tidak hadir" autocomplete="off">
+                                                <input type="radio" class="btn-check" name="attendance[<?php echo e($student->id); ?>][status]" id="tidak-hadir-<?php echo e($student->id); ?>" value="tidak hadir" autocomplete="off" 
+                                                    <?php echo e($student->attendance && $student->attendance->status === 'tidak hadir' ? 'checked' : ''); ?>>
                                                 <label class="btn btn-outline-danger btn-sm" for="tidak-hadir-<?php echo e($student->id); ?>">Tidak Hadir</label>
 
-                                                <input type="radio" class="btn-check" name="attendance[<?php echo e($student->id); ?>][status]" id="terlambat-<?php echo e($student->id); ?>" value="terlambat" autocomplete="off">
+                                                <input type="radio" class="btn-check" name="attendance[<?php echo e($student->id); ?>][status]" id="terlambat-<?php echo e($student->id); ?>" value="terlambat" autocomplete="off" 
+                                                    <?php echo e($student->attendance && $student->attendance->status === 'terlambat' ? 'checked' : ''); ?>>
                                                 <label class="btn btn-outline-warning btn-sm" for="terlambat-<?php echo e($student->id); ?>">Terlambat</label>
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#scoreModal<?php echo e($student->id); ?>">Score</button>
+                                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#scoreModal<?php echo e($student->id); ?>" id="score-button-<?php echo e($student->id); ?>">
+                                            Score
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -91,48 +95,126 @@
                                 <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
                                         <div class="modal-header bg-primary text-white">
-                                            <h5 class="modal-title" id="scoreModalLabel<?php echo e($student->id); ?>">Penilaian Materi | <?php echo e($student->user->name); ?></h5>
+                                            <h5 class="modal-title" id="scoreModalLabel<?php echo e($student->id); ?>">Score Materials for <?php echo e($student->user->name); ?></h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <?php $__currentLoopData = $session->course->materials; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $material): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <div class="mb-3">
-                                                    <p class="fw-bold"><?php echo e($material->name); ?></p>
-                                                    <div class="d-flex align-items-center">
-                                                        <!-- Skor -->
-                                                        <span class="text-muted">Nilai: </span>
-                                                        <div class="btn-group me-3" role="group" aria-label="Score Options">
-                                                            <input type="radio" class="btn-check" name="scores[<?php echo e($student->id); ?>][<?php echo e($material->id); ?>][score]" id="score-1-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>" value="1" autocomplete="off">
-                                                            <label class="btn btn-outline-danger btn-sm" for="score-1-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>">1</label>
+                                            <form class="score-form" action="<?php echo e(route('score.store', $student->id)); ?>" method="POST">
+                                                <?php echo csrf_field(); ?>
+                                                <?php $__currentLoopData = $session->course->materials; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $material): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <div class="mb-3">
+                                                        <p class="fw-bold"><?php echo e($material->name); ?></p>
+                                                        <div class="d-flex align-items-center">
+                                                            <!-- Skor -->
+                                                            <div class="btn-group me-3" role="group" aria-label="Score Options">
+                                                                <input type="radio" class="btn-check" name="scores[<?php echo e($material->id); ?>][score]" id="score-1-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>" value="1" autocomplete="off">
+                                                                <label class="btn btn-outline-secondary btn-sm" for="score-1-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>">1</label>
 
-                                                            <input type="radio" class="btn-check" name="scores[<?php echo e($student->id); ?>][<?php echo e($material->id); ?>][score]" id="score-2-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>" value="2" autocomplete="off">
-                                                            <label class="btn btn-outline-warning btn-sm" for="score-2-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>">2</label>
+                                                                <input type="radio" class="btn-check" name="scores[<?php echo e($material->id); ?>][score]" id="score-2-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>" value="2" autocomplete="off">
+                                                                <label class="btn btn-outline-secondary btn-sm" for="score-2-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>">2</label>
 
-                                                            <input type="radio" class="btn-check" name="scores[<?php echo e($student->id); ?>][<?php echo e($material->id); ?>][score]" id="score-3-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>" value="3" autocomplete="off">
-                                                            <label class="btn btn-outline-success btn-sm" for="score-3-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>">3</label>
+                                                                <input type="radio" class="btn-check" name="scores[<?php echo e($material->id); ?>][score]" id="score-3-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>" value="3" autocomplete="off">
+                                                                <label class="btn btn-outline-secondary btn-sm" for="score-3-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>">3</label>
+                                                            </div>
+                                                            <!-- Catatan -->
+                                                            <textarea name="scores[<?php echo e($material->id); ?>][remarks]" class="form-control" rows="2" placeholder="Remarks (optional)"></textarea>
                                                         </div>
-                                                        <!-- Catatan -->
-                                                        <textarea name="scores[<?php echo e($student->id); ?>][<?php echo e($material->id); ?>][remarks]" class="form-control" rows="2" placeholder="Remarks (optional)"></textarea>
                                                     </div>
-                                                </div>
-                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-primary">Save Scores</button>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                <button type="submit" class="btn btn-primary">Save Scores</button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
-                    <div class="text-end mt-3">
-                        <button type="submit" class="btn btn-primary">Save Attendance</button>
-                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Absensi dan Skoring</button>
                 </form>
             </div>
         </div>
     </div>
+
+    <script>
+        // Objek untuk menyimpan data skoring sementara
+        let scoringData = {};
+
+        // Event listener untuk tombol Save Scores di modal box
+        document.querySelectorAll('.score-form').forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const studentId = this.getAttribute('action').split('/').pop(); // Ambil studentId dari URL
+                scoringData[studentId] = {}; // Buat objek untuk murid ini
+
+                // Ambil semua skor dan catatan dari form
+                this.querySelectorAll('input[type="radio"]:checked').forEach(input => {
+                    const materialId = input.name.match(/\[(\d+)\]/)[1]; // Ambil materialId dari nama input
+                    scoringData[studentId][materialId] = {
+                        score: input.value,
+                        remarks: this.querySelector(`textarea[name="scores[${materialId}][remarks]"]`).value || null
+                    };
+                });
+
+                // Update tombol Score untuk murid ini
+                const scoreButton = document.querySelector(`#score-button-${studentId}`);
+                scoreButton.innerHTML = '✔ Scored';
+                scoreButton.classList.add('btn-success');
+                scoreButton.classList.remove('btn-primary');
+
+                // Tutup modal
+                const modal = document.querySelector(`#scoreModal${studentId}`);
+                modal.querySelector('.btn-close').click();
+            });
+        });
+
+        document.querySelector('form[action="<?php echo e(route('attendance.store', $session->id)); ?>"]').addEventListener('submit', function (e) {
+            e.preventDefault(); // Mencegah form dikirimkan secara default
+
+            const formData = new FormData(this);
+
+            // Tambahkan data skoring ke formData
+            for (const studentId in scoringData) {
+                for (const materialId in scoringData[studentId]) {
+                    formData.append(`scores[${studentId}][${materialId}][score]`, scoringData[studentId][materialId].score);
+                    formData.append(`scores[${studentId}][${materialId}][remarks]`, scoringData[studentId][materialId].remarks);
+                }
+            }
+
+            // Kirim form menggunakan fetch
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json' // Ensure the server returns JSON
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json(); // Parse JSON response
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    alert('Scores saved successfully!');
+                } else {
+                    alert('Error saving scores!');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+
+            console.log('Form Data:', Array.from(formData.entries()));
+        });
+
+        document.querySelectorAll('[data-bs-toggle="modal"]').forEach(button => {
+            button.addEventListener('click', function () {
+                console.log('Modal opened:', this.getAttribute('data-bs-target'));
+            });
+        });
+    </script>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal1c2e2f4f77e507b499e79defc0d48b7e)): ?>

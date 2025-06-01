@@ -78,4 +78,8 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(Student::class);
     }
+    public function getAvatarAttribute()
+    {
+        return $this->profile_picture ?? asset('assets/media/avatars/default-avatar.png');
+    }
 }

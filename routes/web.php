@@ -12,7 +12,6 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseMaterialController;
 use App\Http\Controllers\CourseSessionController;
-use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\GeneralScheduleController;
 use Illuminate\Support\Facades\Route;
 use App\Models\CourseMaterial;
@@ -85,13 +84,6 @@ Route::get('/api/materials', function (Request $request) {
     return $materials;
 });
 
-// Route untuk menyimpan dan menghapus sesi kursus
-//Route::post('/courses/{course}/sessions', [CourseSessionController::class, 'store'])->name('courses.sessions.store');
-//Route::delete('/courses/{course}/sessions/{session}', [CourseSessionController::class, 'destroy'])->name('courses.sessions.destroy');
-
-// Route untuk menyimpan kehadiran sesi
-Route::post('/sessions/{session}/attendance', [AttendanceController::class, 'store'])->name('sessions.attendance.store');
-Route::get('/sessions/{session}/attendance', [AttendanceController::class, 'index'])->name('sessions.attendance.index');
 
 require __DIR__ . '/auth.php';
 
@@ -109,23 +101,11 @@ Route::prefix('courses/{course}/sessions')->group(function () {
     Route::delete('/{session}', [CourseSessionController::class, 'destroy'])->name('sessions.destroy'); // Hapus sesi
 });
 
-Route::prefix('sessions/{session}/attendances')->group(function () {
-    Route::get('/', [AttendanceController::class, 'index'])->name('attendances.index');
-    Route::post('/', [AttendanceController::class, 'store'])->name('attendances.store');
-    Route::put('/{attendance}', [AttendanceController::class, 'update'])->name('attendances.update');
-    Route::delete('/{attendance}', [AttendanceController::class, 'destroy'])->name('attendances.destroy');
-});
 
 Route::get('/general-schedule', [GeneralScheduleController::class, 'index'])->name('general-schedule.index');
 Route::get('/general-schedule/export', [GeneralScheduleController::class, 'export'])->name('general-schedule.export');
 Route::get('/general-schedule/export-pdf', [GeneralScheduleController::class, 'exportPdf'])->name('general-schedule.export-pdf');
 
-Route::prefix('attendance')->group(function () {
-    Route::get('/{sessionId}', [AttendanceController::class, 'show'])->name('attendance.show');
-    Route::post('/{sessionId}/materials', [AttendanceController::class, 'saveMaterials'])->name('attendance.materials');
-    Route::post('/{sessionId}', [AttendanceController::class, 'store'])->name('attendance.store');
-    Route::post('/{sessionId}/scores', [AttendanceController::class, 'saveScores'])->name('attendance.scores');
-});
 
 Route::get('/courses/{courseId}', [CourseController::class, 'show'])->name('courses.show');
 

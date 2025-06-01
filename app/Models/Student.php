@@ -43,14 +43,32 @@ class Student extends Model
         return $this->belongsToMany(CourseSession::class, 'course_session_student');
     }
     
-    public function attendances()
-    {
-        return $this->hasMany(Attendance::class);
-    }
 
     public function materialScores()
     {
         return $this->belongsToMany(CourseMaterial::class, 'course_session_material_student', 'student_id', 'material_id')
                     ->withPivot('score', 'remarks');
+    }
+
+    public function getCoursesCountAttribute()
+    {
+        return $this->courses()->count();
+    }
+
+    public function getSessionsCountAttribute()
+    {
+        return $this->sessions()->count();
+    }
+
+    public function getAgeGroupAttribute()
+    {
+        $age = \Carbon\Carbon::parse($this->birth_date)->age;
+        if ($age < 5) {
+            return 'Balita';
+        } elseif ($age <= 18) {
+            return 'Remaja';
+        } else {
+            return 'Dewasa';
+        }
     }
 }

@@ -129,7 +129,7 @@
                                         </td>
                                         <td>{{ $student->user->name }}</td>
                                         <td>{{ $student->age_group }}</td>
-                                        <td>{{ $student->attendances->count() }}</td>
+                                        
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -165,7 +165,7 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <a href="{{ route('attendance.show', $session->id) }}" class="btn btn-info btn-sm">Attendance</a>
+                                                
                                                 <a href="{{ route('sessions.edit', [$course->id, $session->id]) }}" class="btn btn-warning btn-sm">Edit</a>
                                                 <form action="{{ route('sessions.destroy', [$course->id, $session->id]) }}" method="POST" style="display:inline;">
                                                     @csrf

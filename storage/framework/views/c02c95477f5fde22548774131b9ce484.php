@@ -1,11 +1,20 @@
-<x-default-layout>
+<?php if (isset($component)) { $__componentOriginal1c2e2f4f77e507b499e79defc0d48b7e = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal1c2e2f4f77e507b499e79defc0d48b7e = $attributes; } ?>
+<?php $component = App\View\Components\DefaultLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('default-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\DefaultLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
         <div class="container-xxl" id="kt_content_container">
             <div class="card card-custom">
                 <div class="card-header border-0 pt-6">
                     <h3 class="card-title">Detail Murid</h3>
                     <div class="card-toolbar">
-                        <a href="{{ route('students.index') }}" class="btn btn-light-secondary btn-sm">
+                        <a href="<?php echo e(route('students.index')); ?>" class="btn btn-light-secondary btn-sm">
                             <i class="fas fa-arrow-left"></i> Kembali
                         </a>
                     </div>
@@ -34,11 +43,11 @@
                                     <div class="card shadow-sm h-100">
                                         <div class="card-body text-center">
                                             <div class="symbol symbol-100px mb-3">
-                                                <img src="{{ $student->user->profile_picture ?? asset('assets/media/avatars/default-avatar.png') }}" alt="Avatar" class="rounded-circle">
+                                                <img src="<?php echo e($student->user->profile_picture ?? asset('assets/media/avatars/default-avatar.png')); ?>" alt="Avatar" class="rounded-circle">
                                             </div>
-                                            <h5 class="text-gray-800 fw-bold">{{ $student->user->name }}</h5>
+                                            <h5 class="text-gray-800 fw-bold"><?php echo e($student->user->name); ?></h5>
                                             <p class="text-gray-600">Organisasi: -</p>
-                                            <a href="https://wa.me/{{ $student->user->phone_number }}" class="btn btn-success btn-sm mb-2" target="_blank">
+                                            <a href="https://wa.me/<?php echo e($student->user->phone_number); ?>" class="btn btn-success btn-sm mb-2" target="_blank">
                                                 <i class="fab fa-whatsapp"></i> Hubungi via WhatsApp</a>
                                         </div>
                                     </div>
@@ -49,19 +58,19 @@
                                             <table class="table align-middle table-row-dashed fs-6 gy-5">
                                                 <tr>
                                                     <th>Email</th>
-                                                    <td>{{ $student->user->email }}</td>
+                                                    <td><?php echo e($student->user->email); ?></td>
                                                 </tr>
                                                 <tr>
                                                     <th>Tanggal Lahir</th>
-                                                    <td>{{ \Carbon\carbon::parse( $student->birth_date)->format('d-m-Y') }}</td>
+                                                    <td><?php echo e(\Carbon\carbon::parse( $student->birth_date)->format('d-m-Y')); ?></td>
                                                 </tr>
                                                 <tr>
                                                     <th>Usia</th>
-                                                    <td>{{ \Carbon\Carbon::parse($student->birth_date)->age }} tahun </td>
+                                                    <td><?php echo e(\Carbon\Carbon::parse($student->birth_date)->age); ?> tahun </td>
                                                 </tr>
                                                 <tr>
                                                     <th>Terdaftar</th>
-                                                    <td>{{ \Carbon\Carbon::parse($student->user->created_at)->format('m-Y') }}</td>
+                                                    <td><?php echo e(\Carbon\Carbon::parse($student->user->created_at)->format('m-Y')); ?></td>
                                                 </tr>
                                             </table>
                                         </div>
@@ -73,15 +82,15 @@
                                             <table class="table align-middle table-row-dashed fs-6 gy-5">
                                                 <tr>
                                                     <th>Jumlah Kursus</th>
-                                                    <td>{{ $student->courses_count }}</td>
+                                                    <td><?php echo e($student->courses_count); ?></td>
                                                 </tr>
                                                 <tr>
                                                     <th>Total Sesi</th>
-                                                    <td>{{ $student->sessions_count }}</td>
+                                                    <td><?php echo e($student->sessions_count); ?></td>
                                                 </tr>
                                                 <tr>
                                                     <th>Status</th>
-                                                    <td>{{ $student->status }}</td>
+                                                    <td><?php echo e($student->status); ?></td>
                                                 </tr>
                                                 <tr>
                                                     <th>Total Nilai Kumulatif</th>
@@ -112,20 +121,21 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach ($student->courses->take(5) as $course)
+                                            <?php $__currentLoopData = $student->courses->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <tr>
-                                                <td>{{ $loop->iteration }}</td>
+                                                <td><?php echo e($loop->iteration); ?></td>
                                                 <td>
-                                                    <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#courseDetailModal{{ $course->id }}">
-                                                        {{ $course->name }}
+                                                    <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#courseDetailModal<?php echo e($course->id); ?>">
+                                                        <?php echo e($course->name); ?>
+
                                                     </a>
                                                 </td>
-                                                <td>{{ $course->max_sessions }}</td>
-                                                <td>{{ $course->venue->name ?? '-' }}</td>
-                                                <td>{{ $course->status }}</td>
+                                                <td><?php echo e($course->max_sessions); ?></td>
+                                                <td><?php echo e($course->venue->name ?? '-'); ?></td>
+                                                <td><?php echo e($course->status); ?></td>
                                                 <td>-</td>
                                             </tr>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -155,16 +165,16 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @for ($i = 1; $i <= 5; $i++)
+                                            <?php for($i = 1; $i <= 5; $i++): ?>
                                             <tr>
-                                                <td>{{ $i }}</td>
-                                                <td>Materi {{ $i }}</td>
-                                                <td>Kursus {{ $i }}</td>
-                                                <td>{{ now()->subDays($i)->format('Y-m-d') }}</td>
-                                                <td>{{ rand(70, 100) }}</td>
-                                                <td>Pelatih {{ $i }}</td>
+                                                <td><?php echo e($i); ?></td>
+                                                <td>Materi <?php echo e($i); ?></td>
+                                                <td>Kursus <?php echo e($i); ?></td>
+                                                <td><?php echo e(now()->subDays($i)->format('Y-m-d')); ?></td>
+                                                <td><?php echo e(rand(70, 100)); ?></td>
+                                                <td>Pelatih <?php echo e($i); ?></td>
                                             </tr>
-                                            @endfor
+                                            <?php endfor; ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -177,25 +187,25 @@
     </div>
 
     <!-- Modal Detail Kursus -->
-    @foreach ($student->courses->take(5) as $course)
-    <div class="modal fade" id="courseDetailModal{{ $course->id }}" tabindex="-1" aria-labelledby="courseDetailModalLabel{{ $course->id }}" aria-hidden="true">
+    <?php $__currentLoopData = $student->courses->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+    <div class="modal fade" id="courseDetailModal<?php echo e($course->id); ?>" tabindex="-1" aria-labelledby="courseDetailModalLabel<?php echo e($course->id); ?>" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="courseDetailModalLabel{{ $course->id }}">Detail Kursus: {{ $course->name }}</h5>
+                    <h5 class="modal-title" id="courseDetailModalLabel<?php echo e($course->id); ?>">Detail Kursus: <?php echo e($course->name); ?></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p><strong>Nama Pelatih:</strong> {{ $course->coach_name ?? '-' }}</p>
-                    <p><strong>Venue:</strong> {{ $course->venue->name ?? '-' }}</p>
-                    <p><strong>Status:</strong> {{ $course->status }}</p>
-                    <p><strong>Jumlah Sesi:</strong> {{ $course->max_sessions }}</p>
+                    <p><strong>Nama Pelatih:</strong> <?php echo e($course->coach_name ?? '-'); ?></p>
+                    <p><strong>Venue:</strong> <?php echo e($course->venue->name ?? '-'); ?></p>
+                    <p><strong>Status:</strong> <?php echo e($course->status); ?></p>
+                    <p><strong>Jumlah Sesi:</strong> <?php echo e($course->max_sessions); ?></p>
                     <p><strong>Nilai Kumulatif:</strong> -</p>
                 </div>
             </div>
         </div>
     </div>
-    @endforeach
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
     <script>
         $(document).ready(function() {
@@ -252,4 +262,13 @@
             chart.render();
         });
     </script>
-</x-default-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal1c2e2f4f77e507b499e79defc0d48b7e)): ?>
+<?php $attributes = $__attributesOriginal1c2e2f4f77e507b499e79defc0d48b7e; ?>
+<?php unset($__attributesOriginal1c2e2f4f77e507b499e79defc0d48b7e); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal1c2e2f4f77e507b499e79defc0d48b7e)): ?>
+<?php $component = $__componentOriginal1c2e2f4f77e507b499e79defc0d48b7e; ?>
+<?php unset($__componentOriginal1c2e2f4f77e507b499e79defc0d48b7e); ?>
+<?php endif; ?><?php /**PATH C:\Users\JITU\swim\resources\views/students/show.blade.php ENDPATH**/ ?>
