@@ -13,6 +13,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseMaterialController;
 use App\Http\Controllers\CourseSessionController;
 use App\Http\Controllers\GeneralScheduleController;
+use App\Http\Controllers\AttendanceController;
 use Illuminate\Support\Facades\Route;
 use App\Models\CourseMaterial;
 use Illuminate\Http\Request;
@@ -99,6 +100,7 @@ Route::prefix('courses/{course}/sessions')->group(function () {
     Route::get('/{session}/edit', [CourseSessionController::class, 'edit'])->name('sessions.edit'); // Form edit sesi
     Route::put('/{session}', [CourseSessionController::class, 'update'])->name('sessions.update'); // Update sesi
     Route::delete('/{session}', [CourseSessionController::class, 'destroy'])->name('sessions.destroy'); // Hapus sesi
+    Route::post('/{session}/attendance', [AttendanceController::class, 'saveAttendance'])->name('sessions.attendance.save');
 });
 
 

@@ -90,4 +90,32 @@ class AttendanceController extends Controller
 
         return response()->json(['success' => true, 'student_id' => $request->student_id]);
     }
+
+    public function saveAttendance(Request $request, $sessionId)
+    {
+        $session = CourseSession::with('course.materials')->findOrFail($sessionId);
+
+        foreach ($request->attendance as $studentId => $data) {
+            // Simpan absensi
+            DB::table('attendances')->updateOrInsert(
+                [
+                    'course_session_id' => $sessionId,
+                    'student_id' => $studentId,
+                ],
+                [
+                    'status' => $data['status'],
+                    'remarks' => $data['remarks'] ?? null,
+                ]
+            );
+        }
+
+        // Perbarui status sesi menjadi 'completed'
+        $session->update(['status' => 'completed']);
+
+        // Kembalikan respons JSON untuk AJAX
+        return response()->json([
+            'success' => true,
+            'message' => 'Attendance saved successfully, and session marked as completed.',
+        ]);
+    }
 }

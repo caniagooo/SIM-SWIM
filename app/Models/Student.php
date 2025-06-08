@@ -60,6 +60,11 @@ class Student extends Model
         return $this->sessions()->count();
     }
 
+    public function sessionMaterialGrades()
+    {
+        return $this->hasMany(CourseSessionMaterialStudent::class, 'student_id', 'id');
+    }
+
     public function getAgeGroupAttribute()
     {
         $age = \Carbon\Carbon::parse($this->birth_date)->age;

@@ -87,11 +87,11 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="valid_until" class="form-label">Valid Until</label>
-                                <input type="date" name="valid_until" id="valid_until" class="form-control" value="<?php echo e(old('valid_until')); ?>" required>
+                                <input type="date" name="valid_until" id="valid_until" class="form-control" value="<?php echo e($course->valid_until); ?>" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="basic_skills" class="form-label">Basic Skills</label>
-                                <textarea name="basic_skills" id="basic_skills" class="form-control" rows="3"><?php echo e(old('basic_skills')); ?></textarea>
+                                <textarea name="basic_skills" id="basic_skills" class="form-control" rows="3"><?php echo e($course->basic_skills); ?></textarea>
                             </div>
                         </div>
                     </div>
@@ -211,4 +211,4 @@
 <?php if (isset($__componentOriginal1c2e2f4f77e507b499e79defc0d48b7e)): ?>
 <?php $component = $__componentOriginal1c2e2f4f77e507b499e79defc0d48b7e; ?>
 <?php unset($__componentOriginal1c2e2f4f77e507b499e79defc0d48b7e); ?>
-<?php endif; ?><?php /**PATH C:\Users\JITU\swim\resources\views/courses/create.blade.php ENDPATH**/ ?>
+<?php endif; ?><?php /**PATH C:\Users\JITU\swim\resources\views/courses/edit.blade.php ENDPATH**/ ?>

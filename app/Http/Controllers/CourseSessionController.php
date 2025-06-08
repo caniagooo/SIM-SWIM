@@ -19,22 +19,30 @@ class CourseSessionController extends Controller
         return view('sessions.create', compact('course'));
     }
 
-    public function store(Request $request, Course $course)
+    public function store(Request $request, $courseId)
     {
-        $validated = $request->validate([
+        $request->validate([
             'session_date' => 'required|date',
-            'start_time' => 'required',
-            'end_time' => 'required',
-            'status' => 'required|in:scheduled,completed,canceled',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
         ]);
 
-        $course->sessions()->create($validated);
-        return redirect()->route('sessions.index', $course->id)->with('success', 'Session created successfully.');
+        $session = CourseSession::create([
+            'course_id' => $courseId,
+            'session_date' => $request->session_date,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'status' => 'scheduled', // Default status
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $session,
+        ]);
     }
 
     public function edit(Course $course, CourseSession $session)
     {
-        
         return view('sessions.form', compact('course', 'session'));
     }
 
@@ -46,10 +54,20 @@ class CourseSessionController extends Controller
             'end_time' => 'required|after:start_time',
             'status' => 'required|in:scheduled,completed,canceled',
         ]);
+        
+        
+        $session = CourseSession::findOrFail($session->id);
+        $session->update([
+                'session_date' => $request->session_date,
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
+                'status' => $request->status,
+        ]);
 
-        $session->update($request->all());
-
-        return redirect()->route('courses.show', $course->id)->with('success', 'Session updated successfully.');
+        return response()->json([
+            'success' => true,
+            'data' => $session,
+        ]);
     }
 
     public function destroy(Course $course, CourseSession $session)

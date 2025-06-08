@@ -85,7 +85,7 @@ class CourseController extends Controller
 
     public function show($courseId, Request $request)
     {
-        $course = Course::with(['sessions', 'materials'])->findOrFail($courseId);
+        $course = Course::with(['sessions', 'sessions.attendances','students.user','students.sessionMaterialGrades','materials'])->findOrFail($courseId);
         $activeTab = $request->get('tab', 'overview'); // Default tab adalah 'overview'
 
         return view('courses.show', compact('course', 'activeTab'));

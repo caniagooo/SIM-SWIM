@@ -34,6 +34,13 @@ class CourseSession extends Model
         return $this->belongsTo(Course::class);
     }
 
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'course_session_id', 'id');
+    }
+
+
     // Relasi ke murid (students)
     public function students()
     {
