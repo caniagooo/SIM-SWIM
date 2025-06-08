@@ -14,6 +14,7 @@ use App\Http\Controllers\CourseMaterialController;
 use App\Http\Controllers\CourseSessionController;
 use App\Http\Controllers\GeneralScheduleController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\GradeController;
 use Illuminate\Support\Facades\Route;
 use App\Models\CourseMaterial;
 use Illuminate\Http\Request;
@@ -110,4 +111,5 @@ Route::get('/general-schedule/export-pdf', [GeneralScheduleController::class, 'e
 
 
 Route::get('/courses/{courseId}', [CourseController::class, 'show'])->name('courses.show');
+Route::post('/courses/{course}/students/{student}/grades', [GradeController::class, 'store'])->name('grades.store');
 

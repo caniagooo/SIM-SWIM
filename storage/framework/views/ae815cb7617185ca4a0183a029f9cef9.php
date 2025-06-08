@@ -124,49 +124,57 @@
                                 <div class="card border-0 shadow-sm h-100">
                                     <div class="card-body">
                                         <h6 class="text-primary mb-2"><i class="bi bi-people"></i> Students</h6>
-                                        <div class="row">
-                                            <?php $__empty_1 = true; $__currentLoopData = $course->students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                                                <div class="col-md-4 mb-4">
-                                                    <div class="card shadow-sm h-100">
-                                                        <div class="card-body text-center">
-                                                            <div class="symbol symbol-100px mb-3">
-                                                                <img src="<?php echo e($student->user->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png')); ?>" alt="Avatar" class="rounded-circle">
-                                                            </div>
-                                                            <h5 class="text-gray-800 fw-bold"><?php echo e($student->user->name); ?></h5>
-                                                            <p class="text-gray-600"><?php echo e(\Carbon\Carbon::parse($student->birth_date)->age); ?> tahun</p>
-                                                            <button class="btn btn-light-primary btn-sm" data-bs-toggle="modal" data-bs-target="#studentDetailModal<?php echo e($student->id); ?>">
-                                                                <i class="fas fa-eye"></i> View Details
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered align-middle">
+                                                <thead>
+                                                    <tr class="text-center">
+                                                        <th>#</th>
+                                                        <th>Foto</th>
+                                                        <th>Nama</th>
+                                                        <th>Kehadiran</th>
+                                                        <th>Nilai Rata-Rata</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php $__empty_1 = true; $__currentLoopData = $course->students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                                        <?php
+                                                            $attendanceCount = $student->sessions->where('course_id', $course->id)->count();
+                                                            $maxSessions = $course->max_sessions ?? 0;
+                                                            $averageScore = 85; // Dummy data untuk nilai rata-rata
+                                                        ?>
+                                                        <tr>
+                                                            <td class="text-center"><?php echo e($loop->iteration); ?></td>
+                                                            <td class="text-center">
+                                                                <img src="<?php echo e($student->user->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png')); ?>" alt="Avatar" class="rounded-circle" width="50" height="50">
+                                                            </td>
+                                                            <td>
+                                                                <a href="<?php echo e(route('students.show', $student->id)); ?>" class="text-primary fw-bold">
+                                                                    <?php echo e($student->user->name); ?>
 
-                                                <!-- Modal Detail Murid -->
-                                                <div class="modal fade" id="studentDetailModal<?php echo e($student->id); ?>" tabindex="-1" aria-labelledby="studentDetailModalLabel<?php echo e($student->id); ?>" aria-hidden="true">
-                                                    <div class="modal-dialog modal-lg">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title" id="studentDetailModalLabel<?php echo e($student->id); ?>">Detail Murid: <?php echo e($student->user->name); ?></h5>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                <p><strong>Email:</strong> <?php echo e($student->user->email); ?></p>
-                                                                <p><strong>Phone Number:</strong> <?php echo e($student->user->phone_number ?? '-'); ?></p>
-                                                                <p><strong>Address:</strong> <?php echo e($student->user->address ?? '-'); ?></p>
-                                                                <p><strong>Usia:</strong> <?php echo e(\Carbon\Carbon::parse($student->birth_date)->age); ?> tahun</p>
-                                                                <p><strong>Attendance:</strong> <?php echo e($student->sessions->count()); ?></p>
-                                                                <a href="<?php echo e(route('students.show', $student->id)); ?>" class="btn btn-primary btn-sm">
-                                                                    <i class="fas fa-link"></i> Go to Student Details
                                                                 </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <?php echo e($attendanceCount); ?> / <?php echo e($maxSessions); ?>
+
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <?php echo e($averageScore); ?>
+
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <button class="btn btn-light-primary btn-sm" data-bs-toggle="modal" data-bs-target="#studentDetailModal<?php echo e($student->id); ?>">
+                                                                    <i class="fas fa-edit"></i> Penilaian
+                                                                </button>
+                                                            </td>
+                                                        </tr>
                                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                                                <div class="col-12">
-                                                    <p class="text-muted">No students enrolled in this course.</p>
-                                                </div>
+                                                        <tr>
+                                                            <td colspan="6" class="text-center text-muted">No students enrolled in this course.</td>
+                                                        </tr>
                                                     <?php endif; ?>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -433,6 +441,68 @@
 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
 
+
+<?php $__currentLoopData = $course->students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+    <div class="modal fade" id="studentDetailModal<?php echo e($student->id); ?>" tabindex="-1" aria-labelledby="studentDetailModalLabel<?php echo e($student->id); ?>" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="studentDetailModalLabel<?php echo e($student->id); ?>">
+                        Penilaian untuk: <strong><?php echo e($student->user->name); ?></strong>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <form id="gradingForm<?php echo e($student->id); ?>">
+                        <?php echo csrf_field(); ?>
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle">
+                                <thead class="bg-light">
+                                    <tr class="text-center">
+                                        <th>#</th>
+                                        <th>Materi</th>
+                                        <th>Penilaian</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php $__currentLoopData = $course->materials; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $material): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php
+                                            // Ambil nilai dari tabel pivot course_session_material_student
+                                            $grade = \DB::table('course_session_material_student')
+                                                ->where('student_id', $student->id)
+                                                ->where('material_id', $material->id)
+                                                ->orderByDesc('id')
+                                                ->first();
+                                        ?>
+                                        <tr>
+                                            <td class="text-center"><?php echo e($loop->iteration); ?></td>
+                                            <td><?php echo e($material->name); ?></td>
+                                            <td class="text-center">
+                                                <div class="btn-group" role="group" aria-label="Penilaian">
+                                                    <?php for($i = 1; $i <= 5; $i++): ?>
+                                                        <input type="radio" class="btn-check" name="grades[<?php echo e($material->id); ?>]" id="grade-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>-<?php echo e($i); ?>" value="<?php echo e($i); ?>"
+                                                            <?php echo e(isset($grade->score) && $grade->score == $i ? 'checked' : ''); ?>>
+                                                        <label class="btn btn-sm btn-outline-primary" for="grade-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>-<?php echo e($i); ?>"><?php echo e($i); ?></label>
+                                                    <?php endfor; ?>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mt-3">Simpan Penilaian</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+
 <!-- Javascript -->
 
 <script src="<?php echo e(asset('assets/plugins/jquery/jquery.min.js')); ?>"></script>
@@ -609,6 +679,34 @@
         alertContainer.fadeIn();
         setTimeout(() => alertContainer.fadeOut(), 3000);
     }
+</script>
+
+<script>
+    $(document).ready(function () {
+        <?php $__currentLoopData = $course->students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            $('#gradingForm<?php echo e($student->id); ?>').on('submit', function (e) {
+                e.preventDefault(); // Prevent default form submission
+
+                // Get the form data
+                var formData = $(this).serialize();
+
+                // Send AJAX request
+                $.ajax({
+                    url: "<?php echo e(route('grades.store', ['course' => $course->id, 'student' => $student->id])); ?>",
+                    method: "POST",
+                    data: formData,
+                    success: function (response) {
+                        console.log('Response:', response); // Log respons JSON ke konsol
+                        showAlert('success', 'Penilaian berhasil disimpan.');
+                    },
+                    error: function (xhr) {
+                        console.error('Error:', xhr.responseText); // Log error ke konsol
+                        showAlert('danger', 'Terjadi kesalahan saat menyimpan penilaian.');
+                    }
+                });
+            });
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    });
 </script>
 
  <?php echo $__env->renderComponent(); ?>

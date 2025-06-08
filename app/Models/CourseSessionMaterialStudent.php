@@ -36,4 +36,10 @@ class CourseSessionMaterialStudent extends Model
     {
         return $this->belongsTo(CourseMaterial::class, 'material_id', 'id');
     }
+
+    // Relasi ke kursus melalui sesi
+    public function course()
+    {
+        return $this->hasOneThrough(Course::class, CourseSession::class, 'id', 'id', 'course_session_id', 'course_id');
+    }
 }
