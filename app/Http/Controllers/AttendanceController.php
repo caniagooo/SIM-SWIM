@@ -2,67 +2,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\CourseSession;
+use App\Models\Attendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AttendanceController extends Controller
 {
-    public function store(Request $request, $sessionId)
-    {
-        $request->validate([
-            'attendance' => 'required|array',
-            'attendance.*.status' => 'required|in:hadir,tidak hadir,terlambat',
-        ]);
 
-        $session = CourseSession::findOrFail($sessionId);
-
-        if (is_array($request->attendance)) {
-            foreach ($request->attendance as $studentId => $data) {
-                DB::table('attendances')->updateOrInsert(
-                    [
-                        'course_session_id' => $sessionId,
-                        'student_id' => $studentId,
-                    ],
-                    [
-                        'status' => $data['status'],
-                        'remarks' => $data['remarks'] ?? null,
-                    ]
-                );
-            }
-        } else {
-            throw new \Exception('Attendance data is missing or invalid.');
-        }
-
-        // Redirect ke halaman detail kursus (tab session)
-        return redirect()->route('courses.show', ['courseId' => $session->course_id, 'tab' => 'sessions'])
-            ->with('success', 'Attendance saved successfully!');
-    }
-
-    public function saveScores(Request $request, $sessionId)
-    {
-        $session = CourseSession::findOrFail($sessionId);
-
-        foreach ($request->scores as $studentId => $materials) {
-            foreach ($materials as $materialId => $data) {
-                DB::table('course_session_material_student')->updateOrInsert(
-                    [
-                        'course_session_id' => $sessionId,
-                        'student_id' => $studentId,
-                        'material_id' => $materialId,
-                    ],
-                    [
-                        'score' => $data['score'],
-                        'remarks' => $data['remarks'] ?? null,
-                    ]
-                );
-            }
-        }
-
-        // Redirect ke halaman detail kursus (tab session)
-        return redirect()->route('courses.show', ['courseId' => $session->course_id, 'tab' => 'sessions'])
-            ->with('success', 'Scores saved successfully!');
-    }
-
+    /**
+     * Tampilkan halaman absensi untuk sesi kursus tertentu.
+     *
+     * @param int $sessionId
+     * @return \Illuminate\View\View
+     */
     public function show($sessionId)
     {
         // Ambil data sesi beserta relasi yang diperlukan
@@ -71,34 +23,31 @@ class AttendanceController extends Controller
         // Tampilkan view absensi
         return view('attendance.show', compact('session'));
     }
-
-    public function storeScore(Request $request)
+    /**
+     * Simpan data absensi untuk sesi kursus.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function saveAttendance(Request $request)
     {
-        $request->validate([
-            'scores.*.*.score' => 'required|in:1,2,3',
-            'scores.*.*.remarks' => 'nullable|string',
-        ]);
+        // Ambil course_session_id dari request
+        $sessionId = $request->input('course_session_id');
 
-        foreach ($request->scores as $studentId => $materials) {
-            foreach ($materials as $materialId => $data) {
-                Score::updateOrCreate(
-                    ['student_id' => $studentId, 'material_id' => $materialId],
-                    ['score' => $data['score'], 'remarks' => $data['remarks']]
-                );
-            }
-        }
+        // Log untuk memastikan sessionId yang benar
+        logger('Session ID from Request:', [$sessionId]);
 
-        return response()->json(['success' => true, 'student_id' => $request->student_id]);
-    }
-
-    public function saveAttendance(Request $request, $sessionId)
-    {
-        $session = CourseSession::with('course.materials')->findOrFail($sessionId);
+        $session = CourseSession::with('course')->findOrFail($sessionId);
 
         foreach ($request->attendance as $studentId => $data) {
-            // Simpan absensi
-            DB::table('attendances')->updateOrInsert(
+            // Log untuk setiap murid yang diproses
+            logger('Processing Attendance for Student ID:', [$studentId]);
+            logger('Attendance Data:', $data);
+
+            // Simpan atau perbarui data absensi
+            Attendance::updateOrCreate(
                 [
+                    'course_id' => $session->course_id,
                     'course_session_id' => $sessionId,
                     'student_id' => $studentId,
                 ],
@@ -107,15 +56,20 @@ class AttendanceController extends Controller
                     'remarks' => $data['remarks'] ?? null,
                 ]
             );
+
+            // Log setelah data absensi disimpan
+            logger('Attendance Saved for Student ID:', [$studentId]);
         }
 
         // Perbarui status sesi menjadi 'completed'
         $session->update(['status' => 'completed']);
 
-        // Kembalikan respons JSON untuk AJAX
+        // Log setelah status sesi diperbarui
+        logger('Session Status Updated to Completed for Session ID:', [$sessionId]);
+
         return response()->json([
             'success' => true,
-            'message' => 'Attendance saved successfully, and session marked as completed.',
+            'message' => 'Attendance saved successfully.',
         ]);
     }
 }

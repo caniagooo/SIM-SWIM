@@ -3,30 +3,40 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\CourseSessionMaterialStudent;
+use App\Models\StudentGrade;
 use App\Models\Course;
 use App\Models\Student;
 
 class GradeController extends Controller
 {
+
+
+    /**
+     * Simpan atau perbarui penilaian untuk murid dalam kursus tertentu.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
     public function store(Request $request, Course $course, Student $student)
     {
-        // Validasi input
         $request->validate([
             'grades' => 'required|array',
-            'grades.*' => 'nullable|numeric|min:1|max:5', // Penilaian 1-5
+            'grades.*.score' => 'nullable|numeric|min:1|max:5',
+            'grades.*.material_id' => 'required|exists:course_materials,id',
+            'remarks' => 'nullable|array',
+            'remarks.*' => 'nullable|string|max:255',
         ]);
 
-        // Simpan atau perbarui nilai untuk setiap materi
-        foreach ($request->grades as $materialId => $score) {
-            CourseSessionMaterialStudent::updateOrCreate(
+        foreach ($request->grades as $materialId => $data) {
+            StudentGrade::updateOrCreate(
                 [
-                    'course_session_id' => $course->sessions->first()->id, // Ambil sesi pertama (atau sesuaikan logika)
+                    'course_id' => $course->id, // Gunakan course_id sebagai referensi utama
                     'student_id' => $student->id,
                     'material_id' => $materialId,
                 ],
                 [
-                    'score' => $score,
+                    'score' => $data['score'] ?? null,
                     'remarks' => $request->remarks[$materialId] ?? null,
                 ]
             );

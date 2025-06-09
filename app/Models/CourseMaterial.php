@@ -17,10 +17,9 @@ class CourseMaterial extends Model
         return $this->belongsToMany(Course::class, 'course_course_material', 'course_material_id', 'course_id');
     }
 
-    public function studentScores()
+    public function grades()
     {
-        return $this->belongsToMany(Student::class, 'course_session_material_student', 'material_id', 'student_id')
-                    ->withPivot('score', 'remarks');
+        return $this->hasMany(StudentGrade::class, 'material_id');
     }
 
     public static function createFromRequest(Request $request)

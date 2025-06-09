@@ -141,7 +141,13 @@
                                                         <?php
                                                             $attendanceCount = $student->sessions->where('course_id', $course->id)->count();
                                                             $maxSessions = $course->max_sessions ?? 0;
-                                                            $averageScore = 85; // Dummy data untuk nilai rata-rata
+                                                            // Hitung rata-rata nilai dari seluruh materi kursus untuk siswa ini
+                                                            $materialIds = $course->materials->pluck('id');
+                                                            $totalScore = \DB::table('student_grades')
+                                                                ->where('student_id', $student->id)
+                                                                ->whereIn('material_id', $materialIds)
+                                                                ->avg('score');
+                                                            $averageScore = $totalScore ? number_format($totalScore, 1) : '-';
                                                         ?>
                                                         <tr>
                                                             <td class="text-center"><?php echo e($loop->iteration); ?></td>
@@ -292,67 +298,71 @@
         </div>
     </div>
 
-    <!-- Attendance Modal -->
-    
+<!-- Attendance Modal -->    
 <?php $__currentLoopData = $course->sessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <div class="modal fade" id="attendanceModal<?php echo e($session->id); ?>" tabindex="-1" aria-labelledby="attendanceModalLabel<?php echo e($session->id); ?>" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="attendanceModalLabel<?php echo e($session->id); ?>">Attendance for Session: <?php echo e($session->session_date->format('d M Y')); ?></h5>
+                <div class="modal-header bg-light-primary">
+                    <h5 class="modal-title" id="attendanceModalLabel<?php echo e($course->id); ?>">
+                        <i class="bi bi-clipboard-check text-primary me-2"></i>
+                        Attendance for Session: 
+                        <span class="fw-bold text-primary"><?php echo e(\Carbon\Carbon::parse($session->session_date)->translatedFormat('l, d F Y')); ?></span>
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="attendanceForm<?php echo e($session->id); ?>" method="POST">
                         <?php echo csrf_field(); ?>
-                        <table class="table table-bordered table-hover">
-                            <caption>Attendance for Session: <?php echo e(\Carbon\Carbon::parse($session->session_date)->translatedFormat('l, d F Y')); ?></caption>
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Nama Murid</th>
-                                    <th>Kehadiran</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php $__currentLoopData = $course->students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <?php
-                                        $attendance = $session->attendances ? $session->attendances->where('student_id', $student->id)->first() : null;
-                                    ?>
-                                    <tr>
-                                        <td><?php echo e($loop->iteration); ?></td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <img src="<?php echo e($student->user->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png')); ?>" alt="Avatar" class="rounded-circle me-2" width="32" height="32">
-                                                <span><?php echo e($student->user->name); ?></span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group" aria-label="Attendance Status">
-                                                <input type="radio" class="btn-check" name="attendance[<?php echo e($student->id); ?>][status]" id="hadir-<?php echo e($student->id); ?>" value="hadir"
-                                                    <?php echo e($attendance && $attendance->status == 'hadir' ? 'checked' : ''); ?>>
-                                                <label class="btn btn-sm btn-light-success" for="hadir-<?php echo e($student->id); ?>">
-                                                    <i class="bi bi-check-circle"></i> Hadir
-                                                </label>
-
-                                                <input type="radio" class="btn-check" name="attendance[<?php echo e($student->id); ?>][status]" id="tidak-hadir-<?php echo e($student->id); ?>" value="tidak hadir"
-                                                    <?php echo e($attendance && $attendance->status == 'tidak hadir' ? 'checked' : ''); ?>>
-                                                <label class="btn btn-sm btn-light-danger" for="tidak-hadir-<?php echo e($student->id); ?>">
-                                                    <i class="bi bi-x-circle"></i> Tidak Hadir
-                                                </label>
-
-                                                <input type="radio" class="btn-check" name="attendance[<?php echo e($student->id); ?>][status]" id="terlambat-<?php echo e($student->id); ?>" value="terlambat"
-                                                    <?php echo e($attendance && $attendance->status == 'terlambat' ? 'checked' : ''); ?>>
-                                                <label class="btn btn-sm btn-light-warning" for="terlambat-<?php echo e($student->id); ?>">
-                                                    <i class="bi bi-clock"></i> Terlambat
-                                                </label>
-                                            </div>
-                                        </td>
+                        <input type="hidden" name="course_id" value="<?php echo e($course->id); ?>">
+                        <input type="hidden" name="course_session_id" value="<?php echo e($session->id); ?>">
+                        <div class="table-responsive">
+                            <table class="table align-middle table-row-dashed gy-3">
+                                <thead class="bg-light">
+                                    <tr class="text-center text-gray-600 fw-bold">
+                                        <th class="min-w-50px">#</th></tbody>
+                                        <th class="min-w-200px">Nama Murid</th>
+                                        <th class="min-w-300px">Status Kehadiran</th>
                                     </tr>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </tbody>
-                        </table>
-                        <button type="submit" class="btn btn-success">Save Attendance</button>
+                                </thead>
+                                <tbody>
+                                    <?php $__currentLoopData = $course->students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <tr>
+                                            <td class="text-center"><?php echo e($loop->iteration); ?></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="symbol symbol-40px me-3">
+                                                        <img src="<?php echo e($student->user->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png')); ?>" alt="Avatar" class="rounded-circle" width="40" height="40">
+                                                    </div>
+                                                    <span class="fw-semibold text-gray-800"><?php echo e($student->user->name); ?></span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group w-100" role="group" aria-label="Status Kehadiran">
+                                                    <input type="radio" class="btn-check" name="attendance[<?php echo e($student->id); ?>][status]" id="hadir-<?php echo e($session->id); ?>-<?php echo e($student->id); ?>" value="hadir" autocomplete="off">
+                                                    <label class="btn btn-sm btn-light-success fw-bold px-4" for="hadir-<?php echo e($session->id); ?>-<?php echo e($student->id); ?>">
+                                                        <i class="bi bi-check-circle me-1"></i> Hadir
+                                                    </label>
+
+                                                    <input type="radio" class="btn-check" name="attendance[<?php echo e($student->id); ?>][status]" id="tidak-hadir-<?php echo e($session->id); ?>-<?php echo e($student->id); ?>" value="tidak hadir" autocomplete="off">
+                                                    <label class="btn btn-sm btn-light-danger fw-bold px-4" for="tidak-hadir-<?php echo e($session->id); ?>-<?php echo e($student->id); ?>">
+                                                        <i class="bi bi-x-circle me-1"></i> Tidak Hadir
+                                                    </label>
+
+                                                    <input type="radio" class="btn-check" name="attendance[<?php echo e($student->id); ?>][status]" id="terlambat-<?php echo e($session->id); ?>-<?php echo e($student->id); ?>" value="terlambat" autocomplete="off">
+                                                    <label class="btn btn-sm btn-light-warning fw-bold px-4" for="terlambat-<?php echo e($session->id); ?>-<?php echo e($student->id); ?>">
+                                                        <i class="bi bi-clock-history me-1"></i> Terlambat
+                                                    </label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mt-4">
+                            <i class="bi bi-save me-2"></i> Simpan Kehadiran
+                        </button>
                     </form>
                 </div>
             </div>
@@ -458,6 +468,7 @@
                 <div class="modal-body">
                     <form id="gradingForm<?php echo e($student->id); ?>">
                         <?php echo csrf_field(); ?>
+                        <input type="hidden" name="course_id" value="<?php echo e($course->id); ?>"> <!-- Tambahkan course_id -->
                         <div class="table-responsive">
                             <table class="table table-bordered align-middle">
                                 <thead class="bg-light">
@@ -470,24 +481,23 @@
                                 <tbody>
                                     <?php $__currentLoopData = $course->materials; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $material): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <?php
-                                            // Ambil nilai dari tabel pivot course_session_material_student
-                                            $grade = \DB::table('course_session_material_student')
-                                                ->where('student_id', $student->id)
-                                                ->where('material_id', $material->id)
-                                                ->orderByDesc('id')
-                                                ->first();
+                                            $grade = $material->grades->where('student_id', $student->id)->first();
                                         ?>
                                         <tr>
                                             <td class="text-center"><?php echo e($loop->iteration); ?></td>
                                             <td><?php echo e($material->name); ?></td>
                                             <td class="text-center">
+                                                <input type="hidden" name="grades[<?php echo e($material->id); ?>][material_id]" value="<?php echo e($material->id); ?>">
                                                 <div class="btn-group" role="group" aria-label="Penilaian">
                                                     <?php for($i = 1; $i <= 5; $i++): ?>
-                                                        <input type="radio" class="btn-check" name="grades[<?php echo e($material->id); ?>]" id="grade-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>-<?php echo e($i); ?>" value="<?php echo e($i); ?>"
+                                                        <input type="radio" class="btn-check" name="grades[<?php echo e($material->id); ?>][score]" id="grade-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>-<?php echo e($i); ?>" value="<?php echo e($i); ?>"
                                                             <?php echo e(isset($grade->score) && $grade->score == $i ? 'checked' : ''); ?>>
                                                         <label class="btn btn-sm btn-outline-primary" for="grade-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>-<?php echo e($i); ?>"><?php echo e($i); ?></label>
                                                     <?php endfor; ?>
                                                 </div>
+                                                <?php if($grade): ?>
+                                                    <span class="badge bg-success">Nilai sudah berhasil disimpan</span>
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -535,19 +545,25 @@
                 $('#attendanceForm<?php echo e($session->id); ?>').on('submit', function (e) {
                     e.preventDefault();
 
+                    // Log data yang akan dikirimkan
+                    console.log($(this).serialize());
+
                     $.ajax({
                         url: "<?php echo e(route('sessions.attendance.save', ['course' => $course->id, 'session' => $session->id])); ?>",
                         method: "POST",
                         data: $(this).serialize(),
                         success: function (response) {
-                            showAlert('success', response.message);
-                            $('#attendanceModal<?php echo e($session->id); ?>').modal('hide');
+                            // Log respons sukses dari server
+                            console.log('Response:', response);
 
-                            const statusBadge = $('#sessionsStatus<?php echo e($session->id); ?>');
-                            statusBadge.removeClass('badge-info').addClass('badge-success').text('Completed');
+                            alert(response.message);
+                            $('#attendanceModal<?php echo e($session->id); ?>').modal('hide');
                         },
-                        error: function () {
-                            showAlert('danger', 'An error occurred while saving attendance. Please try again.');
+                        error: function (xhr) {
+                            // Log error dari server
+                            console.error('Error Response:', xhr.responseText);
+
+                            alert('Terjadi kesalahan saat menyimpan kehadiran.');
                         }
                     });
                 });
@@ -685,22 +701,21 @@
     $(document).ready(function () {
         <?php $__currentLoopData = $course->students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             $('#gradingForm<?php echo e($student->id); ?>').on('submit', function (e) {
-                e.preventDefault(); // Prevent default form submission
+                e.preventDefault();
 
-                // Get the form data
                 var formData = $(this).serialize();
 
-                // Send AJAX request
                 $.ajax({
                     url: "<?php echo e(route('grades.store', ['course' => $course->id, 'student' => $student->id])); ?>",
                     method: "POST",
                     data: formData,
                     success: function (response) {
-                        console.log('Response:', response); // Log respons JSON ke konsol
+                        console.log('Response:', response);
                         showAlert('success', 'Penilaian berhasil disimpan.');
+                        $('#studentDetailModal<?php echo e($student->id); ?>').modal('hide');
                     },
                     error: function (xhr) {
-                        console.error('Error:', xhr.responseText); // Log error ke konsol
+                        console.error('Error:', xhr.responseText);
                         showAlert('danger', 'Terjadi kesalahan saat menyimpan penilaian.');
                     }
                 });

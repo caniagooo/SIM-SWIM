@@ -132,7 +132,13 @@
                                                         @php
                                                             $attendanceCount = $student->sessions->where('course_id', $course->id)->count();
                                                             $maxSessions = $course->max_sessions ?? 0;
-                                                            $averageScore = 85; // Dummy data untuk nilai rata-rata
+                                                            // Hitung rata-rata nilai dari seluruh materi kursus untuk siswa ini
+                                                            $materialIds = $course->materials->pluck('id');
+                                                            $totalScore = \DB::table('student_grades')
+                                                                ->where('student_id', $student->id)
+                                                                ->whereIn('material_id', $materialIds)
+                                                                ->avg('score');
+                                                            $averageScore = $totalScore ? number_format($totalScore, 1) : '-';
                                                         @endphp
                                                         <tr>
                                                             <td class="text-center">{{ $loop->iteration }}</td>
@@ -276,67 +282,71 @@
         </div>
     </div>
 
-    <!-- Attendance Modal -->
-    
+<!-- Attendance Modal -->    
 @foreach ($course->sessions as $session)
     <div class="modal fade" id="attendanceModal{{ $session->id }}" tabindex="-1" aria-labelledby="attendanceModalLabel{{ $session->id }}" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="attendanceModalLabel{{ $session->id }}">Attendance for Session: {{ $session->session_date->format('d M Y') }}</h5>
+                <div class="modal-header bg-light-primary">
+                    <h5 class="modal-title" id="attendanceModalLabel{{ $course->id }}">
+                        <i class="bi bi-clipboard-check text-primary me-2"></i>
+                        Attendance for Session: 
+                        <span class="fw-bold text-primary">{{ \Carbon\Carbon::parse($session->session_date)->translatedFormat('l, d F Y') }}</span>
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="attendanceForm{{ $session->id }}" method="POST">
                         @csrf
-                        <table class="table table-bordered table-hover">
-                            <caption>Attendance for Session: {{ \Carbon\Carbon::parse($session->session_date)->translatedFormat('l, d F Y') }}</caption>
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Nama Murid</th>
-                                    <th>Kehadiran</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($course->students as $student)
-                                    @php
-                                        $attendance = $session->attendances ? $session->attendances->where('student_id', $student->id)->first() : null;
-                                    @endphp
-                                    <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <img src="{{ $student->user->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png') }}" alt="Avatar" class="rounded-circle me-2" width="32" height="32">
-                                                <span>{{ $student->user->name }}</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group" aria-label="Attendance Status">
-                                                <input type="radio" class="btn-check" name="attendance[{{ $student->id }}][status]" id="hadir-{{ $student->id }}" value="hadir"
-                                                    {{ $attendance && $attendance->status == 'hadir' ? 'checked' : '' }}>
-                                                <label class="btn btn-sm btn-light-success" for="hadir-{{ $student->id }}">
-                                                    <i class="bi bi-check-circle"></i> Hadir
-                                                </label>
-
-                                                <input type="radio" class="btn-check" name="attendance[{{ $student->id }}][status]" id="tidak-hadir-{{ $student->id }}" value="tidak hadir"
-                                                    {{ $attendance && $attendance->status == 'tidak hadir' ? 'checked' : '' }}>
-                                                <label class="btn btn-sm btn-light-danger" for="tidak-hadir-{{ $student->id }}">
-                                                    <i class="bi bi-x-circle"></i> Tidak Hadir
-                                                </label>
-
-                                                <input type="radio" class="btn-check" name="attendance[{{ $student->id }}][status]" id="terlambat-{{ $student->id }}" value="terlambat"
-                                                    {{ $attendance && $attendance->status == 'terlambat' ? 'checked' : '' }}>
-                                                <label class="btn btn-sm btn-light-warning" for="terlambat-{{ $student->id }}">
-                                                    <i class="bi bi-clock"></i> Terlambat
-                                                </label>
-                                            </div>
-                                        </td>
+                        <input type="hidden" name="course_id" value="{{ $course->id }}">
+                        <input type="hidden" name="course_session_id" value="{{ $session->id }}">
+                        <div class="table-responsive">
+                            <table class="table align-middle table-row-dashed gy-3">
+                                <thead class="bg-light">
+                                    <tr class="text-center text-gray-600 fw-bold">
+                                        <th class="min-w-50px">#</th></tbody>
+                                        <th class="min-w-200px">Nama Murid</th>
+                                        <th class="min-w-300px">Status Kehadiran</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                        <button type="submit" class="btn btn-success">Save Attendance</button>
+                                </thead>
+                                <tbody>
+                                    @foreach ($course->students as $student)
+                                        <tr>
+                                            <td class="text-center">{{ $loop->iteration }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="symbol symbol-40px me-3">
+                                                        <img src="{{ $student->user->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png') }}" alt="Avatar" class="rounded-circle" width="40" height="40">
+                                                    </div>
+                                                    <span class="fw-semibold text-gray-800">{{ $student->user->name }}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group w-100" role="group" aria-label="Status Kehadiran">
+                                                    <input type="radio" class="btn-check" name="attendance[{{ $student->id }}][status]" id="hadir-{{ $session->id }}-{{ $student->id }}" value="hadir" autocomplete="off">
+                                                    <label class="btn btn-sm btn-light-success fw-bold px-4" for="hadir-{{ $session->id }}-{{ $student->id }}">
+                                                        <i class="bi bi-check-circle me-1"></i> Hadir
+                                                    </label>
+
+                                                    <input type="radio" class="btn-check" name="attendance[{{ $student->id }}][status]" id="tidak-hadir-{{ $session->id }}-{{ $student->id }}" value="tidak hadir" autocomplete="off">
+                                                    <label class="btn btn-sm btn-light-danger fw-bold px-4" for="tidak-hadir-{{ $session->id }}-{{ $student->id }}">
+                                                        <i class="bi bi-x-circle me-1"></i> Tidak Hadir
+                                                    </label>
+
+                                                    <input type="radio" class="btn-check" name="attendance[{{ $student->id }}][status]" id="terlambat-{{ $session->id }}-{{ $student->id }}" value="terlambat" autocomplete="off">
+                                                    <label class="btn btn-sm btn-light-warning fw-bold px-4" for="terlambat-{{ $session->id }}-{{ $student->id }}">
+                                                        <i class="bi bi-clock-history me-1"></i> Terlambat
+                                                    </label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mt-4">
+                            <i class="bi bi-save me-2"></i> Simpan Kehadiran
+                        </button>
                     </form>
                 </div>
             </div>
@@ -442,6 +452,7 @@
                 <div class="modal-body">
                     <form id="gradingForm{{ $student->id }}">
                         @csrf
+                        <input type="hidden" name="course_id" value="{{ $course->id }}"> <!-- Tambahkan course_id -->
                         <div class="table-responsive">
                             <table class="table table-bordered align-middle">
                                 <thead class="bg-light">
@@ -454,24 +465,23 @@
                                 <tbody>
                                     @foreach ($course->materials as $material)
                                         @php
-                                            // Ambil nilai dari tabel pivot course_session_material_student
-                                            $grade = \DB::table('course_session_material_student')
-                                                ->where('student_id', $student->id)
-                                                ->where('material_id', $material->id)
-                                                ->orderByDesc('id')
-                                                ->first();
+                                            $grade = $material->grades->where('student_id', $student->id)->first();
                                         @endphp
                                         <tr>
                                             <td class="text-center">{{ $loop->iteration }}</td>
                                             <td>{{ $material->name }}</td>
                                             <td class="text-center">
+                                                <input type="hidden" name="grades[{{ $material->id }}][material_id]" value="{{ $material->id }}">
                                                 <div class="btn-group" role="group" aria-label="Penilaian">
                                                     @for ($i = 1; $i <= 5; $i++)
-                                                        <input type="radio" class="btn-check" name="grades[{{ $material->id }}]" id="grade-{{ $student->id }}-{{ $material->id }}-{{ $i }}" value="{{ $i }}"
+                                                        <input type="radio" class="btn-check" name="grades[{{ $material->id }}][score]" id="grade-{{ $student->id }}-{{ $material->id }}-{{ $i }}" value="{{ $i }}"
                                                             {{ isset($grade->score) && $grade->score == $i ? 'checked' : '' }}>
                                                         <label class="btn btn-sm btn-outline-primary" for="grade-{{ $student->id }}-{{ $material->id }}-{{ $i }}">{{ $i }}</label>
                                                     @endfor
                                                 </div>
+                                                @if ($grade)
+                                                    <span class="badge bg-success">Nilai sudah berhasil disimpan</span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -519,19 +529,25 @@
                 $('#attendanceForm{{ $session->id }}').on('submit', function (e) {
                     e.preventDefault();
 
+                    // Log data yang akan dikirimkan
+                    console.log($(this).serialize());
+
                     $.ajax({
                         url: "{{ route('sessions.attendance.save', ['course' => $course->id, 'session' => $session->id]) }}",
                         method: "POST",
                         data: $(this).serialize(),
                         success: function (response) {
-                            showAlert('success', response.message);
-                            $('#attendanceModal{{ $session->id }}').modal('hide');
+                            // Log respons sukses dari server
+                            console.log('Response:', response);
 
-                            const statusBadge = $('#sessionsStatus{{ $session->id }}');
-                            statusBadge.removeClass('badge-info').addClass('badge-success').text('Completed');
+                            alert(response.message);
+                            $('#attendanceModal{{ $session->id }}').modal('hide');
                         },
-                        error: function () {
-                            showAlert('danger', 'An error occurred while saving attendance. Please try again.');
+                        error: function (xhr) {
+                            // Log error dari server
+                            console.error('Error Response:', xhr.responseText);
+
+                            alert('Terjadi kesalahan saat menyimpan kehadiran.');
                         }
                     });
                 });
@@ -669,22 +685,21 @@
     $(document).ready(function () {
         @foreach ($course->students as $student)
             $('#gradingForm{{ $student->id }}').on('submit', function (e) {
-                e.preventDefault(); // Prevent default form submission
+                e.preventDefault();
 
-                // Get the form data
                 var formData = $(this).serialize();
 
-                // Send AJAX request
                 $.ajax({
                     url: "{{ route('grades.store', ['course' => $course->id, 'student' => $student->id]) }}",
                     method: "POST",
                     data: formData,
                     success: function (response) {
-                        console.log('Response:', response); // Log respons JSON ke konsol
+                        console.log('Response:', response);
                         showAlert('success', 'Penilaian berhasil disimpan.');
+                        $('#studentDetailModal{{ $student->id }}').modal('hide');
                     },
                     error: function (xhr) {
-                        console.error('Error:', xhr.responseText); // Log error ke konsol
+                        console.error('Error:', xhr.responseText);
                         showAlert('danger', 'Terjadi kesalahan saat menyimpan penilaian.');
                     }
                 });

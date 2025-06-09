@@ -10,9 +10,10 @@ class Attendance extends Model
     use HasFactory;
 
     protected $fillable = [
+        'course_id',
         'course_session_id',
         'student_id',
-        'present',
+        'status',
         'remarks',
     ];
 
@@ -26,5 +27,12 @@ class Attendance extends Model
     public function student()
     {
         return $this->belongsTo(Student::class, 'student_id', 'id');
+    }
+
+    // Relasi ke kursus melalui sesi
+    public function course()
+    {
+        return $this->hasOneThrough(Course::class, CourseSession::class, 'id', 'id', 'course_session_id', 'course_id');
+
     }
 }

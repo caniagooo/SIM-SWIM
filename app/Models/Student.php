@@ -43,11 +43,19 @@ class Student extends Model
         return $this->belongsToMany(CourseSession::class, 'course_session_student');
     }
     
-
-    public function materialScores()
+    public function attendances()
     {
-        return $this->belongsToMany(CourseMaterial::class, 'course_session_material_student', 'student_id', 'material_id')
-                    ->withPivot('score', 'remarks');
+        return $this->hasMany(Attendance::class, 'student_id', 'id');
+    }
+
+
+    public function gradeScores()
+    {
+        return $this->hasMany(StudentGrade::class, 'student_id', 'id');
+    }
+    public function getGradesAttribute()
+    {
+        return $this->gradeScores()->pluck('score', 'material_id');
     }
 
     public function getCoursesCountAttribute()
@@ -59,10 +67,9 @@ class Student extends Model
     {
         return $this->sessions()->count();
     }
-
-    public function sessionMaterialGrades()
+    public function getAttendancesCountAttribute()
     {
-        return $this->hasMany(CourseSessionMaterialStudent::class, 'student_id', 'id');
+        return $this->attendances()->count();
     }
 
     public function getAgeGroupAttribute()
