@@ -92,10 +92,10 @@
                                                             $completed = $course->sessions->where('status', 'completed')->count();
                                                             $unscheduled = max(0, $max - $scheduled);
                                                         ?>
-                                                        <td class="fw-bold text-gray-700">Sessions</td>
+                                                        <td class="fw-bold text-gray-700">Sesi</td>
                                                         <td>
                                                             <span class="text-success"> <?php echo e($completed); ?> </span> / 
-                                                            <span class="text-info"> <?php echo e($course->max_sessions ?? 'N/A'); ?> </span> Max Session
+                                                            <span class="text-info"> <?php echo e($course->max_sessions ?? 'N/A'); ?> </span> Sesi Pertemuan
                                                         </td>
                                                     </tr>
                                                     <tr>
@@ -526,16 +526,7 @@
     });
 </script>
 
-<!-- Attendance Modal Logging -->
-<script>
-    $(document).ready(function () {
-        setTimeout(function () {
-            $('#attendanceModal<?php echo e($session->id); ?>').on('show.bs.modal', function () {
-                console.log('Modal box for session <?php echo e($session->id); ?> is opening after delay.');
-            });
-        }, 500); // Delay 500ms sebelum modal box diinisialisasi
-    });
-</script>
+
 
 <!-- Attendance Form Submission -->
 <script>

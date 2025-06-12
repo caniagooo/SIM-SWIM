@@ -26,8 +26,6 @@
     @endforeach
     <!--end::Global Stylesheets Bundle-->
     
-    <link href="{{ asset('assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
-
 
     <!--begin::Vendor Stylesheets(used by this page)-->
     @foreach(getVendors('css') as $path)
@@ -53,6 +51,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
+
 
     
     
@@ -92,10 +92,6 @@
 <!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- DataTables JS -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
 
 @stack('scripts')
 <!--end::Javascript-->

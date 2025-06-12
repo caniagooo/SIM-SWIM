@@ -18,6 +18,7 @@ use App\Http\Controllers\GradeController;
 use Illuminate\Support\Facades\Route;
 use App\Models\CourseMaterial;
 use Illuminate\Http\Request;
+use App\Http\Controllers\CoursePaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +44,10 @@ Route::middleware(['auth'])->group(function () {
     Route::group(['middleware' => ['role:Super Admin|Admin']], function () {
         Route::resource('venues', VenueController::class);
     });
+
+    Route::post('/course-payments/create/{course}', [CoursePaymentController::class, 'createInvoice'])->name('course-payments.create');
+    Route::post('/course-payments/process/{course}', [CoursePaymentController::class, 'processPayment'])->name('course-payments.process');
+    Route::get('/course-payments/status/{payment}', [CoursePaymentController::class, 'paymentStatus'])->name('course-payments.status');
 });
 
 Route::middleware(['role:Super Admin'])->group(function () {
@@ -87,6 +92,26 @@ Route::get('/api/materials', function (Request $request) {
 });
 
 
+// Route untuk mengelola materi kursus
+Route::middleware(['role:Super Admin|Admin'])->group(function () {
+    Route::resource('course-materials', CourseMaterialController::class);
+    Route::post('course-materials/{material}/courses', [CourseMaterialController::class, 'attachCourse'])->name('course-materials.attach-course');
+    Route::delete('course-materials/{material}/courses/{course}', [CourseMaterialController::class, 'detachCourse'])->name('course-materials.detach-course');
+    Route::get('/materials', [CourseMaterialController::class, 'index'])->name('materials.index');
+    route::get('/{material}/edit', [CourseMaterialController::class, 'edit'])->name('materials.edit');
+});
+
+// route untuk membuat dan mengedit materi kursus
+Route::middleware(['role:Super Admin|Admin'])->group(function () {
+    Route::get('/course-materials/{material}/edit', [CourseMaterialController::class, 'edit'])->name('course-materials.edit');
+    Route::post('/course-materials', [CourseMaterialController::class, 'store'])->name('course-materials.store');
+    Route::get('/course-materials/create', [CourseMaterialController::class, 'create'])->name('course-materials.create');
+    Route::put('/course-materials/{material}', [CourseMaterialController::class, 'update'])->name('course-materials.update');
+    Route::delete('/course-materials/{material}', [CourseMaterialController::class, 'destroy'])->name('course-materials.destroy');
+});
+
+
+
 require __DIR__ . '/auth.php';
 
 Route::middleware(['web'])->group(function () {
@@ -105,11 +130,12 @@ Route::prefix('courses/{course}/sessions')->group(function () {
 });
 
 
-Route::get('/general-schedule', [GeneralScheduleController::class, 'index'])->name('general-schedule.index');
-Route::get('/general-schedule/export', [GeneralScheduleController::class, 'export'])->name('general-schedule.export');
-Route::get('/general-schedule/export-pdf', [GeneralScheduleController::class, 'exportPdf'])->name('general-schedule.export-pdf');
+    Route::get('/general-schedule', [GeneralScheduleController::class, 'index'])->name('general-schedule.index');
+    Route::get('/general-schedule/export', [GeneralScheduleController::class, 'export'])->name('general-schedule.export');
+    Route::get('/general-schedule/export-pdf', [GeneralScheduleController::class, 'exportPdf'])->name('general-schedule.export-pdf');
 
 
-Route::get('/courses/{courseId}', [CourseController::class, 'show'])->name('courses.show');
-Route::post('/courses/{course}/students/{student}/grades', [GradeController::class, 'store'])->name('grades.store');
+    Route::get('/courses/{courseId}', [CourseController::class, 'show'])->name('courses.show');
+    Route::post('/courses/{course}/students/{student}/grades', [GradeController::class, 'store'])->name('grades.store');
+Route::get('/payments/{payment}', [CoursePaymentController::class, 'show'])->name('payments.show');
 

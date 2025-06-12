@@ -8,7 +8,7 @@
             <!--begin:Menu item-->
             <div class="menu-item">
                 <a class="menu-link <?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>" href="<?php echo e(route('dashboard')); ?>">
-                    <span class="menu-icon"><?php echo getIcon('element-11', 'fs-2'); ?></span>
+                    <span class="menu-icon"><?php echo getIcon('graph', 'fs-2'); ?></span>
                     <span class="menu-title">Dashboard</span>
                 </a>
             </div>
@@ -17,8 +17,8 @@
             <!--begin:Menu item-->
             <div class="menu-item menu-accordion <?php echo e(request()->routeIs('students.*', 'payments.*') ? 'here show' : ''); ?>" data-kt-menu-trigger="click">
                 <span class="menu-link">
-                    <span class="menu-icon"><?php echo getIcon('user', 'fs-2'); ?></span>
-                    <span class="menu-title">Manajemen Murid</span>
+                    <span class="menu-icon"><?php echo getIcon('badge', 'fs-2'); ?></span>
+                    <span class="menu-title">Murid</span>
                     <span class="menu-arrow"></span>
                 </span>
                 <div class="menu-sub menu-sub-accordion">
@@ -28,7 +28,7 @@
                             <span class="menu-bullet">
                                 <span class="bullet bullet-dot"></span>
                             </span>
-                            <span class="menu-title">Students</span>
+                            <span class="menu-title">Daftar Murid</span>
                         </a>
                     </div>
                     <!-- Menu Payments -->
@@ -37,7 +37,7 @@
                             <span class="menu-bullet">
                                 <span class="bullet bullet-dot"></span>
                             </span>
-                            <span class="menu-title">Payments</span>
+                            <span class="menu-title">Pembayaran</span>
                         </a>
                     </div>
                 </div>
@@ -45,37 +45,76 @@
             <!--end:Menu item-->
 
             <!--begin:Menu item-->
-            <div class="menu-item">
-                <a class="menu-link <?php echo e(request()->routeIs('venues.*') ? 'active' : ''); ?>" href="<?php echo e(route('venues.index')); ?>">
-                    <span class="menu-icon"><?php echo getIcon('map', 'fs-2'); ?></span>
-                    <span class="menu-title">Venue</span>
-                </a>
+            <div class="menu-item menu-accordion <?php echo e(request()->routeIs('courses.*', 'materials.*') ? 'here show' : ''); ?>" data-kt-menu-trigger="click">
+                <span class="menu-link">
+                    <span class="menu-icon"><?php echo getIcon('questionnaire-tablet', 'fs-2'); ?></span>
+                    <span class="menu-title">Kursus</span>
+                    <span class="menu-arrow"></span>
+                </span>
+                <div class="menu-sub menu-sub-accordion">
+                    <!-- Menu Daftar Kursus -->
+                    <div class="menu-item">
+                        <a class="menu-link <?php echo e(request()->routeIs('courses.*') ? 'active' : ''); ?>" href="<?php echo e(route('courses.index')); ?>">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Daftar Kursus</span>
+                        </a>
+                    </div>
+
+                    <!-- Menu Materi Kursus -->
+                    <div class="menu-item">
+                        <a class="menu-link <?php echo e(request()->routeIs('materials.*') ? 'active' : ''); ?>" href="<?php echo e(route('materials.index')); ?>">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Materi Kursus</span>
+                        </a>
+                    </div>
+
+                </div>
             </div>
             <!--end:Menu item-->
 
+
             <!--begin:Menu item-->
-            <div class="menu-item">
-                <a class="menu-link <?php echo e(request()->routeIs('courses.*') ? 'active' : ''); ?>" href="<?php echo e(route('courses.index')); ?>">
-                    <span class="menu-icon"><?php echo getIcon('book', 'fs-2'); ?></span>
-                    <span class="menu-title">Courses</span>
-                </a>
+            <div class="menu-item menu-accordion <?php echo e(request()->routeIs('trainers.*', 'venues.*') ? 'here show' : ''); ?>" data-kt-menu-trigger="click">
+                <span class="menu-link">
+                    <span class="menu-icon"><?php echo getIcon('teacher', 'fs-2',); ?></span>
+                    <span class="menu-title">Club</span>
+                    <span class="menu-arrow"></span>
+                </span>
+                <div class="menu-sub menu-sub-accordion">
+                    <!-- Menu Trainer -->
+                    <div class="menu-item">
+                        <a class="menu-link <?php echo e(request()->routeIs('trainers.*') ? 'active' : ''); ?>" href="<?php echo e(route('trainers.index')); ?>">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Pelatih</span>
+                        </a>
+                    </div>
+
+                    <!-- Menu Materi Venue -->
+                    <div class="menu-item">
+                        <a class="menu-link <?php echo e(request()->routeIs('venues.*') ? 'active' : ''); ?>" href="<?php echo e(route('venues.index')); ?>">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Venue</span>
+                        </a>
+                    </div>
+
+                </div>
             </div>
             <!--end:Menu item-->
 
-            <!--begin:Menu item-->
-            <div class="menu-item">
-                <a class="menu-link <?php echo e(request()->routeIs('trainers.*') ? 'active' : ''); ?>" href="<?php echo e(route('trainers.index')); ?>">
-                    <span class="menu-icon"><?php echo getIcon('user', 'fs-2'); ?></span>
-                    <span class="menu-title">Trainers</span>
-                </a>
-            </div>
-            <!--end:Menu item-->
 
             <!--begin:Menu item-->
             <div class="menu-item menu-accordion <?php echo e(request()->routeIs('user-management.*') ? 'here show' : ''); ?>" data-kt-menu-trigger="click">
                 <span class="menu-link">
-                    <span class="menu-icon"><?php echo getIcon('abstract-28', 'fs-2'); ?></span>
-                    <span class="menu-title">User Management</span>
+                    <span class="menu-icon"><?php echo getIcon('user-tick', 'fs-2'); ?></span>
+                    <span class="menu-title">Admin Menu</span>
                     <span class="menu-arrow"></span>
                 </span>
                 <div class="menu-sub menu-sub-accordion">
@@ -114,7 +153,7 @@
             <div class="menu-item">
                 <a class="menu-link <?php echo e(request()->routeIs('general-schedule.index') ? 'active' : ''); ?>" href="<?php echo e(route('general-schedule.index')); ?>">
                     <span class="menu-icon"><?php echo getIcon('calendar', 'fs-2'); ?></span>
-                    <span class="menu-title">General Schedule</span>
+                    <span class="menu-title">Jadwal</span>
                 </a>
             </div>
             <!--end:Menu item-->

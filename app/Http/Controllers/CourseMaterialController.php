@@ -77,10 +77,11 @@ class CourseMaterialController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(CourseMaterial $courseMaterial)
+    public function destroy($id)
     {
-        $courseMaterial->delete();
+        $material = CourseMaterial::findOrFail($id);
+        $material->delete();
 
-        return redirect()->route('course-materials.index')->with('success', 'Material deleted successfully.');
+        return response()->json(['success' => true, 'message' => 'Material deleted successfully.']);
     }
 }

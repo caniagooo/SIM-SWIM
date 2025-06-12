@@ -25,7 +25,7 @@ class CourseController extends Controller
             $query->where('type', $request->type);
         }
 
-        $courses = $query->with(['venue', 'trainers.user', 'students.user'])->get();
+        $courses = $query->with(['venue', 'trainers.user', 'students.user', 'payment'])->get();
 
         return view('courses.index', compact('courses'));
     }
@@ -46,40 +46,47 @@ class CourseController extends Controller
             'type' => 'required|in:private,group',
             'venue_id' => 'required|exists:venues,id',
             'start_date' => 'required|date|after_or_equal:today',
-            'valid_until' => 'required|date|after_or_equal:start_date',
             'duration_days' => 'required|integer|min:1',
             'max_sessions' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
             'basic_skills' => 'nullable|string|max:1000',
             'students' => 'required|array',
             'students.*' => 'exists:students,id',
-            'trainers' => 'required|array',
-            'trainers.*' => 'exists:trainers,id',
-            'materials' => 'nullable|array',
-            'materials.*' => 'exists:course_materials,id',
+            // 'payment_status' => 'required|in:pending,paid', // HAPUS dari validasi request!
+            // 'payment_method' => 'nullable|in:cash,bank_transfer,credit_card',
         ]);
+
+        // Hitung end date berdasarkan start date dan duration_days
+        $startDate = \Carbon\Carbon::parse($validatedData['start_date']);
+        $validatedData['valid_until'] = $startDate->copy()->addDays((int) $validatedData['duration_days']);
 
         // Generate nama kursus otomatis
         $typeCode = $validatedData['type'] === 'private' ? 'PRV' : 'GRP';
-        $year = Carbon::now()->year;
-        $sequence = Course::where('type', $validatedData['type'])
+        $year = now()->year;
+        $sequence = \App\Models\Course::where('type', $validatedData['type'])
             ->whereYear('created_at', $year)
-            ->count() + 1; // Hitung jumlah kursus untuk tipe dan tahun ini
+            ->count() + 1;
         $courseName = sprintf('%03d/%s/%d', $sequence, $typeCode, $year);
 
-        // Tambahkan nama kursus ke data yang divalidasi
         $validatedData['name'] = $courseName;
 
         // Simpan kursus
-        $course = Course::create($validatedData);
+        $course = \App\Models\Course::create($validatedData);
 
-        // Hubungkan murid dan pelatih
+        // Hubungkan murid
         $course->students()->sync($validatedData['students']);
-        $course->trainers()->sync($validatedData['trainers']);
-        if ($request->has('materials')) {
-            $course->materials()->sync($validatedData['materials']);
+
+        // Buat invoice pembayaran dengan status pending
+        if ($validatedData['price'] > 0) {
+            $payment = $course->payment()->create([
+                'invoice_number' => 'INV-' . strtoupper(uniqid()),
+                'amount' => $validatedData['price'],
+                'status' => 'pending', // SET DEFAULT
+                'payment_method' => null,
+            ]);
         }
 
+        // Redirect ke halaman index kursus
         return redirect()->route('courses.index')->with('success', 'Course created successfully.');
     }
 
@@ -104,10 +111,11 @@ class CourseController extends Controller
             'type' => 'required|string',
             'max_sessions' => 'required|integer|min:1',
             'venue_id' => 'required|exists:venues,id',
-            'valid_until' => 'required|date|after_or_equal:start_date', // Validasi valid_until
-            'basic_skills' => 'nullable|string|max:1000', // Validasi basic_skills
+            'valid_until' => 'required|date|after_or_equal:start_date',
+            'basic_skills' => 'nullable|string|max:1000',
             'materials' => 'nullable|array',
             'materials.*' => 'exists:course_materials,id',
+            'price' => 'required|numeric|min:0', // Validasi harga
         ]);
 
         $course->update($validatedData);
@@ -116,6 +124,13 @@ class CourseController extends Controller
             $course->materials()->sync($request->materials);
         } else {
             $course->materials()->detach();
+        }
+
+        // Perbarui invoice pembayaran jika harga berubah
+        if ($course->payment) {
+            $course->payment->update([
+                'amount' => $validatedData['price'],
+            ]);
         }
 
         return redirect()->route('courses.index')->with('success', 'Course updated successfully.');

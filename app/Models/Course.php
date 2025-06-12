@@ -50,6 +50,14 @@ class Course extends Model
         return $this->belongsTo(Venue::class, 'venue_id');
     }
 
+    // Relasi ke pembayaran (one-to-many)
+    public function payment()   
+    {
+        return $this->hasOne(CoursePayment::class, 'course_id', );
+    }
+
+
+
     // Relasi ke sesi (one-to-many)
     public function sessions()
     {
