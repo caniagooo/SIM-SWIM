@@ -80,6 +80,6 @@ class User extends Authenticatable implements MustVerifyEmail
     }
     public function getAvatarAttribute()
     {
-        return $this->profile_picture ?? asset('assets/media/avatars/default-avatar.png');
+        return $this->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png');
     }
 }

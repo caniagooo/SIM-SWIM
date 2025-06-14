@@ -138,4 +138,8 @@ Route::prefix('courses/{course}/sessions')->group(function () {
     Route::get('/courses/{courseId}', [CourseController::class, 'show'])->name('courses.show');
     Route::post('/courses/{course}/students/{student}/grades', [GradeController::class, 'store'])->name('grades.store');
 Route::get('/payments/{payment}', [CoursePaymentController::class, 'show'])->name('payments.show');
+Route::post('/courses/{course}/assign', [CourseController::class, 'assign'])->name('courses.assign')->middleware('role:Super Admin|Admin');
+
+Route::get('/course-payments/invoice/{course}', [CoursePaymentController::class, 'invoice'])->name('course-payments.invoice');
+Route::post('/course-payments/process/{course}', [CoursePaymentController::class, 'process'])->name('course-payments.process');
 

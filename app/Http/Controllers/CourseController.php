@@ -26,8 +26,10 @@ class CourseController extends Controller
         }
 
         $courses = $query->with(['venue', 'trainers.user', 'students.user', 'payment'])->get();
+        $allTrainers = \App\Models\Trainer::all();
+        $allMaterials = \App\Models\CourseMaterial::all();
 
-        return view('courses.index', compact('courses'));
+        return view('courses.index', compact('courses', 'allTrainers', 'allMaterials'));
     }
 
     public function create()
@@ -141,5 +143,20 @@ class CourseController extends Controller
         $course->delete();
 
         return redirect()->route('courses.index')->with('success', 'Course deleted successfully.');
+    }
+
+    public function assign(Request $request, Course $course)
+    {
+        $request->validate([
+            'trainers' => 'nullable|array',
+            'trainers.*' => 'exists:trainers,id',
+            'materials' => 'nullable|array',
+            'materials.*' => 'exists:course_materials,id',
+        ]);
+
+        $course->trainers()->sync($request->input('trainers', []));
+        $course->materials()->sync($request->input('materials', []));
+
+        return redirect()->route('courses.index')->with('success', 'Trainer & materials assigned successfully.');
     }
 }
