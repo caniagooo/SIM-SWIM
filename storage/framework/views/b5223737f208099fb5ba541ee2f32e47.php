@@ -3,6 +3,11 @@
 <?php
     // Data pembayaran kursus
     $payment = $course->payment;
+    $isPending = $payment && $payment->status === 'pending';
+    $isPaid = $payment && $payment->status === 'paid';
+    $sessionsCompleted = $course->sessions->where('status', 'completed')->count();
+    
+
 
     // Jumlah sesi selesai
     $sessionsCompleted = $course->sessions->where('status', 'completed')->count();
@@ -64,20 +69,22 @@
                             <?php echo e($course->name ?? '-'); ?>
 
                         </span>
-                        <?php if($statusText === 'Unpaid'): ?>
+                        <?php if($isPending): ?>
                             <button type="button"
                                 class="btn btn-light-warning btn-sm fw-bold px-4 py-2 btnPayNow"
                                 style="font-size: 0.85rem; line-height: 1; padding: 0.25rem 0.75rem; border-radius: 0.475rem; height: 25px; min-width: 70px;"
-                                data-course-id="<?php echo e($course->id); ?>"
-                                data-bs-toggle="modal"
-                                data-bs-target="#paymentModal">
+                                data-course-id="<?php echo e($course->id); ?>">
                                 <i class="bi bi-cash-coin me-2"></i> Pay Now
                             </button>
-                        <?php else: ?>
-                            <span class="badge <?php echo e($statusClass); ?> fs-8 fw-semibold px-4 py-2"
+                        <?php elseif($isPaid && !$isExpired && !$maxSessionReached): ?>
+                            <span class="badge badge-light-success fs-8 fw-semibold px-4 py-2"
                                 style="font-size: 0.85rem; line-height: 1; border-radius: 0.475rem; height: 25px; min-width: 70px; display: inline-flex; align-items: center; justify-content: center;">
-                                <?php echo e($statusText); ?>
-
+                                Aktif
+                            </span>
+                        <?php else: ?>
+                            <span class="badge badge-light-danger fs-8 fw-semibold px-4 py-2"
+                                style="font-size: 0.85rem; line-height: 1; border-radius: 0.475rem; height: 25px; min-width: 70px; display: inline-flex; align-items: center; justify-content: center;">
+                                Expired
                             </span>
                         <?php endif; ?>
                     </div>

@@ -46,8 +46,8 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::post('/course-payments/create/{course}', [CoursePaymentController::class, 'createInvoice'])->name('course-payments.create');
-    Route::post('/course-payments/process/{course}', [CoursePaymentController::class, 'processPayment'])->name('course-payments.process');
-    Route::get('/course-payments/status/{payment}', [CoursePaymentController::class, 'paymentStatus'])->name('course-payments.status');
+    Route::get('/course-payments/invoice/{course}', [CoursePaymentController::class, 'invoice'])->name('course-payments.invoice');
+    Route::post('/course-payments/process/{course}', [CoursePaymentController::class, 'process'])->name('course-payments.process');
 });
 
 Route::middleware(['role:Super Admin'])->group(function () {
@@ -132,6 +132,5 @@ Route::prefix('courses/{course}/sessions')->group(function () {
 Route::get('/payments/{payment}', [CoursePaymentController::class, 'show'])->name('payments.show');
 Route::post('/courses/{course}/assign', [CourseController::class, 'assign'])->name('courses.assign')->middleware('role:Super Admin|Admin');
 
-Route::get('/course-payments/invoice/{course}', [CoursePaymentController::class, 'invoice'])->name('course-payments.invoice');
-Route::post('/course-payments/process/{course}', [CoursePaymentController::class, 'process'])->name('course-payments.process');
+
 

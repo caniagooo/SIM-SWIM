@@ -92,6 +92,10 @@ class CoursePaymentController extends Controller
             'invoice_number' => $payment->invoice_number,
             'amount' => $payment->amount,
             'status' => $payment->status,
+            'course_name' => $course->name,
+            'start_date' => $course->start_date ? $course->start_date->format('d M Y') : '-',
+            'valid_until' => $course->valid_until ? $course->valid_until->format('d M Y') : '-',
+            'max_sessions' => $course->max_sessions,
         ]);
     }
 

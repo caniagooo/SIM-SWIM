@@ -25,12 +25,52 @@ class CourseController extends Controller
             $query->where('type', $request->type);
         }
 
+           // Filter by trainer
+        if ($request->filled('trainer_id')) {
+            $query->whereHas('trainers', function($q) use ($request) {
+                $q->where('trainers.id', $request->trainer_id);
+            });
+        }
+
+        // Filter by venue
+        if ($request->filled('venue_id')) {
+            $query->where('venue_id', $request->venue_id);
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $now = now();
+            $query->with(['payment', 'sessions']);
+            $query->where(function($q) use ($request, $now) {
+                if ($request->status == 'active') {
+                    $q->whereHas('payment', function($q2) {
+                        $q2->where('status', 'paid');
+                    })
+                    ->where('valid_until', '>=', $now)
+                    ->whereRaw('(SELECT COUNT(*) FROM course_sessions WHERE course_sessions.course_id = courses.id AND course_sessions.status = "completed") < max_sessions');
+                } elseif ($request->status == 'expired') {
+                    $q->where(function($q2) use ($now) {
+                        $q2->where('valid_until', '<', $now)
+                        ->orWhereRaw('(SELECT COUNT(*) FROM course_sessions WHERE course_sessions.course_id = courses.id AND course_sessions.status = "completed") >= max_sessions');
+                    });
+                } elseif ($request->status == 'unpaid') {
+                    $q->whereHas('payment', function($q2) {
+                        $q2->where('status', 'pending');
+                    });
+                }
+            });
+        }
+
+
+
         // Tambahkan orderBy di sini
         $query->orderBy('created_at', 'desc');
 
         $courses = $query->with(['venue', 'trainers.user', 'students.user', 'payment'])->get();
         $allTrainers = \App\Models\Trainer::all();
         $allMaterials = \App\Models\CourseMaterial::all();
+
+        
 
         return view('courses.index', compact('courses', 'allTrainers', 'allMaterials'));
     }
