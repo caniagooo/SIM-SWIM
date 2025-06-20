@@ -12,6 +12,7 @@ class CourseSession extends Model
     const STATUS_SCHEDULED = 'scheduled';
     const STATUS_COMPLETED = 'completed';
     const STATUS_CANCELLED = 'cancelled';
+    const STATUS_RESCHEDULED = 'rescheduled';
 
     protected $fillable = [
         'course_id',

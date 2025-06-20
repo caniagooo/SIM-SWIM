@@ -36,6 +36,16 @@ class CoursePaymentController extends Controller
             return response()->json(['message' => 'Payment record not found.'], 404);
         }
 
+        // Cek jika sudah paid
+        if ($payment->status === 'paid') {
+            return response()->json(['message' => 'Kursus sudah dibayar.'], 400);
+        }
+
+        // Cek jika kursus expired
+        if (now()->gt($course->valid_until)) {
+            return response()->json(['message' => 'Kursus sudah expired.'], 400);
+        }
+
         $validatedData = $request->validate([
             'payment_method' => 'required|in:cash,bank_transfer,credit_card',
         ]);
@@ -71,10 +81,17 @@ class CoursePaymentController extends Controller
     public function invoice(Course $course)
     {
         $payment = $course->payment;
+        if (!$payment) {
+            $payment = $course->payment()->create([
+                'invoice_number' => 'INV-' . strtoupper(uniqid()),
+                'amount' => $course->price,
+                'status' => 'pending',
+            ]);
+        }
         return response()->json([
-            'invoice_number' => $payment->invoice_number ?? '-',
-            'amount' => $payment->amount ?? 0,
-            'status' => ucfirst($payment->status ?? 'Not Paid'),
+            'invoice_number' => $payment->invoice_number,
+            'amount' => $payment->amount,
+            'status' => $payment->status,
         ]);
     }
 
@@ -85,12 +102,24 @@ class CoursePaymentController extends Controller
         ]);
 
         $payment = $course->payment;
-        if ($payment) {
-            $payment->status = 'paid';
-            $payment->payment_method = $request->payment_method;
-            $payment->save();
-            return response()->json(['message' => 'Payment successful!']);
+        if (!$payment) {
+            return response()->json(['message' => 'Invoice not found.'], 404);
         }
-        return response()->json(['message' => 'Invoice not found.'], 404);
+
+        // Cek jika sudah paid
+        if ($payment->status === 'paid') {
+            return response()->json(['message' => 'Kursus sudah dibayar.'], 400);
+        }
+
+        // Cek jika kursus expired
+        if (now()->gt($course->valid_until)) {
+            return response()->json(['message' => 'Kursus sudah expired.'], 400);
+        }
+
+        $payment->status = 'paid';
+        $payment->payment_method = $request->payment_method;
+        $payment->save();
+
+        return response()->json(['message' => 'Payment successful!']);
     }
 }

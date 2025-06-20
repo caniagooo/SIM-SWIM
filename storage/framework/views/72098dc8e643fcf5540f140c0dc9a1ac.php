@@ -44,12 +44,16 @@
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     <!--end::Custom Stylesheets--> 
 
+    <!--begin:custom JS-->
+    
+
     <!-- Toastr -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
     <!-- DataTables CSS -->
     <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
     
@@ -74,6 +78,8 @@
 <?php echo $__env->yieldContent('content'); ?>
 
 <!--begin::Javascript-->
+<script src="<?php echo e(asset('assets/js/courses-index.js')); ?>"></script>
+<script src="<?php echo e(asset('assets/js/courses.js')); ?>"></script>
 <!--begin::Global Javascript Bundle(mandatory for all pages)-->
 <?php $__currentLoopData = getGlobalAssets(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $path): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <?php echo sprintf('<script src="%s"></script>', asset($path)); ?>

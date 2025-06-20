@@ -10,7 +10,7 @@ class CourseSessionController extends Controller
 {
     public function index(Course $course)
     {
-        $sessions = $course->sessions()->get(); // Ambil semua sesi yang terkait dengan kursus
+        $sessions = $course->sessions()->get();
         return view('sessions.index', compact('course', 'sessions'));
     }
 
@@ -19,7 +19,7 @@ class CourseSessionController extends Controller
         return view('sessions.create', compact('course'));
     }
 
-    public function store(Request $request, $courseId)
+    public function store(Request $request, Course $course)
     {
         $request->validate([
             'session_date' => 'required|date',
@@ -27,13 +27,14 @@ class CourseSessionController extends Controller
             'end_time' => 'required|date_format:H:i|after:start_time',
         ]);
 
-        $session = CourseSession::create([
-            'course_id' => $courseId,
+        $session = $course->sessions()->create([
             'session_date' => $request->session_date,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
-            'status' => 'scheduled', // Default status
+            'status' => 'scheduled',
         ]);
+
+        $session->session_date_formatted = \Carbon\Carbon::parse($session->session_date)->translatedFormat('l, d F Y');
 
         return response()->json([
             'success' => true,
@@ -50,19 +51,23 @@ class CourseSessionController extends Controller
     {
         $request->validate([
             'session_date' => 'required|date|after_or_equal:today',
-            'start_time' => 'required',
-            'end_time' => 'required|after:start_time',
-            'status' => 'required|in:scheduled,completed,canceled',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
         ]);
-        
-        
-        $session = CourseSession::findOrFail($session->id);
+
+        // Hanya boleh reschedule jika status masih 'scheduled'
+        if ($session->status !== 'scheduled') {
+        return response()->json(['message' => 'Sesi yang sudah completed tidak dapat di-reschedule.'], 403);
+        }
+
         $session->update([
-                'session_date' => $request->session_date,
-                'start_time' => $request->start_time,
-                'end_time' => $request->end_time,
-                'status' => $request->status,
+            'session_date' => $request->session_date,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'status' => 'rescheduled',
         ]);
+
+        $session->session_date_formatted = \Carbon\Carbon::parse($session->session_date)->translatedFormat('l, d F Y');
 
         return response()->json([
             'success' => true,
@@ -74,6 +79,9 @@ class CourseSessionController extends Controller
     {
         $session->delete();
 
-        return redirect()->route('courses.show', $course->id)->with('success', 'Session deleted successfully.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Session deleted successfully.',
+        ]);
     }
 }

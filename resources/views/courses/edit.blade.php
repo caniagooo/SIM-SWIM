@@ -1,195 +1,719 @@
 <x-default-layout>
     <div class="container mt-5">
-        <div class="card shadow-lg">
-            <div class="card-header bg-gradient-primary text-white">
-                <h3 class="card-title text-center">Create a New Course</h3>
-            </div>
-            <div class="card-body">
-                <!-- Tampilkan Pesan Error -->
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+        <form id="course-form" method="POST" action="{{ route('courses.update', $course->id) }}">
+            @csrf
+            @method('PUT')
 
-                <!-- Progress Indicator -->
-                <div class="progress mb-4" style="height: 20px;">
-                    <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 20%;" id="progress-bar">
-                        Step 1 of 5
+            <!-- Progress Tab -->
+            <div class="card card-flush">
+                <div class="card-header align-items-center py-5 gap-2 gap-md-5">
+                    <div class="card-title">
+                        <h2 class="fw-bold mb-0">
+                            <span class="svg-icon svg-icon-2 me-2 text-primary">
+                                <i class="bi-book"></i>
+                            </span>
+                            Edit Kursus
+                        </h2>
+                    </div>
+                    <div class="card-toolbar">
+                        <a href="{{ route('courses.show', $course->id) }}" class="btn btn-light-primary btn-sm">
+                            <span class="svg-icon svg-icon-2 me-1">
+                                <i class="bi-arrow-left"></i>
+                            </span>
+                            Kembali ke Detail Kursus
+                        </a>
                     </div>
                 </div>
-
-                <!-- Form -->
-                <form action="{{ route('courses.store') }}" method="POST" id="course-form">
-                    @csrf
-
-                    <!-- Step 1: Basic Info -->
-                    <div class="step step-1">
-                        <h4 class="mb-3">Basic Information</h4>
-                        <div class="row mb-3">
-                            
-                            <div class="col-md-6">
-                                <label for="type" class="form-label">Course Type</label>
-                                <select name="type" id="type" class="form-control" required>
-                                    <option value="">Select Type</option>
-                                    <option value="private" {{ old('type') == 'private' ? 'selected' : '' }}>Private</option>
-                                    <option value="group" {{ old('type') == 'group' ? 'selected' : '' }}>Group</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                            <label for="venue_id" class="form-label">Select Venue</label>
-                            <select name="venue_id" id="venue_id" class="form-control" required>
-                                <option value="">Select Venue</option>
-                                @foreach ($venues as $venue)
-                                    <option value="{{ $venue->id }}" {{ old('venue_id') == $venue->id ? 'selected' : '' }}>
-                                        {{ $venue->name }}
-                                    </option>
+                <div class="card-body">
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
                                 @endforeach
-                            </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="price" class="form-label">Course Price</label>
-                                <input type="number" name="price" id="price" class="form-control" value="{{ old('price') }}" required>
-                            </div>
-                            
+                            </ul>
                         </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="start_date" class="form-label">Start Date</label>
-                                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date') }}" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="duration_days" class="form-label">Duration (Days)</label>
-                                <input type="number" name="duration_days" id="duration_days" class="form-control" value="{{ old('duration_days') }}" required min="1">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="max_sessions" class="form-label">Max Sessions</label>
-                                <input type="number" name="max_sessions" id="max_sessions" class="form-control" value="{{ old('max_sessions') }}" required>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="valid_until" class="form-label">Valid Until</label>
-                                <input type="date" name="valid_until" id="valid_until" class="form-control" value="{{ $course->valid_until }}" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="basic_skills" class="form-label">Basic Skills</label>
-                                <textarea name="basic_skills" id="basic_skills" class="form-control" rows="3">{{ $course->basic_skills }}</textarea>
-                            </div>
-                        </div>
-                    </div>
+                    @endif
 
-                    <!-- Step 2: Select Students -->
-                    <div class="step step-2 d-none">
-                        <h4 class="mb-3">Select Students</h4>
-                        <div class="mb-3">
-                            <label class="form-label">Students</label>
-                            <div id="students-container">
-                                @foreach ($students as $student)
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input student-checkbox" id="student-{{ $student->id }}" name="students[]" value="{{ $student->id }}" {{ in_array($student->id, old('students', [])) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="student-{{ $student->id }}">{{ $student->user->name }} ({{ $student->age_group }})</label>
+                    <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6" id="progressTab" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="step1-tab" data-bs-toggle="tab" data-bs-target="#step1" type="button" role="tab" aria-controls="step1" aria-selected="true">
+                                Step 1: Detail Kursus
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="step2-tab" data-bs-toggle="tab" data-bs-target="#step2" type="button" role="tab" aria-controls="step2" aria-selected="false">
+                                Step 2: Venue & Sesi
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="step3-tab" data-bs-toggle="tab" data-bs-target="#step3" type="button" role="tab" aria-controls="step3" aria-selected="false">
+                                Step 3: Pelatih & Materi
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="progressTabContent">
+                        <!-- Step 1 -->
+                        <div class="tab-pane fade show active" id="step1" role="tabpanel" aria-labelledby="step1-tab">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label mb-2">Tipe Kursus</label>
+                                    <div class="d-flex gap-3">
+                                        <input type="hidden" name="type" id="type" value="{{ old('type', $course->type) }}">
+                                        <div class="card course-type-card border-primary position-relative" data-type="private" style="cursor:pointer; min-width:200px;">
+                                            <div class="position-absolute top-0 end-0 m-2 z-index-2">
+                                                <div class="form-check form-check-sm form-check-custom form-check-solid">
+                                                    <input class="form-check-input course-type-checkbox" type="checkbox" id="type-private-checkbox" value="private" disabled {{ old('type', $course->type) == 'private' ? 'checked' : '' }}>
+                                                </div>
+                                            </div>
+                                            <div class="card-body text-center py-3">
+                                                <i class="bi bi-person fs-2 text-primary"></i>
+                                                <div class="fw-bold mt-2">Private</div>
+                                            </div>
+                                        </div>
+                                        <div class="card course-type-card position-relative" data-type="group" style="cursor:pointer; min-width:200px;">
+                                            <div class="position-absolute top-0 end-0 m-2 z-index-2">
+                                                <div class="form-check form-check-sm form-check-custom form-check-solid">
+                                                    <input class="form-check-input course-type-checkbox" type="checkbox" id="type-group-checkbox" value="group" disabled {{ old('type', $course->type) == 'group' ? 'checked' : '' }}>
+                                                </div>
+                                            </div>
+                                            <div class="card-body text-center py-3">
+                                                <i class="bi bi-people fs-2 text-primary"></i>
+                                                <div class="fw-bold mt-2">Group</div>
+                                            </div>
+                                        </div>
                                     </div>
-                                @endforeach
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            function updateTypeCheckbox(selectedType) {
+                                                document.getElementById('type-private-checkbox').checked = selectedType === 'private';
+                                                document.getElementById('type-group-checkbox').checked = selectedType === 'group';
+                                            }
+                                            const typeInput = document.getElementById('type');
+                                            function selectCardWithCheckbox(selectedType) {
+                                                updateTypeCheckbox(selectedType);
+                                                if (typeof selectCard === 'function') {
+                                                    selectCard(selectedType);
+                                                }
+                                            }
+                                            document.querySelectorAll('.course-type-card').forEach(card => {
+                                                card.addEventListener('click', function () {
+                                                    selectCardWithCheckbox(card.dataset.type);
+                                                });
+                                            });
+                                            updateTypeCheckbox(typeInput.value);
+                                        });
+                                    </script>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="basic_skills" class="form-label">Catatan terkait murid</label>
+                                    <textarea name="basic_skills" id="basic_skills" class="form-control" rows="4">{{ old('basic_skills', $course->basic_skills) }}</textarea>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 3: Select Materials -->
-                    <div class="step step-3 d-none">
-                        <h4 class="mb-3">Select Materials</h4>
-                        <div class="mb-3">
-                            <label class="form-label">Materials</label>
-                            <div id="materials-container">
-                                @foreach ($materials as $material)
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input material-checkbox" id="material-{{ $material->id }}" name="materials[]" value="{{ $material->id }}" {{ in_array($material->id, old('materials', [])) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="material-{{ $material->id }}">{{ $material->name }} ({{ $material->level }})</label>
+                            <div class="mb-3">
+                                <label for="students" class="form-label">Pilih Murid</label>
+                                <div id="students-section">
+                                    <!-- Private: Dropdown -->
+                                    <div id="students-dropdown-section" style="{{ old('type', $course->type) == 'private' ? '' : 'display:none;' }}">
+                                        <select class="form-select" name="students[]" id="student-private-dropdown">
+                                            <option value="">-- Select Student --</option>
+                                            @foreach ($students as $student)
+                                                @php
+                                                    $dob = $student->birth_date ?? null;
+                                                    $age = $dob ? \Carbon\Carbon::parse($dob)->age : '-';
+                                                @endphp
+                                                <option value="{{ $student->id }}" {{ in_array($student->id, old('students', $course->students->pluck('id')->toArray())) ? 'selected' : '' }}>
+                                                    {{ $student->user->name }} | {{ $student->user->email }} | <span class="text-muted">({{ $age }} tahun)</span>
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
+                                    @push('scripts')
+                                        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+                                        <script>
+                                            document.addEventListener('DOMContentLoaded', function () {
+                                                $('#student-private-dropdown').select2({
+                                                    placeholder: '-- Select Student --',
+                                                    allowClear: true,
+                                                    width: '100%'
+                                                });
+                                            });
+                                        </script>
+                                    @endpush
+                                    @push('styles')
+                                        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+                                    @endpush
 
-                    <!-- Step 4: Select Trainers -->
-                    <div class="step step-4 d-none">
-                        <h4 class="mb-3">Select Trainers</h4>
-                        <div class="mb-3">
-                            <label class="form-label">Trainers</label>
-                            <div id="trainers-container">
-                                @foreach ($trainers as $trainer)
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input trainer-checkbox" id="trainer-{{ $trainer->id }}" name="trainers[]" value="{{ $trainer->id }}" {{ in_array($trainer->id, old('trainers', [])) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="trainer-{{ $trainer->id }}">{{ $trainer->user->name }}</label>
+                                    <!-- Group: Table with Checkbox & Search -->
+                                    <div id="students-table-section" style="{{ old('type', $course->type) == 'group' ? '' : 'display:none;' }}">
+                                        <input type="text" id="student-search" class="form-control mb-2" placeholder="Search students by name or email">
+                                        <div style="max-height: 300px; overflow-y: auto;">
+                                            <table class="table table-bordered table-hover" id="students-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:40px;">
+                                                            <input type="checkbox" id="select-all-students">
+                                                        </th>
+                                                        <th>Name</th>
+                                                        <th>Email</th>
+                                                        <th>Tanggal Lahir</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="students-table-body">
+                                                    @foreach ($students as $student)
+                                                        <tr>
+                                                            <td>
+                                                                <input type="checkbox" class="student-checkbox"
+                                                                    name="students[]"
+                                                                    value="{{ $student->id }}"
+                                                                    {{ in_array($student->id, old('students', $course->students->pluck('id')->toArray())) ? 'checked' : '' }}>
+                                                            </td>
+                                                            <td>{{ $student->user->name }}</td>
+                                                            <td>{{ $student->user->email }}</td>
+                                                            <td>
+                                                                @php
+                                                                    $dob = $student->birth_date ?? null;
+                                                                    $age = $dob ? \Carbon\Carbon::parse($dob)->age : '-';
+                                                                @endphp
+                                                                {{ $dob ? \Carbon\Carbon::parse($dob)->format('d M Y') : '-' }} 
+                                                                @if($age !== '-') 
+                                                                    <span class="text-muted">({{ $age }} tahun)</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                @endforeach
+                                </div>
+                            </div>
+                            <style>
+                                .course-type-card {
+                                    border-width: 1px;
+                                    transition: border-color 0.2s, box-shadow 0.2s;
+                                }
+                                .course-type-card.selected, .course-type-card:hover {
+                                    border-color: #0d6efd !important;
+                                    box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+                                }
+                            </style>
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    const typeInput = document.getElementById('type');
+                                    const cards = document.querySelectorAll('.course-type-card');
+                                    function selectCard(selectedType) {
+                                        cards.forEach(card => {
+                                            if (card.dataset.type === selectedType) {
+                                                card.classList.add('selected', 'border-primary');
+                                                card.classList.remove('border-secondary');
+                                            } else {
+                                                card.classList.remove('selected', 'border-primary');
+                                                card.classList.add('border-secondary');
+                                            }
+                                        });
+                                        typeInput.value = selectedType;
+                                        if (selectedType === 'private') {
+                                            document.getElementById('students-dropdown-section').style.display = '';
+                                            document.getElementById('students-table-section').style.display = 'none';
+                                            document.getElementById('student-private-dropdown').disabled = false;
+                                            document.querySelectorAll('.student-checkbox').forEach(cb => cb.disabled = true);
+                                        } else {
+                                            document.getElementById('students-dropdown-section').style.display = 'none';
+                                            document.getElementById('students-table-section').style.display = '';
+                                            document.getElementById('student-private-dropdown').disabled = true;
+                                            document.querySelectorAll('.student-checkbox').forEach(cb => cb.disabled = false);
+                                        }
+                                    }
+                                    cards.forEach(card => {
+                                        card.addEventListener('click', function () {
+                                            selectCard(card.dataset.type);
+                                        });
+                                    });
+                                    selectCard(typeInput.value);
+
+                                    const searchInput = document.getElementById('student-search');
+                                    if (searchInput) {
+                                        searchInput.addEventListener('input', function () {
+                                            const filter = searchInput.value.toLowerCase();
+                                            document.querySelectorAll('#students-table-body tr').forEach(row => {
+                                                const name = row.children[1].textContent.toLowerCase();
+                                                const email = row.children[2].textContent.toLowerCase();
+                                                row.style.display = (name.includes(filter) || email.includes(filter)) ? '' : 'none';
+                                            });
+                                        });
+                                    }
+                                    const selectAll = document.getElementById('select-all-students');
+                                    if (selectAll) {
+                                        selectAll.addEventListener('change', function () {
+                                            document.querySelectorAll('.student-checkbox').forEach(cb => {
+                                                cb.checked = selectAll.checked;
+                                            });
+                                        });
+                                    }
+                                });
+                            </script>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="tab-pane fade" id="step2" role="tabpanel" aria-labelledby="step2-tab">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label for="venue_id" class="form-label fw-semibold">Venue</label>
+                                    <select name="venue_id" id="venue_id" class="form-select" required>
+                                        <option value="">-- Select Venue --</option>
+                                        @foreach ($venues as $venue)
+                                            <option value="{{ $venue->id }}" {{ old('venue_id', $course->venue_id) == $venue->id ? 'selected' : '' }}>
+                                                {{ $venue->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="price" class="form-label fw-semibold">Harga Kursus</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" min="0" name="price" id="price" class="form-control" value="{{ old('price', $course->price) }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-4 mt-1">
+                                <div class="col-md-6">
+                                    <label for="max_sessions" class="form-label fw-semibold">Total Sesi</label>
+                                    <div class="input-group">
+                                        <input type="number" min="1" name="max_sessions" id="max_sessions" class="form-control" value="{{ old('max_sessions', $course->max_sessions) }}" required>
+                                        <span class="input-group-text">Sesi</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="duration_days" class="form-label fw-semibold">Durasi</label>
+                                    <div class="input-group">
+                                        <input type="number" min="1" name="duration_days" id="duration_days" class="form-control" value="{{ old('duration_days', $course->duration_days) }}" required>
+                                        <span class="input-group-text">hari</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-4 mt-1">
+                                <div class="col-md-6">
+                                    <label for="start_date" class="form-label fw-semibold">Tanggal Mulai</label>
+                                    <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date', $course->start_date ? $course->start_date->format('Y-m-d') : '') }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="valid_until" class="form-label fw-semibold">Tanggal Berakhir</label>
+                                    <input type="date" name="valid_until" id="valid_until" class="form-control" value="{{ old('valid_until', $course->valid_until ? $course->valid_until->format('Y-m-d') : '') }}" readonly>
+                                </div>
+                            </div>
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    function updateExpiration() {
+                                        const startDate = document.getElementById('start_date').value;
+                                        const duration = parseInt(document.getElementById('duration_days').value, 10);
+                                        const validUntil = document.getElementById('valid_until');
+                                        if (startDate && duration && duration > 0) {
+                                            const date = new Date(startDate);
+                                            date.setDate(date.getDate() + duration - 1);
+                                            const yyyy = date.getFullYear();
+                                            const mm = String(date.getMonth() + 1).padStart(2, '0');
+                                            const dd = String(date.getDate()).padStart(2, '0');
+                                            validUntil.value = `${yyyy}-${mm}-${dd}`;
+                                        } else {
+                                            validUntil.value = '';
+                                        }
+                                    }
+                                    document.getElementById('start_date').addEventListener('change', updateExpiration);
+                                    document.getElementById('duration_days').addEventListener('input', updateExpiration);
+                                    updateExpiration();
+                                });
+                            </script>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="tab-pane fade" id="step3" role="tabpanel" aria-labelledby="step3-tab">
+                            <div class="row">
+                                <!-- Trainers List -->
+                                <div class="row mb-4">
+                                    <label class="form-label mb-2 fw-semibold fs-5">Pilih Pelatih</label>
+                                    @php
+                                        $shuffledTrainers = $trainers->shuffle();
+                                    @endphp
+                                    <div class="position-relative">
+                                        <button type="button" id="trainers-prev" class="btn btn-light btn-sm position-absolute top-50 start-0 translate-middle-y z-index-2 shadow" style="left: -30px; border-radius: 50%; width: 36px; height: 36px; display: none;">
+                                            <i class="bi bi-chevron-left fs-3"></i>
+                                        </button>
+                                        <button type="button" id="trainers-next" class="btn btn-light btn-sm position-absolute top-50 end-0 translate-middle-y z-index-2 shadow" style="right: -30px; border-radius: 50%; width: 36px; height: 36px; display: none;">
+                                            <i class="bi bi-chevron-right fs-3"></i>
+                                        </button>
+                                        <div id="trainers-carousel-viewport" class="overflow-hidden w-100" style="min-height: 240px;">
+                                            <div id="trainers-carousel" class="d-flex flex-row" style="gap: 2rem; transition: transform 0.3s;">
+                                                @foreach ($shuffledTrainers as $trainer)
+                                                    <div class="trainer-card-wrapper flex-shrink-0" style="width: 100%; max-width: 280px;">
+                                                        <div class="card card-flush h-100 border border-solid  position-relative trainer-card box-shadow" style="cursor:pointer;">
+                                                            <div class="position-absolute top-0 end-0 m-2 z-index-2">
+                                                                <div class="form-check form-check-sm form-check-custom form-check-solid">
+                                                                    <input class="form-check-input trainer-checkbox" type="checkbox" name="trainers[]" value="{{ $trainer->id }}" id="trainer-{{ $trainer->id }}"
+                                                                        {{ in_array($trainer->id, old('trainers', $course->trainers->pluck('id')->toArray())) ? 'checked' : '' }}>
+                                                                </div>
+                                                            </div>
+                                                            <div class="card-body d-flex flex-column align-items-center justify-content-center py-4">
+                                                                <div class="symbol symbol-60px symbol-circle mb-3">
+                                                                    <img src="{{ $trainer->user->profile_photo_url ?? asset('assets/media/avatars/default-avatar.png') }}" alt="{{ $trainer->user->name }}">
+                                                                </div>
+                                                                <div class="fw-bold mb-2 text-center">
+                                                                    {{ $trainer->user->name }}
+                                                                </div>
+                                                                <div class="mb-1">
+                                                                    @php
+                                                                        $dob = $trainer->user->date_of_birth ?? null;
+                                                                        $age = $dob ? \Carbon\Carbon::parse($dob)->age : '-';
+                                                                    @endphp
+                                                                    <span class="badge badge-light-info">
+                                                                        <i class="ki-duotone ki-calendar fs-6 me-1"></i> Age: {{ $age }}
+                                                                    </span>
+                                                                </div>
+                                                                <div>
+                                                                    <span class="badge badge-light-primary">
+                                                                        <i class="ki-duotone ki-briefcase fs-6 me-1"></i>
+                                                                        Kursus Aktif: {{ $trainer->active_courses_count ?? 0 }}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <style>
+                                    #trainers-carousel-viewport {
+                                        width: 100%;
+                                        overflow: hidden;
+                                        position: relative;
+                                    }
+                                    #trainers-carousel {
+                                        transition: transform 0.3s;
+                                        will-change: transform;
+                                    }
+                                    .trainer-card-wrapper {
+                                        min-width: 200px;
+                                        max-width: 250px;
+                                        width: 100%;
+                                    }
+                                    @media (max-width: 991.98px) {
+                                        .trainer-card-wrapper {
+                                            min-width: 260px;
+                                            max-width: 280px;
+                                        }
+                                    }
+                                </style>
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        // Only allow one trainer to be selected
+                                        document.querySelectorAll('.trainer-checkbox').forEach(function(checkbox) {
+                                            checkbox.addEventListener('change', function() {
+                                                if (this.checked) {
+                                                    document.querySelectorAll('.trainer-checkbox').forEach(function(cb) {
+                                                        if (cb !== checkbox) cb.checked = false;
+                                                    });
+                                                }
+                                            });
+                                        });
+                                        // Card click toggles checkbox
+                                        document.querySelectorAll('.trainer-card').forEach(function(card) {
+                                            const checkbox = card.querySelector('.trainer-checkbox');
+                                            card.addEventListener('click', function(e) {
+                                                if (e.target !== checkbox) {
+                                                    checkbox.checked = !checkbox.checked;
+                                                    checkbox.dispatchEvent(new Event('change'));
+                                                }
+                                            });
+                                            checkbox.addEventListener('click', function(e) {
+                                                e.stopPropagation();
+                                            });
+                                        });
+
+                                        // Carousel logic
+                                        const carousel = document.getElementById('trainers-carousel');
+                                        const wrappers = carousel.querySelectorAll('.trainer-card-wrapper');
+                                        const prevBtn = document.getElementById('trainers-prev');
+                                        const nextBtn = document.getElementById('trainers-next');
+                                        let visibleCount = 3;
+                                        let currentIndex = 0;
+
+                                        function updateVisibleCount() {
+                                            if (window.innerWidth < 768) {
+                                                visibleCount = 1;
+                                            } else if (window.innerWidth < 992) {
+                                                visibleCount = 2;
+                                            } else {
+                                                visibleCount = 3;
+                                            }
+                                        }
+
+                                        function getCardWidth() {
+                                            const wrapper = wrappers[0];
+                                            if (!wrapper) return 320;
+                                            const style = window.getComputedStyle(wrapper);
+                                            const width = wrapper.offsetWidth;
+                                            const marginRight = parseInt(style.marginRight) || 16;
+                                            return width + marginRight;
+                                        }
+
+                                        function updateCarousel() {
+                                            const cardWidth = getCardWidth();
+                                            if (currentIndex + visibleCount > wrappers.length) {
+                                                currentIndex = Math.max(0, wrappers.length - visibleCount);
+                                            }
+                                            carousel.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+                                            prevBtn.style.display = currentIndex > 0 ? '' : 'none';
+                                            nextBtn.style.display = (currentIndex + visibleCount) < wrappers.length ? '' : 'none';
+                                        }
+
+                                        prevBtn.addEventListener('click', function () {
+                                            if (currentIndex > 0) {
+                                                currentIndex--;
+                                                updateCarousel();
+                                            }
+                                        });
+                                        nextBtn.addEventListener('click', function () {
+                                            if ((currentIndex + visibleCount) < wrappers.length) {
+                                                currentIndex++;
+                                                updateCarousel();
+                                            }
+                                        });
+
+                                        window.addEventListener('resize', function () {
+                                            updateVisibleCount();
+                                            updateCarousel();
+                                        });
+
+                                        updateVisibleCount();
+                                        updateCarousel();
+                                    });
+                                </script>
+                                <!-- Materials List -->
+                                <div class="row mb-3">
+                                    <label class="form-label mb-2 fw-semibold fs-5">Pilih Materi</label>
+                                    <div id="materialsAccordion" class="accordion accordion-icon-toggle">
+                                        @php
+                                            $groupedMaterials = $materials->groupBy('level');
+                                        @endphp
+                                        @foreach ($groupedMaterials as $level => $levelMaterials)
+                                            <div class="accordion-item mb-2">
+                                                <h2 class="accordion-header" id="headingLevel{{ $level }}">
+                                                    <button class="accordion-button collapsed px-4 py-3 fs-6 fw-bold text-gray-800 bg-light-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLevel{{ $level }}" aria-expanded="false" aria-controls="collapseLevel{{ $level }}">
+                                                        <span class="svg-icon svg-icon-2 me-2">
+                                                            <i class="ki-duotone ki-element-11 fs-2 text-primary"></i>
+                                                        </span>
+                                                        <span>
+                                                            <span class="text-muted">Level</span>
+                                                            <span class="ms-1 text-primary">{{ $level }}</span>
+                                                        </span>
+                                                    </button>
+                                                </h2>
+                                                <div id="collapseLevel{{ $level }}" class="accordion-collapse collapse" aria-labelledby="headingLevel{{ $level }}" data-bs-parent="#materialsAccordion">
+                                                    <div class="accordion-body p-0">
+                                                        <div class="table-responsive" style="max-height: 220px; overflow-y: auto;">
+                                                            <table class="table align-middle table-row-dashed gy-3 mb-0">
+                                                                <thead class="bg-light-primary">
+                                                                    <tr class="fw-semibold text-gray-700">
+                                                                        <th style="width:60px;"></th>
+                                                                        <th>Materi</th>
+                                                                        <th>Est. Sesi</th>
+                                                                        <th>Min. Score</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    @foreach ($levelMaterials as $material)
+                                                                        <tr>
+                                                                            <td>
+                                                                                <div class="d-flex justify-content-center">
+                                                                                    <div class="form-check form-check-sm form-check-custom form-check-solid ms-2">
+                                                                                        <input class="form-check-input material-checkbox" type="checkbox" name="materials[]" value="{{ $material->id }}" data-estimated-sessions="{{ $material->estimated_sessions ?? 0 }}" data-min-score="{{ $material->minimum_score ?? 0 }}"
+                                                                                            {{ in_array($material->id, old('materials', $course->materials->pluck('id')->toArray())) ? 'checked' : '' }}>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </td>
+                                                                            <td>
+                                                                                <span class="fw-semibold">{{ $material->name }}</span>
+                                                                            </td>
+                                                                            <td>
+                                                                                <span class="badge badge-light-primary fs-7">{{ $material->estimated_sessions ?? '-' }}</span>
+                                                                            </td>
+                                                                            <td>
+                                                                                <span class="badge badge-light-success fs-7">{{ $material->minimum_score ?? '-' }}</span>
+                                                                            </td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="d-flex align-items-center gap-4">
+                                            <div class="d-flex align-items-center">
+                                                <span class="svg-icon svg-icon-2 text-primary me-1">
+                                                    <i class="ki-duotone ki-check-circle"></i>
+                                                </span>
+                                                <span class="fw-semibold">Terpilih: <span id="selected-materials-count" class="text-primary">0</span></span>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <span class="svg-icon svg-icon-2 text-warning me-1">
+                                                    <i class="ki-duotone ki-calendar"></i>
+                                                </span>
+                                                <span class="fw-semibold">Est. Sesi: <span id="selected-materials-sessions" class="text-warning">0</span></span>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <span class="svg-icon svg-icon-2 text-success me-1">
+                                                    <i class="ki-duotone ki-chart-line-up"></i>
+                                                </span>
+                                                <span class="fw-semibold">Avg. Min. Score: <span id="selected-materials-minscore" class="text-success">0</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        function updateMaterialCounts() {
+                                            const checkboxes = document.querySelectorAll('.material-checkbox:checked');
+                                            let count = 0;
+                                            let totalSessions = 0;
+                                            let totalMinScore = 0;
+                                            let minScoreCount = 0;
+
+                                            checkboxes.forEach(function(cb) {
+                                                count++;
+                                                let est = parseInt(cb.getAttribute('data-estimated-sessions')) || 0;
+                                                let minScore = parseFloat(cb.getAttribute('data-min-score'));
+                                                totalSessions += est;
+                                                if (!isNaN(minScore) && minScore > 0) {
+                                                    totalMinScore += minScore;
+                                                    minScoreCount++;
+                                                }
+                                            });
+
+                                            document.getElementById('selected-materials-count').textContent = count;
+                                            document.getElementById('selected-materials-sessions').textContent = totalSessions;
+                                            document.getElementById('selected-materials-minscore').textContent = minScoreCount > 0 ? (totalMinScore / minScoreCount).toFixed(2) : '0';
+                                        }
+                                        document.querySelectorAll('.material-checkbox').forEach(function (cb) {
+                                            cb.addEventListener('change', updateMaterialCounts);
+                                        });
+                                        updateMaterialCounts();
+                                    });
+                                </script>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Step 5: Additional Details -->
-                    <div class="step step-5 d-none">
-                        <h4 class="mb-3">Catatan tambahan</h4>
-                        
-                        <div class="mb-3">
-                            
-                            <textarea name="basic_skills" id="basic_skills" class="form-control" rows="4">{{ old('basic_skills') }}</textarea>
-                        </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary" id="prevBtn" style="display: none;">Prev</button>
+                    <div>
+                        <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Submit</button>
                     </div>
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const tabs = ['step1', 'step2', 'step3'];
+                        let currentTab = 0;
 
-                    <!-- Navigation Buttons -->
-                    <div class="d-flex justify-content-between mt-4">
-                        <button type="button" class="btn btn-secondary d-none" id="prev-btn">Previous</button>
-                        <button type="button" class="btn btn-primary" id="next-btn">Next</button>
-                        <button type="submit" class="btn btn-success d-none" id="submit-btn">Submit</button>
-                    </div>
-                </form>
+                        const prevBtn = document.getElementById('prevBtn');
+                        const nextBtn = document.getElementById('nextBtn');
+                        const submitBtn = document.getElementById('submitBtn');
+
+                        function showTab(index) {
+                            tabs.forEach((tab, i) => {
+                                const tabPane = document.getElementById(tab);
+                                const tabBtn = document.getElementById(tab + '-tab');
+                                if (i === index) {
+                                    tabPane.classList.add('show', 'active');
+                                    tabBtn.classList.add('active');
+                                    tabBtn.setAttribute('aria-selected', 'true');
+                                } else {
+                                    tabPane.classList.remove('show', 'active');
+                                    tabBtn.classList.remove('active');
+                                    tabBtn.setAttribute('aria-selected', 'false');
+                                }
+                            });
+
+                            prevBtn.style.display = index === 0 ? 'none' : '';
+                            nextBtn.style.display = index === tabs.length - 1 ? 'none' : '';
+                            submitBtn.style.display = index === tabs.length - 1 ? '' : 'none';
+                        }
+
+                        prevBtn.addEventListener('click', function () {
+                            if (currentTab > 0) {
+                                currentTab--;
+                                showTab(currentTab);
+                            }
+                        });
+
+                        nextBtn.addEventListener('click', function () {
+                            if (currentTab < tabs.length - 1) {
+                                currentTab++;
+                                showTab(currentTab);
+                            }
+                        });
+
+                        tabs.forEach((tab, i) => {
+                            document.getElementById(tab + '-tab').addEventListener('click', function () {
+                                currentTab = i;
+                                showTab(currentTab);
+                            });
+                        });
+
+                        showTab(currentTab);
+                    });
+                </script>
             </div>
-        </div>
+        </form>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const steps = document.querySelectorAll('.step');
-            const progressBar = document.getElementById('progress-bar');
-            const nextBtn = document.getElementById('next-btn');
-            const prevBtn = document.getElementById('prev-btn');
-            const submitBtn = document.getElementById('submit-btn');
-            let currentStep = 0;
-
-            function updateStep() {
-                steps.forEach((step, index) => {
-                    step.classList.toggle('d-none', index !== currentStep);
-                });
-                progressBar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
-                progressBar.textContent = `Step ${currentStep + 1} of ${steps.length}`;
-                prevBtn.classList.toggle('d-none', currentStep === 0);
-                nextBtn.classList.toggle('d-none', currentStep === steps.length - 1);
-                submitBtn.classList.toggle('d-none', currentStep !== steps.length - 1);
-            }
-
-            nextBtn.addEventListener('click', function () {
-                if (currentStep < steps.length - 1) {
-                    currentStep++;
-                    updateStep();
-                }
-            });
-
-            prevBtn.addEventListener('click', function () {
-                if (currentStep > 0) {
-                    currentStep--;
-                    updateStep();
-                }
-            });
-
-            updateStep();
-        });
-    </script>
 </x-default-layout>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const carousel = document.getElementById('trainers-carousel');
+        const prevBtn = document.getElementById('trainers-prev');
+        const nextBtn = document.getElementById('trainers-next');
+        const viewport = document.getElementById('trainers-carousel-viewport');
+        const cardWidth = 280 + 32; // card width + gap (px)
+        let position = 0;
+
+        // Hitung jumlah card yang bisa tampil sekaligus
+        function getVisibleCount() {
+            return Math.floor(viewport.offsetWidth / cardWidth) || 1;
+        }
+
+        function updateButtons() {
+            const totalCards = carousel.children.length;
+            const visible = getVisibleCount();
+            prevBtn.style.display = position > 0 ? '' : 'none';
+            nextBtn.style.display = (position + visible) < totalCards ? '' : 'none';
+        }
+
+        function slideTo(pos) {
+            position = Math.max(0, Math.min(pos, carousel.children.length - getVisibleCount()));
+            carousel.style.transform = `translateX(-${position * cardWidth}px)`;
+            updateButtons();
+        }
+
+        if (prevBtn && nextBtn && carousel && viewport) {
+            prevBtn.addEventListener('click', function () {
+                slideTo(position - 1);
+            });
+            nextBtn.addEventListener('click', function () {
+                slideTo(position + 1);
+            });
+            window.addEventListener('resize', function () {
+                slideTo(position); // Recalculate on resize
+            });
+            // Inisialisasi
+            slideTo(0);
+        }
+    });
+</script>

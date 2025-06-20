@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log; // Import Log facade
 use Carbon\Carbon; // Import Carbon untuk manipulasi tanggal
 use App\Models\CourseSession; // Import model CourseSession
 use App\Models\Attendance; // Import model Attendance
-use app\Models\Payment; // Import model Payment
+use App\Models\CoursePayment; // Import model Course Payment
 
 class CourseController extends Controller
 {
@@ -24,6 +24,9 @@ class CourseController extends Controller
         if ($request->has('type') && $request->type) {
             $query->where('type', $request->type);
         }
+
+        // Tambahkan orderBy di sini
+        $query->orderBy('created_at', 'desc');
 
         $courses = $query->with(['venue', 'trainers.user', 'students.user', 'payment'])->get();
         $allTrainers = \App\Models\Trainer::all();
@@ -100,10 +103,15 @@ class CourseController extends Controller
         return view('courses.show', compact('course', 'activeTab'));
     }
 
-    public function edit(Course $course)
+    public function edit($id)
     {
-        $course->load(['students', 'trainers']);
-        return view('courses.edit', compact('course'));
+        $course = Course::findOrFail($id);
+        $venues = Venue::all(); // Pastikan model Venue sudah di-import
+        $students = Student::all();
+        $materials = CourseMaterial::all();
+        $trainers = Trainer::all();
+
+        return view('courses.edit', compact('course', 'venues', 'students', 'materials', 'trainers'));
     }
 
     public function update(Request $request, Course $course)
@@ -147,16 +155,31 @@ class CourseController extends Controller
 
     public function assign(Request $request, Course $course)
     {
-        $request->validate([
-            'trainers' => 'nullable|array',
-            'trainers.*' => 'exists:trainers,id',
-            'materials' => 'nullable|array',
-            'materials.*' => 'exists:course_materials,id',
-        ]);
+    $request->validate([
+        'trainers' => 'nullable|array',
+        'trainers.*' => 'exists:trainers,id',
+        'materials' => 'nullable|array',
+        'materials.*' => 'exists:course_materials,id',
+    ]);
 
+    // Hanya sync jika field dikirim dari form
+    if ($request->has('trainers')) {
         $course->trainers()->sync($request->input('trainers', []));
-        $course->materials()->sync($request->input('materials', []));
-
-        return redirect()->route('courses.index')->with('success', 'Trainer & materials assigned successfully.');
     }
+    if ($request->has('materials')) {
+        $course->materials()->sync($request->input('materials', []));
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Data berhasil disimpan.',
+        'trainers' => $course->trainers->map(function($t) {
+            return [
+                'name' => $t->user->name,
+                'photo' => $t->user->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png'),
+            ];
+        }),
+        'materials_count' => $course->materials->count(),
+    ]);
+}
 }

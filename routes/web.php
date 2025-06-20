@@ -103,21 +103,13 @@ Route::middleware(['role:Super Admin|Admin'])->group(function () {
 
 // route untuk membuat dan mengedit materi kursus
 Route::middleware(['role:Super Admin|Admin'])->group(function () {
-    Route::get('/course-materials/{material}/edit', [CourseMaterialController::class, 'edit'])->name('course-materials.edit');
     Route::post('/course-materials', [CourseMaterialController::class, 'store'])->name('course-materials.store');
     Route::get('/course-materials/create', [CourseMaterialController::class, 'create'])->name('course-materials.create');
-    Route::put('/course-materials/{material}', [CourseMaterialController::class, 'update'])->name('course-materials.update');
-    Route::delete('/course-materials/{material}', [CourseMaterialController::class, 'destroy'])->name('course-materials.destroy');
+    
+   
 });
 
 
-
-require __DIR__ . '/auth.php';
-
-Route::middleware(['web'])->group(function () {
-    Route::resource('courses', CourseController::class);
-    Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
-});
 
 Route::prefix('courses/{course}/sessions')->group(function () {
     Route::get('/', [CourseSessionController::class, 'index'])->name('sessions.index'); // Menampilkan daftar sesi
@@ -135,7 +127,7 @@ Route::prefix('courses/{course}/sessions')->group(function () {
     Route::get('/general-schedule/export-pdf', [GeneralScheduleController::class, 'exportPdf'])->name('general-schedule.export-pdf');
 
 
-    Route::get('/courses/{courseId}', [CourseController::class, 'show'])->name('courses.show');
+    
     Route::post('/courses/{course}/students/{student}/grades', [GradeController::class, 'store'])->name('grades.store');
 Route::get('/payments/{payment}', [CoursePaymentController::class, 'show'])->name('payments.show');
 Route::post('/courses/{course}/assign', [CourseController::class, 'assign'])->name('courses.assign')->middleware('role:Super Admin|Admin');

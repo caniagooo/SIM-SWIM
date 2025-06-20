@@ -18,33 +18,32 @@ class GradeController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
 
-    public function store(Request $request, Course $course, Student $student)
+    public function store(Request $request, $courseId, $studentId)
     {
-        $request->validate([
-            'grades' => 'required|array',
-            'grades.*.score' => 'nullable|numeric|min:1|max:5',
-            'grades.*.material_id' => 'required|exists:course_materials,id',
-            'remarks' => 'nullable|array',
-            'remarks.*' => 'nullable|string|max:255',
-        ]);
+        $course = \App\Models\Course::findOrFail($courseId);
+        $student = \App\Models\Student::findOrFail($studentId);
 
-        foreach ($request->grades as $materialId => $data) {
-            StudentGrade::updateOrCreate(
-                [
-                    'course_id' => $course->id, // Gunakan course_id sebagai referensi utama
-                    'student_id' => $student->id,
-                    'material_id' => $materialId,
-                ],
-                [
-                    'score' => $data['score'] ?? null,
-                    'remarks' => $request->remarks[$materialId] ?? null,
-                ]
-            );
+        $materials = $course->materials; // relasi materi kursus
+
+        foreach ($materials as $material) {
+            $score = $request->input("grades.{$material->id}.score");
+            $remarks = $request->input("grades.{$material->id}.remarks");
+
+            if ($score !== null || $remarks) {
+                \App\Models\StudentGrade::updateOrCreate(
+                    [
+                        'course_id' => $course->id,
+                        'student_id' => $student->id,
+                        'material_id' => $material->id,
+                    ],
+                    [
+                        'score' => $score,
+                        'remarks' => $remarks,
+                    ]
+                );
+            }
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Penilaian berhasil disimpan.',
-        ]);
+        return back()->with('success', 'Penilaian berhasil disimpan.');
     }
 }

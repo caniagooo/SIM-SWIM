@@ -5,24 +5,39 @@
 
             <!-- Progress Tab -->
             <div class="card card-flush">
-                <div class="card-header">
-                    <h3 class="card-title">Create Course</h3>
+                <div class="card-header align-items-center py-5 gap-2 gap-md-5">
+                    <div class="card-title">
+                        <h2 class="fw-bold mb-0">
+                            <span class="svg-icon svg-icon-2 me-2 text-primary">
+                                <i class="bi-book"></i>
+                            </span>
+                            Pembuatan Kursus Baru
+                        </h2>
+                    </div>
+                    <div class="card-toolbar">
+                        <a href="{{ route('courses.index') }}" class="btn btn-light-primary btn-sm">
+                            <span class="svg-icon svg-icon-2 me-1">
+                                <i class="bi-arrow-left"></i>
+                            </span>
+                            Kembali ke Daftar Kursus
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body">
                     <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6" id="progressTab" role="tablist">
                         <li class="nav-item">
                             <button class="nav-link active" id="step1-tab" data-bs-toggle="tab" data-bs-target="#step1" type="button" role="tab" aria-controls="step1" aria-selected="true">
-                                Step 1: Course Details
+                                Step 1: Detail Kursus
                             </button>
                         </li>
                         <li class="nav-item">
                             <button class="nav-link" id="step2-tab" data-bs-toggle="tab" data-bs-target="#step2" type="button" role="tab" aria-controls="step2" aria-selected="false">
-                                Step 2: Venue & Schedule
+                                Step 2: Venue & Sesi
                             </button>
                         </li>
                         <li class="nav-item">
                             <button class="nav-link" id="step3-tab" data-bs-toggle="tab" data-bs-target="#step3" type="button" role="tab" aria-controls="step3" aria-selected="false">
-                                Step 3: Trainers & Materials
+                                Step 3: Pelatih & Materi
                             </button>
                         </li>
                     </ul>
@@ -33,7 +48,7 @@
                         <div class="tab-pane fade show active" id="step1" role="tabpanel" aria-labelledby="step1-tab">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label mb-2">Course Type</label>
+                                    <label class="form-label mb-2">Tipe Kursus</label>
                                     <div class="d-flex gap-3">
                                         <input type="hidden" name="type" id="type" value="private">
                                         <div class="card course-type-card border-primary position-relative" data-type="private" style="cursor:pointer; min-width:200px;">
@@ -89,22 +104,41 @@
                                     </script>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="basic_skills" class="form-label">Basic Skills</label>
+                                    <label for="basic_skills" class="form-label">Catatan terkait murid</label>
                                     <textarea name="basic_skills" id="basic_skills" class="form-control" rows="4"></textarea>
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label for="students" class="form-label">Select Students</label>
+                                <label for="students" class="form-label">Pilih Murid</label>
                                 <div id="students-section">
                                     <!-- Private: Dropdown -->
                                     <div id="students-dropdown-section">
                                         <select class="form-select" name="students[]" id="student-private-dropdown">
                                             <option value="">-- Select Student --</option>
                                             @foreach ($students as $student)
-                                                <option value="{{ $student->id }}">{{ $student->user->name }} ({{ $student->user->email }})</option>
+                                                @php
+                                                    $dob = $student->birth_date ?? null;
+                                                    $age = $dob ? \Carbon\Carbon::parse($dob)->age : '-';
+                                                @endphp
+                                            <option value="{{ $student->id }}">{{ $student->user->name }} | {{ $student->user->email }} | <span class="text-muted">({{ $age }} tahun)</span></option>
                                             @endforeach
                                         </select>
                                     </div>
+                                    @push('scripts')
+                                        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+                                        <script>
+                                            document.addEventListener('DOMContentLoaded', function () {
+                                                $('#student-private-dropdown').select2({
+                                                    placeholder: '-- Select Student --',
+                                                    allowClear: true,
+                                                    width: '100%'
+                                                });
+                                            });
+                                        </script>
+                                    @endpush
+                                    @push('styles')
+                                        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+                                    @endpush
 
                                     <!-- Group: Table with Checkbox & Search -->
                                     <div id="students-table-section" style="display: none;">
@@ -118,7 +152,7 @@
                                                         </th>
                                                         <th>Name</th>
                                                         <th>Email</th>
-                                                        <th>Age Group</th>
+                                                        <th>Tanggal Lahir</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="students-table-body">
@@ -131,7 +165,16 @@
                                                             </td>
                                                             <td>{{ $student->user->name }}</td>
                                                             <td>{{ $student->user->email }}</td>
-                                                            <td>{{ $student->age_group }}</td>
+                                                            <td>
+                                                                @php
+                                                                    $dob = $student->birth_date ?? null;
+                                                                    $age = $dob ? \Carbon\Carbon::parse($dob)->age : '-';
+                                                                @endphp
+                                                                {{ $dob ? \Carbon\Carbon::parse($dob)->format('d M Y') : '-' }} 
+                                                                @if($age !== '-') 
+                                                                    <span class="text-muted">({{ $age }} tahun)</span>
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>
@@ -225,7 +268,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="price" class="form-label fw-semibold">Course Price</label>
+                                    <label for="price" class="form-label fw-semibold">Harga Kursus</label>
                                     <div class="input-group">
                                         <span class="input-group-text">Rp</span>
                                         <input type="number" min="0" name="price" id="price" class="form-control" required>
@@ -235,28 +278,28 @@
                             </div>
                             <div class="row g-4 mt-1">
                                 <div class="col-md-6">
-                                    <label for="max_sessions" class="form-label fw-semibold">Number of Sessions</label>
+                                    <label for="max_sessions" class="form-label fw-semibold">Total Sesi</label>
                                     <div class="input-group">
                                         <input type="number" min="1" name="max_sessions" id="max_sessions" class="form-control" required>
-                                        <span class="input-group-text">sessions</span>
+                                        <span class="input-group-text">Sesi</span>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="duration_days" class="form-label fw-semibold">Duration</label>
                                     <div class="input-group">
                                         <input type="number" min="1" name="duration_days" id="duration_days" class="form-control" required>
-                                        <span class="input-group-text">days</span>
+                                        <span class="input-group-text">hari</span>
                                     </div>
                                 </div>
                                 
                             </div>
                             <div class="row g-4 mt-1">
                                 <div class="col-md-6">
-                                    <label for="start_date" class="form-label fw-semibold">Start Date</label>
+                                    <label for="start_date" class="form-label fw-semibold">Tanggal Mulai</label>
                                     <input type="date" name="start_date" id="start_date" class="form-control" value="{{ now()->format('Y-m-d') }}" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="valid_until" class="form-label fw-semibold">Expiration Date</label>
+                                    <label for="valid_until" class="form-label fw-semibold">Tanggal Berakhir</label>
                                     <input type="date" name="valid_until" id="valid_until" class="form-control" readonly>
                                 </div>
                             </div>
@@ -290,7 +333,7 @@
                             <div class="row">
                                 <!-- Trainers List -->
                                 <div class="row mb-4">
-                                    <label class="form-label mb-2 fw-semibold fs-5">Select Trainers</label>
+                                    <label class="form-label mb-2 fw-semibold fs-5">Pilih Pelatih</label>
                                     @php
                                         $shuffledTrainers = $trainers->shuffle();
                                     @endphp
@@ -316,7 +359,7 @@
                                                             </div>
                                                             <div class="card-body d-flex flex-column align-items-center justify-content-center py-4">
                                                                 <div class="symbol symbol-60px symbol-circle mb-3">
-                                                                    <img src="{{ $trainer->user->profile_photo_url ?? asset('assets/media/avatars/blank.png') }}" alt="{{ $trainer->user->name }}">
+                                                                    <img src="{{ $trainer->user->profile_photo_url ?? asset('assets/media/avatars/default-avatar.png') }}" alt="{{ $trainer->user->name }}">
                                                                 </div>
                                                                 <div class="fw-bold mb-2 text-center">
                                                                     {{ $trainer->user->name }}
@@ -333,7 +376,7 @@
                                                                 <div>
                                                                     <span class="badge badge-light-primary">
                                                                         <i class="ki-duotone ki-briefcase fs-6 me-1"></i>
-                                                                        Active Courses: {{ $trainer->active_courses_count ?? 0 }}
+                                                                        Kursus Aktif: {{ $trainer->active_courses_count ?? 0 }}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -484,8 +527,8 @@
                                                                 <thead class="bg-light-primary">
                                                                     <tr class="fw-semibold text-gray-700">
                                                                         <th style="width:60px;"></th>
-                                                                        <th>Material Name</th>
-                                                                        <th>Est. Sessions</th>
+                                                                        <th>Materi</th>
+                                                                        <th>Est. Sesi</th>
                                                                         <th>Min. Score</th>
                                                                     </tr>
                                                                 </thead>
@@ -524,13 +567,13 @@
                                                 <span class="svg-icon svg-icon-2 text-primary me-1">
                                                     <i class="ki-duotone ki-check-circle"></i>
                                                 </span>
-                                                <span class="fw-semibold">Selected: <span id="selected-materials-count" class="text-primary">0</span></span>
+                                                <span class="fw-semibold">Terpilih: <span id="selected-materials-count" class="text-primary">0</span></span>
                                             </div>
                                             <div class="d-flex align-items-center">
                                                 <span class="svg-icon svg-icon-2 text-warning me-1">
                                                     <i class="ki-duotone ki-calendar"></i>
                                                 </span>
-                                                <span class="fw-semibold">Est. Sessions: <span id="selected-materials-sessions" class="text-warning">0</span></span>
+                                                <span class="fw-semibold">Est. Sesi: <span id="selected-materials-sessions" class="text-warning">0</span></span>
                                             </div>
                                             <div class="d-flex align-items-center">
                                                 <span class="svg-icon svg-icon-2 text-success me-1">

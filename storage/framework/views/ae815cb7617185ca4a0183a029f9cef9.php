@@ -169,7 +169,7 @@
 
                                                             </td>
                                                             <td class="text-center">
-                                                                <button class="btn btn-light-primary btn-sm" data-bs-toggle="modal" data-bs-target="#studentDetailModal<?php echo e($student->id); ?>">
+                                                                <button class="btn btn-light-primary btn-sm" data-bs-toggle="modal" data-bs-target="#gradeModal<?php echo e($student->id); ?>">
                                                                     <i class="fas fa-edit"></i> Penilaian
                                                                 </button>
                                                             </td>
@@ -193,8 +193,6 @@
                                 <div class="card border-0 shadow-sm h-100">
                                     <div class="card-body">
                                         <h6 class="text-primary mb-3"><i class="bi bi-calendar-check"></i> Sessions</h6>
-
-                                        <!-- Button Tambah Jadwal -->
                                         <div class="d-flex justify-content-between mb-3">
                                             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addScheduleModal"
                                                 <?php echo e($course->sessions->count() >= $course->max_sessions ? 'disabled' : ''); ?>>
@@ -204,516 +202,90 @@
                                                 <small class="text-danger">Max sessions reached (<?php echo e($course->max_sessions); ?>)</small>
                                             <?php endif; ?>
                                         </div>
+                                        <div class="table-responsive">
+                                            <table id="sessionsTable" class="table align-middle table-row-dashed fs-6 gy-4">
+                                                <thead>
+                                                    <tr class="text-start text-gray-400 fw-bold fs-7 text-uppercase gs-0">
+                                                        <th class="min-w-50px">#</th>
+                                                        <th class="min-w-150px">Date</th>
+                                                        <th class="min-w-100px">Start Time</th>
+                                                        <th class="min-w-100px">End Time</th>
+                                                        <th class="min-w-100px">Status</th>
+                                                        <th class="min-w-150px text-end">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="fw-semibold text-gray-700">
+                                                    <?php $__currentLoopData = $course->sessions->whereIn('status', ['scheduled', 'completed','rescheduled','canceled']); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                        <tr id="sessionRow<?php echo e($session->id); ?>">
+                                                            <td></td>
+                                                            <td>
+                                                                <span class="badge badge-light-primary fs-7">
+                                                                    <?php echo e(\Carbon\Carbon::parse($session->session_date)->translatedFormat('l, d F Y')); ?>
 
-                                        <!-- Tabel Jadwal Sesi -->
-                                        <?php if($course->sessions && $course->sessions->count() > 0): ?>
-                                            <div class="table-responsive">
-                                                <table id="sessionsTable" class="table align-middle table-row-dashed fs-6 gy-4">
-                                                    <thead>
-                                                        <tr class="text-start text-gray-400 fw-bold fs-7 text-uppercase gs-0">
-                                                            <th class="min-w-50px">#</th>
-                                                            <th class="min-w-150px">Date</th>
-                                                            <th class="min-w-100px">Start Time</th>
-                                                            <th class="min-w-100px">End Time</th>
-                                                            <th class="min-w-100px">Status</th>
-                                                            <th class="min-w-150px text-end">Actions</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody class="fw-semibold text-gray-700">
-                                                        <?php $__currentLoopData = $course->sessions->whereIn('status', ['scheduled', 'completed']); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                            <tr id="sessionRow<?php echo e($session->id); ?>">
-                                                                <td><?php echo e($loop->iteration); ?></td>
-                                                                <td>
-                                                                    <span class="badge badge-light-primary fs-7">
-                                                                        <?php echo e(\Carbon\Carbon::parse($session->session_date)->translatedFormat('l, d F Y')); ?>
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge badge-light-info fs-7">
+                                                                    <?php echo e(\Carbon\Carbon::parse($session->start_time)->format('H:i')); ?>
 
-                                                                    </span>
-                                                                </td>
-                                                                <td>
-                                                                    <span class="badge badge-light-info fs-7">
-                                                                        <?php echo e(\Carbon\Carbon::parse($session->start_time)->format('H:i')); ?>
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge badge-light-info fs-7">
+                                                                    <?php echo e(\Carbon\Carbon::parse($session->end_time)->format('H:i')); ?>
 
-                                                                    </span>
-                                                                </td>
-                                                                <td>
-                                                                    <span class="badge badge-light-info fs-7">
-                                                                        <?php echo e(\Carbon\Carbon::parse($session->end_time)->format('H:i')); ?>
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span id="sessionsStatus<?php echo e($session->id); ?>" class="badge badge-<?php echo e($session->status === 'scheduled' ? 'info' : ($session->status === 'rescheduled' ? 'warning' : 'success')); ?> fs-7">
+                                                                    <?php echo e(ucfirst($session->status)); ?>
 
-                                                                    </span>
-                                                                </td>
-                                                                <td>
-                                                                    <span id="sessionsStatus<?php echo e($session->id); ?>" class="badge badge-<?php echo e($session->status == 'completed' ? 'success' : 'info'); ?> fs-7">
-                                                                        <?php echo e(ucfirst($session->status)); ?>
-
-                                                                    </span>
-                                                                </td>
-                                                                <td class="text-end">
-                                                                    <div class="d-flex justify-content-end gap-2">
-                                                                        <!-- Button Absen -->
-                                                                        <button class="btn btn-icon btn-sm btn-light-primary" data-bs-toggle="modal" data-bs-target="#attendanceModal<?php echo e($session->id); ?>" title="Absen">
-                                                                            <i class="fas fa-clipboard-check"></i>
-                                                                        </button>
-                                                                        <a href="javascript:void(0);" class="btn btn-icon btn-sm btn-light-warning" data-bs-toggle="modal" data-bs-target="#editScheduleModal<?php echo e($session->id); ?>" title="Edit">
+                                                                </span>
+                                                            </td>
+                                                            <td class="text-end">
+                                                                <div class="d-flex justify-content-end gap-2">
+                                                                    <button class="btn btn-icon btn-sm btn-light-primary btnAttendance" data-session-id="<?php echo e($session->id); ?>" title="Absen">
+                                                                        <i class="fas fa-clipboard-check"></i>
+                                                                    </button>
+                                                                    <?php if($session->status === 'scheduled'): ?>
+                                                                        <button class="btn btn-icon btn-sm btn-light-warning btnEditSession" data-session-id="<?php echo e($session->id); ?>" title="Edit">
                                                                             <i class="fas fa-edit"></i>
-                                                                        </a>
-                                                                        <form action="<?php echo e(route('sessions.destroy', [$course->id, $session->id])); ?>" method="POST" style="display:inline;">
-                                                                            <?php echo csrf_field(); ?>
-                                                                            <?php echo method_field('DELETE'); ?>
-                                                                            <button type="submit" class="btn btn-icon btn-sm btn-light-danger" title="Delete" onclick="return confirm('Are you sure?')">
-                                                                                <i class="fas fa-trash-alt"></i>
-                                                                            </form>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-
-                                                            
-                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        <?php else: ?>
-                                            <div class="alert alert-info d-flex align-items-center p-4">
-                                                <i class="bi bi-info-circle fs-2x me-3"></i>
-                                                <div>
-                                                    <span class="fw-semibold">No sessions scheduled.</span>
-                                                </div>
-                                            </div>
-                                        <?php endif; ?>
+                                                                        </button>
+                                                                    <?php endif; ?>
+                                                                    <button class="btn btn-icon btn-sm btn-light-danger btnDeleteSession" data-session-id="<?php echo e($session->id); ?>" title="Delete">
+                                                                        <i class="fas fa-trash-alt"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- Alert Container -->
-                    <div id="alertContainer" class="alert d-none alert-dismissible fade show" role="alert">
-                        <div class="d-flex align-items-center">
-                            <i id="alertIcon" class="bi me-2"></i>
-                            <span id="alertMessage"></span>
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                <!-- end Alert Container -->
             </div>
         </div>
     </div>
 
-<!-- Attendance Modal -->    
-<?php $__currentLoopData = $course->sessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-    <div class="modal fade" id="attendanceModal<?php echo e($session->id); ?>" tabindex="-1" aria-labelledby="attendanceModalLabel<?php echo e($session->id); ?>" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-light-primary">
-                    <h5 class="modal-title" id="attendanceModalLabel<?php echo e($course->id); ?>">
-                        <i class="bi bi-clipboard-check text-primary me-2"></i>
-                        Attendance for Session: 
-                        <span class="fw-bold text-primary"><?php echo e(\Carbon\Carbon::parse($session->session_date)->translatedFormat('l, d F Y')); ?></span>
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="attendanceForm<?php echo e($session->id); ?>" method="POST">
-                        <?php echo csrf_field(); ?>
-                        <input type="hidden" name="course_id" value="<?php echo e($course->id); ?>">
-                        <input type="hidden" name="course_session_id" value="<?php echo e($session->id); ?>">
-                        <div class="table-responsive">
-                            <table class="table align-middle table-row-dashed gy-3">
-                                <thead class="bg-light">
-                                    <tr class="text-center text-gray-600 fw-bold">
-                                        <th class="min-w-50px">#</th></tbody>
-                                        <th class="min-w-200px">Nama Murid</th>
-                                        <th class="min-w-300px">Status Kehadiran</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php $__currentLoopData = $course->students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                        <tr>
-                                            <td class="text-center"><?php echo e($loop->iteration); ?></td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="symbol symbol-40px me-3">
-                                                        <img src="<?php echo e($student->user->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png')); ?>" alt="Avatar" class="rounded-circle" width="40" height="40">
-                                                    </div>
-                                                    <span class="fw-semibold text-gray-800"><?php echo e($student->user->name); ?></span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="btn-group w-100" role="group" aria-label="Status Kehadiran">
-                                                    <input type="radio" class="btn-check" name="attendance[<?php echo e($student->id); ?>][status]" id="hadir-<?php echo e($session->id); ?>-<?php echo e($student->id); ?>" value="hadir" autocomplete="off">
-                                                    <label class="btn btn-sm btn-light-success fw-bold px-4" for="hadir-<?php echo e($session->id); ?>-<?php echo e($student->id); ?>">
-                                                        <i class="bi bi-check-circle me-1"></i> Hadir
-                                                    </label>
+    <!-- Modals Section -->
 
-                                                    <input type="radio" class="btn-check" name="attendance[<?php echo e($student->id); ?>][status]" id="tidak-hadir-<?php echo e($session->id); ?>-<?php echo e($student->id); ?>" value="tidak hadir" autocomplete="off">
-                                                    <label class="btn btn-sm btn-light-danger fw-bold px-4" for="tidak-hadir-<?php echo e($session->id); ?>-<?php echo e($student->id); ?>">
-                                                        <i class="bi bi-x-circle me-1"></i> Tidak Hadir
-                                                    </label>
-
-                                                    <input type="radio" class="btn-check" name="attendance[<?php echo e($student->id); ?>][status]" id="terlambat-<?php echo e($session->id); ?>-<?php echo e($student->id); ?>" value="terlambat" autocomplete="off">
-                                                    <label class="btn btn-sm btn-light-warning fw-bold px-4" for="terlambat-<?php echo e($session->id); ?>-<?php echo e($student->id); ?>">
-                                                        <i class="bi bi-clock-history me-1"></i> Terlambat
-                                                    </label>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 mt-4">
-                            <i class="bi bi-save me-2"></i> Simpan Kehadiran
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    <!-- Modal Tambah Jadwal -->
-    <div class="modal fade" id="addScheduleModal" tabindex="-1" aria-labelledby="addScheduleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addScheduleModalLabel">Tambah Jadwal Sesi</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="addScheduleForm">
-                        <?php echo csrf_field(); ?>
-                        <div class="mb-3">
-                            <label for="session_date" class="form-label">Tanggal Sesi</label>
-                            <input type="date" class="form-control" id="session_date" name="session_date" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="start_time" class="form-label">Waktu Mulai</label>
-                            <input type="time" class="form-control" id="start_time" name="start_time" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="end_time" class="form-label">Waktu Selesai</label>
-                            <input type="time" class="form-control" id="end_time" name="end_time" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Simpan Jadwal</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-<!-- Edit Schedule Modal -->
-<?php $__currentLoopData = $course->sessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-    <div class="modal fade" id="editScheduleModal<?php echo e($session->id); ?>" tabindex="-1" aria-labelledby="editScheduleModalLabel<?php echo e($session->id); ?>" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editScheduleModalLabel<?php echo e($session->id); ?>">Edit Jadwal Sesi</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editScheduleForm<?php echo e($session->id); ?>">
-                        <?php echo csrf_field(); ?>
-                        <?php echo method_field('PUT'); ?>
-                        <div class="mb-3">
-                            <label for="session_date_<?php echo e($session->id); ?>" class="form-label">Tanggal Sesi</label>
-                            <input type="date" class="form-control" id="session_date_<?php echo e($session->id); ?>" name="session_date"
-                                value="<?php echo e($session->session_date ? $session->session_date->format('Y-m-d') : ''); ?>"
-                                placeholder="<?php echo e($session->session_date ? $session->session_date->format('d M Y') : '-'); ?>" required>
-                            <small class="text-muted">Tanggal sebelumnya: <?php echo e($session->session_date ? \Carbon\Carbon::parse($session->session_date)->translatedFormat('l, d F Y') : '-'); ?></small>
-                        </div>
-                        <div class="mb-3">
-                            <label for="start_time_<?php echo e($session->id); ?>" class="form-label">Waktu Mulai</label>
-                            <input type="time" class="form-control" id="start_time_<?php echo e($session->id); ?>" name="start_time"
-                                value="<?php echo e($session->start_time ? \Carbon\Carbon::parse($session->start_time)->format('H:i') : ''); ?>"
-                                placeholder="<?php echo e($session->start_time ? \Carbon\Carbon::parse($session->start_time)->format('H:i') : '-'); ?>" required>
-                            <small class="text-muted">Waktu sebelumnya: <?php echo e($session->start_time ? \Carbon\Carbon::parse($session->start_time)->format('H:i') : '-'); ?></small>
-                        </div>
-                        <div class="mb-3">
-                            <label for="end_time_<?php echo e($session->id); ?>" class="form-label">Waktu Selesai</label>
-                            <input type="time" class="form-control" id="end_time_<?php echo e($session->id); ?>" name="end_time"
-                                value="<?php echo e($session->end_time ? \Carbon\Carbon::parse($session->end_time)->format('H:i') : ''); ?>"
-                                placeholder="<?php echo e($session->end_time ? \Carbon\Carbon::parse($session->end_time)->format('H:i') : '-'); ?>" required>
-                            <small class="text-muted">Waktu sebelumnya: <?php echo e($session->end_time ? \Carbon\Carbon::parse($session->end_time)->format('H:i') : '-'); ?></small>
-                        </div>
-                        <div class="mb-3">
-                            <label for="status_<?php echo e($session->id); ?>" class="form-label">Status</label>
-                            <select class="form-select" id="status_<?php echo e($session->id); ?>" name="status" required>
-                                <option value="scheduled" <?php echo e($session->status == 'scheduled' ? 'selected' : ''); ?>>Scheduled</option>
-                                <option value="cancelled" <?php echo e($session->status == 'cancelled' ? 'selected' : ''); ?>>Cancelled</option>
-                            </select>
-                            <small class="text-muted">Status sebelumnya: <?php echo e(ucfirst($session->status)); ?></small>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-
-
-
-<?php $__currentLoopData = $course->students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-    <div class="modal fade" id="studentDetailModal<?php echo e($student->id); ?>" tabindex="-1" aria-labelledby="studentDetailModalLabel<?php echo e($student->id); ?>" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <!-- Modal Header -->
-                <div class="modal-header">
-                    <h5 class="modal-title" id="studentDetailModalLabel<?php echo e($student->id); ?>">
-                        Penilaian untuk: <strong><?php echo e($student->user->name); ?></strong>
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <!-- Modal Body -->
-                <div class="modal-body">
-                    <form id="gradingForm<?php echo e($student->id); ?>">
-                        <?php echo csrf_field(); ?>
-                        <input type="hidden" name="course_id" value="<?php echo e($course->id); ?>"> <!-- Tambahkan course_id -->
-                        <div class="table-responsive">
-                            <table class="table table-bordered align-middle">
-                                <thead class="bg-light">
-                                    <tr class="text-center">
-                                        <th>#</th>
-                                        <th>Materi</th>
-                                        <th>Penilaian</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php $__currentLoopData = $course->materials; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $material): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                        <?php
-                                            $grade = $material->grades->where('student_id', $student->id)->first();
-                                        ?>
-                                        <tr>
-                                            <td class="text-center"><?php echo e($loop->iteration); ?></td>
-                                            <td><?php echo e($material->name); ?></td>
-                                            <td class="text-center">
-                                                <input type="hidden" name="grades[<?php echo e($material->id); ?>][material_id]" value="<?php echo e($material->id); ?>">
-                                                <div class="btn-group" role="group" aria-label="Penilaian">
-                                                    <?php for($i = 1; $i <= 5; $i++): ?>
-                                                        <input type="radio" class="btn-check" name="grades[<?php echo e($material->id); ?>][score]" id="grade-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>-<?php echo e($i); ?>" value="<?php echo e($i); ?>"
-                                                            <?php echo e(isset($grade->score) && $grade->score == $i ? 'checked' : ''); ?>>
-                                                        <label class="btn btn-sm btn-outline-primary" for="grade-<?php echo e($student->id); ?>-<?php echo e($material->id); ?>-<?php echo e($i); ?>"><?php echo e($i); ?></label>
-                                                    <?php endfor; ?>
-                                                </div>
-                                                <?php if($grade): ?>
-                                                    <span class="badge bg-success">Nilai sudah berhasil disimpan</span>
-                                                <?php endif; ?>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 mt-3">Simpan Penilaian</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-
-
-<!-- Javascript -->
-
-<script src="<?php echo e(asset('assets/plugins/jquery/jquery.min.js')); ?>"></script>
-<script src="<?php echo e(asset('assets/plugins/bootstrap/js/bootstrap.bundle.min.js')); ?>"></script>
-<!-- DataTables Initialization -->
-<script>
-    $(document).ready(function () {
-        $('#sessionsTable').DataTable();
-        $('#materialsTable').DataTable();
-        $('#studentsTable').DataTable();
-    });
-</script>
-
-
-
-<!-- Attendance Form Submission -->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        $(document).ready(function () {
-            <?php $__currentLoopData = $course->sessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                $('#attendanceForm<?php echo e($session->id); ?>').on('submit', function (e) {
-                    e.preventDefault();
-
-                    // Log data yang akan dikirimkan
-                    console.log($(this).serialize());
-
-                    $.ajax({
-                        url: "<?php echo e(route('sessions.attendance.save', ['course' => $course->id, 'session' => $session->id])); ?>",
-                        method: "POST",
-                        data: $(this).serialize(),
-                        success: function (response) {
-                            // Log respons sukses dari server
-                            console.log('Response:', response);
-
-                            alert(response.message);
-                            $('#attendanceModal<?php echo e($session->id); ?>').modal('hide');
-                        },
-                        error: function (xhr) {
-                            // Log error dari server
-                            console.error('Error Response:', xhr.responseText);
-
-                            alert('Terjadi kesalahan saat menyimpan kehadiran.');
-                        }
-                    });
-                });
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        });
-    });
-</script>
-
-<!-- Add Schedule Form Submission -->
-<script>
-    $(document).ready(function () {
-        $('#addScheduleForm').on('submit', function (e) {
-            e.preventDefault();
-
-            $.ajax({
-                url: "<?php echo e(route('sessions.store', ['course' => $course->id])); ?>",
-                method: "POST",
-                data: $(this).serialize(),
-                success: function (response) {
-                    showAlert('success', 'Jadwal sesi berhasil ditambahkan.');
-                    $('#addScheduleModal').modal('hide');
-
-                    $('#sessionsTable tbody').append(`
-                        <tr>
-                            <td>${response.data.id}</td>
-                            <td><span class="badge badge-light-primary fs-7">${response.data.session_date}</td>
-                            <td><span class="badge badge-light-info fs-7">${response.data.start_time}</td>
-                            <td><span class="badge badge-light-info fs-7">${response.data.end_time}</td>
-                            <td><span class="badge badge-info fs-7">Scheduled</span></td>
-                            <td class="text-end">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <button class="btn btn-icon btn-sm btn-light-primary" data-bs-toggle="modal" data-bs-target="#attendanceModal${response.data.id}" title="Absen">
-                                        <i class="fas fa-clipboard-check"></i>
-                                    </button>
-                                    <a href="#" class="btn btn-icon btn-sm btn-light-warning" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <button class="btn btn-icon btn-sm btn-light-danger" title="Delete">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `);
-                },
-                error: function () {
-                    showAlert('danger', 'Terjadi kesalahan saat menambahkan jadwal. Silakan coba lagi.');
-                }
-            });
-        });
-    });
-</script>
-
-<!-- Edit Schedule Form -->
-<script>
-    $(document).ready(function () {
-        <?php $__currentLoopData = $course->sessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            $('#editScheduleForm<?php echo e($session->id); ?>').on('submit', function (e) {
-                e.preventDefault(); // Prevent default form submission
-
-                // Get the form data
-                var formData = $(this).serialize();
-
-                // Menampilkan data existing
-                console.log('Editing session:', <?php echo e($session->id); ?>, formData);
-
-                
-
-
-                // Send AJAX request
-                $.ajax({
-                    url: "<?php echo e(route('sessions.update', ['course' => $course->id, 'session' => $session->id])); ?>",
-                    method: "PUT",
-                    data: formData,
-                    success: function (response) {
-                        console.log(response); // Log respons JSON ke konsol
-                        showAlert('success', 'Jadwal sesi berhasil diperbarui.');
-
-                        // Close the modal
-                        $('#editScheduleModal<?php echo e($session->id); ?>').modal('hide');
-
-                        // Update the row in the table dynamically
-                        const row = $(`#sessionRow${response.data.id}`);
-                        // Format tanggal ke "Senin, 18 Januari 2025"
-                        const date = new Date(response.data.session_date);
-                        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-                        const months = [
-                            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-                        ];
-                        const formattedDate = `${days[date.getDay()]}, ${date.getDate().toString().padStart(2, '0')} ${months[date.getMonth()]} ${date.getFullYear()}`;
-                        row.find('td:nth-child(2) span').text(formattedDate);
-                        row.find('td:nth-child(3) span').text(response.data.start_time);
-                        row.find('td:nth-child(4) span').text(response.data.end_time);
-                        row.find('td:nth-child(5) span').text(response.data.status);
-                    },
-                    error: function (xhr) {
-                        console.error(xhr.responseText); // Log error ke konsol
-                        showAlert('danger', 'Terjadi kesalahan saat memperbarui jadwal. Silakan coba lagi.');
-                    }
-                });
-            });
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    });
-</script>
-
-<!-- Alert Handling Function -->
-<script>
-    function showAlert(type, message) {
-        const alertContainer = $('#alertContainer');
-        const alertIcon = $('#alertIcon');
-        const alertMessage = $('#alertMessage');
-
-        alertContainer.removeClass('d-none alert-success alert-danger alert-info alert-warning');
-        alertContainer.addClass(`alert-${type}`);
-        alertMessage.text(message);
-
-        alertIcon.removeClass('bi-check-circle bi-x-circle bi-info-circle bi-exclamation-triangle');
-        if (type === 'success') {
-            alertIcon.addClass('bi-check-circle text-success');
-        } else if (type === 'danger') {
-            alertIcon.addClass('bi-x-circle text-danger');
-        } else if (type === 'info') {
-            alertIcon.addClass('bi-info-circle text-info');
-        } else if (type === 'warning') {
-            alertIcon.addClass('bi-exclamation-triangle text-warning');
-        }
-
-        alertContainer.fadeIn();
-        setTimeout(() => alertContainer.fadeOut(), 3000);
-    }
-</script>
-
-<script>
-    $(document).ready(function () {
-        <?php $__currentLoopData = $course->students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            $('#gradingForm<?php echo e($student->id); ?>').on('submit', function (e) {
-                e.preventDefault();
-
-                var formData = $(this).serialize();
-
-                $.ajax({
-                    url: "<?php echo e(route('grades.store', ['course' => $course->id, 'student' => $student->id])); ?>",
-                    method: "POST",
-                    data: formData,
-                    success: function (response) {
-                        console.log('Response:', response);
-                        showAlert('success', 'Penilaian berhasil disimpan.');
-                        $('#studentDetailModal<?php echo e($student->id); ?>').modal('hide');
-                    },
-                    error: function (xhr) {
-                        console.error('Error:', xhr.responseText);
-                        showAlert('danger', 'Terjadi kesalahan saat menyimpan penilaian.');
-                    }
-                });
-            });
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    });
-</script>
+    
+    <?php $__currentLoopData = $course->sessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <?php echo $__env->make('courses.partials.attendance-modal', ['session' => $session, 'course' => $course], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+        <?php if($session->status === 'scheduled'): ?>
+            <?php echo $__env->make('courses.partials.edit-schedule-modal', ['session' => $session, 'course' => $course], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+        <?php endif; ?>
+        <?php echo $__env->make('courses.partials.edit-schedule-modal', ['session' => $session, 'course' => $course], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    <?php $__currentLoopData = $course->students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <?php echo $__env->make('courses.partials.score-student-modal', ['student' => $student, 'course' => $course], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    <?php echo $__env->make('courses.partials.add-schedule-modal', ['course' => $course], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
