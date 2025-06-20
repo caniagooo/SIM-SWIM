@@ -1,10 +1,14 @@
 <?php
 
-use App\Http\Controllers\Apps\PermissionManagementController;
-use App\Http\Controllers\Apps\RoleManagementController;
-use App\Http\Controllers\Apps\UserManagementController;
-use App\Http\Controllers\Auth\SocialiteController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\Apps\UserManagementController;
+use App\Http\Controllers\Apps\RoleManagementController;
+use App\Http\Controllers\Apps\PermissionManagementController;
 use App\Http\Controllers\VenueController;
 use App\Http\Controllers\TrainerController;
 use App\Http\Controllers\StudentController;
@@ -12,125 +16,97 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseMaterialController;
 use App\Http\Controllers\CourseSessionController;
-use App\Http\Controllers\GeneralScheduleController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\GradeController;
-use Illuminate\Support\Facades\Route;
-use App\Models\CourseMaterial;
-use Illuminate\Http\Request;
+use App\Http\Controllers\GeneralScheduleController;
 use App\Http\Controllers\CoursePaymentController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+// Semua route di-protect auth & role:Super Admin|Admin
+Route::middleware(['auth', 'role:Super Admin|Admin'])->group(function () {
 
-Route::middleware(['auth'])->group(function () {
+    // Dashboard
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 
-    Route::get('/', [DashboardController::class, 'index']);
-
-    Route::name('user-management.')->group(function () {
-        Route::resource('/user-management/users', UserManagementController::class);
-        Route::resource('/user-management/roles', RoleManagementController::class);
-        Route::resource('/user-management/permissions', PermissionManagementController::class);
+    // User Management
+    Route::prefix('user-management')->name('user-management.')->group(function () {
+        Route::resource('users', UserManagementController::class);
+        Route::resource('roles', RoleManagementController::class);
+        Route::resource('permissions', PermissionManagementController::class);
     });
 
-    Route::group(['middleware' => ['role:Super Admin|Admin']], function () {
-        Route::resource('venues', VenueController::class);
-    });
+    // Profile
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
 
-    Route::post('/course-payments/create/{course}', [CoursePaymentController::class, 'createInvoice'])->name('course-payments.create');
-    Route::get('/course-payments/invoice/{course}', [CoursePaymentController::class, 'invoice'])->name('course-payments.invoice');
-    Route::post('/course-payments/process/{course}', [CoursePaymentController::class, 'process'])->name('course-payments.process');
-});
+    // Logout
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-Route::middleware(['role:Super Admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'index']);
-});
+    // Venue
+    Route::resource('venues', VenueController::class);
 
-Route::middleware(['role:Pelatih'])->group(function () {
-    Route::get('/trainer/dashboard', [TrainerController::class, 'index']);
-});
+    // Trainer, Student, Payment
+    Route::resource('trainers', TrainerController::class);
+    Route::resource('students', StudentController::class);
+    Route::resource('payments', PaymentController::class);
 
-Route::resource('courses', CourseController::class)->middleware('role:Super Admin|Admin');
-Route::resource('trainers', TrainerController::class)->middleware('role:Super Admin|Admin');
-Route::resource('students', StudentController::class)->middleware('role:Super Admin|Admin');
-Route::resource('payments', PaymentController::class)->middleware('role:Super Admin|Admin');
-Route::resource('course-materials', CourseMaterialController::class)->middleware('role:Super Admin|Admin');
+    // Student Payments
+    Route::get('students/{student}/payments', [StudentController::class, 'payments'])->name('students.payments');
 
-// Tambahkan rute untuk payments murid
-Route::get('students/{student}/payments', [StudentController::class, 'payments'])->name('students.payments');
-
-Route::get('/error', function () {
-    abort(500);
-});
-
-Route::get('/auth/redirect/{provider}', [SocialiteController::class, 'redirect']);
-
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
-
-// Profil User
-Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-
-// Logout
-Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-
-Route::get('/api/materials', function (Request $request) {
-    $level = $request->query('level'); // Menggunakan instance Request
-    \Log::info('Level:', ['level' => $level]);
-
-    $materials = CourseMaterial::where('level', $level)->get();
-    \Log::info('Materials:', $materials->toArray());
-
-    return $materials;
-});
-
-
-// Route untuk mengelola materi kursus
-Route::middleware(['role:Super Admin|Admin'])->group(function () {
+    // Course Materials
     Route::resource('course-materials', CourseMaterialController::class);
     Route::post('course-materials/{material}/courses', [CourseMaterialController::class, 'attachCourse'])->name('course-materials.attach-course');
     Route::delete('course-materials/{material}/courses/{course}', [CourseMaterialController::class, 'detachCourse'])->name('course-materials.detach-course');
     Route::get('/materials', [CourseMaterialController::class, 'index'])->name('materials.index');
-    route::get('/{material}/edit', [CourseMaterialController::class, 'edit'])->name('materials.edit');
-});
-
-// route untuk membuat dan mengedit materi kursus
-Route::middleware(['role:Super Admin|Admin'])->group(function () {
+    Route::get('/materials/{material}/edit', [CourseMaterialController::class, 'edit'])->name('materials.edit');
     Route::post('/course-materials', [CourseMaterialController::class, 'store'])->name('course-materials.store');
     Route::get('/course-materials/create', [CourseMaterialController::class, 'create'])->name('course-materials.create');
-    
-   
-});
 
+    // Course AJAX (letakkan sebelum resource!)
+    Route::get('/courses/ajax', [CourseController::class, 'ajaxIndex'])->name('courses.ajax');
 
+    // Courses
+    Route::resource('courses', CourseController::class);
+    Route::post('/courses/{course}/assign', [CourseController::class, 'assign'])->name('courses.assign');
 
-Route::prefix('courses/{course}/sessions')->group(function () {
-    Route::get('/', [CourseSessionController::class, 'index'])->name('sessions.index'); // Menampilkan daftar sesi
-    Route::get('/create', [CourseSessionController::class, 'create'])->name('sessions.create'); // Form tambah sesi
-    Route::post('/', [CourseSessionController::class, 'store'])->name('sessions.store'); // Simpan sesi baru
-    Route::get('/{session}/edit', [CourseSessionController::class, 'edit'])->name('sessions.edit'); // Form edit sesi
-    Route::put('/{session}', [CourseSessionController::class, 'update'])->name('sessions.update'); // Update sesi
-    Route::delete('/{session}', [CourseSessionController::class, 'destroy'])->name('sessions.destroy'); // Hapus sesi
-    Route::post('/{session}/attendance', [AttendanceController::class, 'saveAttendance'])->name('sessions.attendance.save');
-});
+    // Course Payments
+    Route::post('/course-payments/create/{course}', [CoursePaymentController::class, 'createInvoice'])->name('course-payments.create');
+    Route::get('/course-payments/invoice/{course}', [CoursePaymentController::class, 'invoice'])->name('course-payments.invoice');
+    Route::post('/course-payments/process/{course}', [CoursePaymentController::class, 'process'])->name('course-payments.process');
+    Route::get('/payments/{payment}', [CoursePaymentController::class, 'show'])->name('payments.show');
 
+    // Course Sessions
+    Route::prefix('courses/{course}/sessions')->group(function () {
+        Route::get('/', [CourseSessionController::class, 'index'])->name('sessions.index');
+        Route::get('/create', [CourseSessionController::class, 'create'])->name('sessions.create');
+        Route::post('/', [CourseSessionController::class, 'store'])->name('sessions.store');
+        Route::get('/{session}/edit', [CourseSessionController::class, 'edit'])->name('sessions.edit');
+        Route::put('/{session}', [CourseSessionController::class, 'update'])->name('sessions.update');
+        Route::delete('/{session}', [CourseSessionController::class, 'destroy'])->name('sessions.destroy');
+        Route::post('/{session}/attendance', [AttendanceController::class, 'saveAttendance'])->name('sessions.attendance.save');
+    });
 
+    // General Schedule
     Route::get('/general-schedule', [GeneralScheduleController::class, 'index'])->name('general-schedule.index');
     Route::get('/general-schedule/export', [GeneralScheduleController::class, 'export'])->name('general-schedule.export');
     Route::get('/general-schedule/export-pdf', [GeneralScheduleController::class, 'exportPdf'])->name('general-schedule.export-pdf');
 
-
-    
+    // Grade
     Route::post('/courses/{course}/students/{student}/grades', [GradeController::class, 'store'])->name('grades.store');
-Route::get('/payments/{payment}', [CoursePaymentController::class, 'show'])->name('payments.show');
-Route::post('/courses/{course}/assign', [CourseController::class, 'assign'])->name('courses.assign')->middleware('role:Super Admin|Admin');
 
+    // API Materials (for AJAX select2, etc)
+    Route::get('/api/materials', function (Request $request) {
+        $level = $request->query('level');
+        \Log::info('Level:', ['level' => $level]);
+        $materials = \App\Models\CourseMaterial::where('level', $level)->get();
+        \Log::info('Materials:', $materials->toArray());
+        return $materials;
+    });
 
+    // Error test
+    Route::get('/error', function () {
+        abort(500);
+    });
+});
 
+// Socialite Auth
+Route::get('/auth/redirect/{provider}', [SocialiteController::class, 'redirect']);

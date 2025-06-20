@@ -1,31 +1,81 @@
 <x-default-layout>
     <div class="container">
         <!-- Header -->
-        <div class="d-flex flex-wrap flex-stack mb-6">
-            <div class="d-flex align-items-center">
-                <h1 class="fw-bold mb-0 me-4">Courses</h1>
-                <span class="badge badge-light-primary fs-7 me-2 py-2 px-3" style="font-size:0.95rem;">
-                    Total <span class="fw-bold ms-1">{{ $courses->count() }}</span>
-                </span>
-                <a href="?status=active" class="badge badge-light-success fs-7 me-1 py-2 px-3 {{ request('status') == 'active' ? 'border border-success' : '' }}" style="font-size:0.95rem; cursor:pointer;">
-                    Aktif <span class="fw-bold ms-1">
-                        {{ $courses->filter(fn($c) => optional($c->payment)->status === 'paid' && now()->lte($c->valid_until) && (!$c->max_sessions || $c->sessions->where('status','completed')->count() < $c->max_sessions))->count() }}
-                    </span>
-                </a>
-                <a href="?status=expired" class="badge badge-light-danger fs-7 me-1 py-2 px-3 {{ request('status') == 'expired' ? 'border border-danger' : '' }}" style="font-size:0.95rem; cursor:pointer;">
-                    Expired <span class="fw-bold ms-1">
-                        {{ $courses->filter(fn($c) => optional($c->payment)->status === 'paid' && (now()->gt($c->valid_until) || ($c->max_sessions && $c->sessions->where('status','completed')->count() >= $c->max_sessions)))->count() }}
-                    </span>
-                </a>
-                <a href="?status=unpaid" class="badge badge-light-warning fs-7 py-2 px-3 {{ request('status') == 'unpaid' ? 'border border-warning' : '' }}" style="font-size:0.95rem; cursor:pointer;">
-                    Unpaid <span class="fw-bold ms-1">
-                        {{ $courses->filter(fn($c) => optional($c->payment)->status === 'pending')->count() }}
-                    </span>
-                </a>
+        <div class="d-flex flex-wrap flex-stack align-items-center mb-5 gap-3 gap-md-0">
+            <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center flex-wrap flex-grow-1 gap-2">
+                <h1 class="fw-bold mb-0 me-md-4 fs-3 fs-md-2">Courses</h1>
+                <!-- Status Filter Dropdown -->
+                <div class="dropdown mb-2 mb-md-0">
+                    <button class="btn btn-light-primary btn-sm dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-filter me-1"></i>
+                        @php
+                            $countTotal = $allCourses->count();
+                            $countActive = $allCourses->filter(fn($c) => optional($c->payment)->status === 'paid' && now()->lte($c->valid_until) && (!$c->max_sessions || $c->sessions->where('status','completed')->count() < $c->max_sessions))->count();
+                            $countExpired = $allCourses->filter(fn($c) => optional($c->payment)->status === 'paid' && (now()->gt($c->valid_until) || ($c->max_sessions && $c->sessions->where('status','completed')->count() >= $c->max_sessions)))->count();
+                            $countUnpaid = $allCourses->filter(fn($c) => optional($c->payment)->status === 'pending')->count();
+
+                            $statusLabel = 'Total';
+                            $statusCount = $countTotal;
+                            $statusBadgeClass = 'bg-light text-dark';
+                            if(request('status') == 'active') {
+                                $statusLabel = 'Aktif';
+                                $statusCount = $countActive;
+                                $statusBadgeClass = 'bg-success';
+                            } elseif(request('status') == 'expired') {
+                                $statusLabel = 'Expired';
+                                $statusCount = $countExpired;
+                                $statusBadgeClass = 'bg-danger';
+                            } elseif(request('status') == 'unpaid') {
+                                $statusLabel = 'Unpaid';
+                                $statusCount = $countUnpaid;
+                                $statusBadgeClass = 'bg-warning text-dark';
+                            }
+                        @endphp
+                        <span>{{ $statusLabel }}</span>
+                        <span class="badge {{ $statusBadgeClass }} ms-2">{{ $statusCount }}</span>
+                    </button>
+                    <ul class="dropdown-menu shadow-sm">
+                        <li>
+                            <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ !request('status') ? 'active fw-bold' : '' }}"
+                               href="{{ route('courses.index', request()->except('status')) }}">
+                                Total
+                                <span class="badge bg-primary text-white ms-2">{{ $countTotal }}</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ request('status') == 'active' ? 'active fw-bold' : '' }}"
+                               href="?status=active">
+                                Aktif
+                                <span class="badge bg-success text-white ms-2">{{ $countActive }}</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ request('status') == 'expired' ? 'active fw-bold' : '' }}"
+                               href="?status=expired">
+                                Expired
+                                <span class="badge bg-danger text-white ms-2">{{ $countExpired }}</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ request('status') == 'unpaid' ? 'active fw-bold' : '' }}"
+                               href="?status=unpaid">
+                                Unpaid
+                                <span class="badge bg-warning text-white ms-2">{{ $countUnpaid }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                @if(request('status'))
+                    <a href="{{ route('courses.index', request()->except('status')) }}"
+                        class="btn btn-light btn-sm border ms-1" title="Clear Selection">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                @endif
+
                 <!-- Advanced Filter Dropdown -->
-                <div class="dropdown ms-3">
-                    <button class="btn btn-light-primary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-funnel-fill me-1"></i> Filter Lanjutan
+                <div class="dropdown ms-0 ms-md-3 mt-2 mt-md-0">
+                    <button class="btn btn-light-primary btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-funnel-fill me-1"></i> Filter
                     </button>
                     <div class="dropdown-menu p-4 shadow-lg" style="min-width:320px;">
                         <form method="GET" id="advancedFilterForm">
@@ -59,10 +109,15 @@
                     </div>
                 </div>
             </div>
-            <a href="{{ route('courses.create') }}" class="btn btn-primary">
+            <a href="{{ route('courses.create') }}" class="btn btn-primary btn-sm mt-2 mt-md-0">
                 <i class="bi bi-plus-circle"></i> Add Course
             </a>
         </div>
+
+        <!-- Course List -->
+        <div id="courseList">
+                @include('courses.partials.course-list', ['courses' => $courses])
+        </div>                            
 
         <!-- Success Message -->
         @if (session('success'))
@@ -72,18 +127,7 @@
             </div>
         @endif
 
-        <div class="row g-8">
-            @forelse ($courses as $course)
-                @include('courses.partials.course-card', ['course' => $course])
-            @empty
-                <div class="col-12 text-center text-muted">
-                    <div class="alert alert-info py-10">
-                        <i class="bi bi-info-circle fs-2x mb-2"></i>
-                        <div class="fs-5">No courses available.</div>
-                    </div>
-                </div>
-            @endforelse
-        </div>
+        
     </div>
 
     @foreach ($courses as $course)
