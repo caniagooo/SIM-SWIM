@@ -151,3 +151,39 @@ FROM student_grades sg
 JOIN students s ON s.id = sg.student_id
 JOIN users u ON u.id = s.user_id
 GROUP BY sg.student_id, u.name;
+
+
+
+-- past course sessions --
+CREATE OR REPLACE VIEW past_course_sessions AS
+SELECT 
+    cs.id AS session_id,
+    cs.course_id,
+    c.name AS course_name,
+    cs.session_date,
+    cs.status,
+    v.name AS venue_name,
+    GROUP_CONCAT(DISTINCT u.name ORDER BY u.name SEPARATOR ', ') AS trainer_names
+FROM course_sessions cs
+JOIN courses c ON c.id = cs.course_id
+LEFT JOIN venues v ON v.id = c.venue_id
+LEFT JOIN course_session_trainer cst ON cst.course_session_id = cs.id
+LEFT JOIN trainers t ON t.id = cst.trainer_id
+LEFT JOIN users u ON u.id = t.user_id
+WHERE cs.session_date < CURRENT_DATE
+GROUP BY cs.id, cs.course_id, c.name, cs.session_date, cs.status, v.name;
+
+-- session monthly summary --
+CREATE OR REPLACE VIEW session_monthly_summary AS
+SELECT 
+    CASE 
+        WHEN MONTH(cs.session_date) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH) THEN 'last_month'
+        WHEN MONTH(cs.session_date) = MONTH(CURRENT_DATE) THEN 'this_month'
+        WHEN MONTH(cs.session_date) = MONTH(CURRENT_DATE + INTERVAL 1 MONTH) THEN 'next_month'
+        ELSE 'other'
+    END AS period,
+    COUNT(*) AS session_count
+FROM course_sessions cs
+WHERE cs.session_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH)
+                          AND DATE_ADD(CURRENT_DATE, INTERVAL 1 MONTH)
+GROUP BY period;

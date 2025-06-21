@@ -1,112 +1,169 @@
 <x-default-layout>
-    <div class="container mt-5">
-        <div class="card shadow-lg">
-            <!-- Header -->
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h3 class="card-title">General Schedule</h3>
-                <div class="card-toolbar">
-                    <a href="{{ route('dashboard') }}" class="btn btn-light btn-sm">Back to Dashboard</a>
-                    <a href="{{ route('general-schedule.export-pdf') }}" class="btn btn-danger btn-sm">Export to PDF</a>
+    @php
+        $stats = [
+            'last_month' => $sessions->where('session_date', '<', now()->startOfMonth())->count(),
+            'this_month' => $sessions->where('session_date', '>=', now()->startOfMonth())->where('session_date', '<=', now()->endOfMonth())->count(),
+            'next_month' => $sessions->where('session_date', '>', now()->endOfMonth())->count(),
+        ];
+        // Ambil sesi completed saja untuk log, paginasi manual (10 per halaman)
+        $completedSessions = $sessions->where('status', 'completed')->sortByDesc('session_date')->values();
+        $perPage = 10;
+        $page = request('page', 1);
+        $total = $completedSessions->count();
+        $logSessions = $completedSessions->slice(($page-1)*$perPage, $perPage);
+        $paginator = new Illuminate\Pagination\LengthAwarePaginator(
+            $logSessions,
+            $total,
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+    @endphp
+    <div class="container-xxl mt-6">
+        <div class="row g-5">
+            <!-- Kalender List Mode -->
+            <div class="col-12 col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="card-title mb-0">Jadwal Sesi (List Calendar)</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="kt_fullcalendar" style="min-height: 600px;"></div>
+                    </div>
                 </div>
             </div>
-
-            <!-- Body -->
-            <div class="card-body">
-                <div class="row">
-                    <!-- Kalender -->
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 shadow-sm">
-                            <h5 class="text-muted mb-3">Calendar</h5>
-                            <div id="calendar" style="height: 400px;"></div>
-                        </div>
+            <!-- Statistik & Log Sesi -->
+            <div class="col-12 col-lg-4">
+                <div class="card shadow-sm mb-5">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="card-title mb-0">Statistik Sesi</h4>
                     </div>
-                    <!-- Summary -->
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 shadow-sm">
-                            <h5 class="text-muted mb-3">Summary</h5>
-                            <div id="summary">
-                                <p class="text-muted">Select a date on the calendar to see the summary.</p>
+                    <div class="card-body">
+                        <div class="d-flex flex-column gap-3">
+                            <div class="d-flex align-items-center">
+                                <div class="symbol symbol-40px bg-light-primary me-3">
+                                    <i class="bi bi-calendar2-check text-primary fs-2"></i>
+                                </div>
+                                <div>
+                                    <div class="fs-5 fw-bold">{{ $stats['last_month'] ?? 0 }}</div>
+                                    <div class="fs-8 text-gray-600">Sesi Bulan Lalu</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="symbol symbol-40px bg-light-success me-3">
+                                    <i class="bi bi-calendar2-week text-success fs-2"></i>
+                                </div>
+                                <div>
+                                    <div class="fs-5 fw-bold">{{ $stats['this_month'] ?? 0 }}</div>
+                                    <div class="fs-8 text-gray-600">Sesi Bulan Ini</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="symbol symbol-40px bg-light-info me-3">
+                                    <i class="bi bi-calendar2-plus text-info fs-2"></i>
+                                </div>
+                                <div>
+                                    <div class="fs-5 fw-bold">{{ $stats['next_month'] ?? 0 }}</div>
+                                    <div class="fs-8 text-gray-600">Sesi Bulan Depan</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Tabel Jadwal -->
-                <div class="mt-5">
-                    <h5 class="text-muted">Schedule List</h5>
-                    <table class="table table-bordered table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>#</th>
-                                <th>Course Name</th>
-                                <th>Date</th>
-                                <th>Start Time</th>
-                                <th>End Time</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($sessions as $session)
-                                <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $session->course->name }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($session->session_date)->translatedFormat('l, d F Y') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($session->start_time)->format('H : i') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($session->end_time)->format('H : i') }}</td>
-                                    <td>
-                                        <span class="badge bg-{{ $session->status == 'completed' ? 'success text-white' : ($session->status == 'canceled' ? 'danger text-white' : 'info text-white') }}">
-                                            {{ ucfirst($session->status) }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('attendances.index', $session->id) }}" class="btn btn-info btn-sm">Manage Attendance</a>
-                                        <a href="{{ route('sessions.edit', [$session->course->id, $session->id]) }}" class="btn btn-warning btn-sm">Edit</a>
-                                        <form action="{{ route('sessions.destroy', [$session->course->id, $session->id]) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                <!-- Log Sesi Lewat (Completed) -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">Log Sesi Selesai</h5>
+                    </div>
+                    <div class="card-body" style="max-height: 420px; overflow-y: auto;">
+                        @forelse($paginator as $session)
+                            <div class="mb-3 pb-2 border-bottom">
+                                <div class="fw-semibold">{{ $session->course->name }}</div>
+                                <div class="fs-8 text-gray-600">
+                                    {{ \Carbon\Carbon::parse($session->session_date)->translatedFormat('d M Y') }},
+                                    {{ \Carbon\Carbon::parse($session->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($session->end_time)->format('H:i') }}
+                                </div>
+                                <div class="fs-8 text-gray-500 mb-1">
+                                    <i class="bi bi-geo-alt"></i> {{ $session->course->venue->name ?? '-' }}
+                                </div>
+                                <span class="badge bg-success text-white mb-2">
+                                    {{ ucfirst($session->status) }}
+                                </span>
+                                <div>
+                                    <a href="{{ route('courses.show', $session->course->id) }}" class="btn btn-sm btn-light-primary">
+                                        <i class="bi bi-eye"></i> Detail Kursus
+                                    </a>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-muted">Belum ada sesi yang selesai.</div>
+                        @endforelse
+                    </div>
+                    <div class="card-footer bg-white py-2">
+                        <div class="d-flex justify-content-center">
+                            {{ $paginator->links('vendor.pagination.bootstrap-5') }}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- FullCalendar Script -->
+    <!-- FullCalendar Metronic Assets -->
+    <link href="{{ asset('assets/plugins/custom/fullcalendar/fullcalendar.bundle.css') }}" rel="stylesheet" type="text/css"/>
+    <script src="{{ asset('assets/plugins/custom/fullcalendar/fullcalendar.bundle.js') }}"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
+            var calendarEl = document.getElementById('kt_fullcalendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                height: 400, // Membatasi tinggi kalender agar lebih compact
-                events: @json($sessions->map(function ($session) {
+                themeSystem: 'bootstrap5',
+                initialView: 'listDay',
+                now: '{{ now()->toDateString() }}',
+                height: 600,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'listDay,listWeek,dayGridMonth'
+                },
+                views: {
+                    listDay: { buttonText: 'Hari Ini' },
+                    listWeek: { buttonText: 'Minggu Ini' },
+                    dayGridMonth: { buttonText: 'Bulan' }
+                },
+                events: {!! $sessions->map(function ($session) {
                     return [
                         'title' => $session->course->name,
-                        'start' => $session->session_date,
+                        'start' => $session->session_date . 'T' . ($session->start_time ?? '00:00:00'),
+                        'end'   => $session->session_date . 'T' . ($session->end_time ?? '23:59:59'),
+                        'color' => $session->status == 'completed' ? '#50cd89' : ($session->status == 'canceled' ? '#f1416c' : '#009ef7'),
                         'extendedProps' => [
-                            'students' => $session->course->students->count()
+                            'status' => $session->status,
+                            'course' => $session->course->name,
+                            'students' => $session->course->students->count(),
+                            'venue' => $session->course->venue->name ?? '-'
                         ]
                     ];
-                })),
+                })->values()->toJson() !!},
                 eventClick: function(info) {
-                    var studentsCount = info.event.extendedProps.students;
-                    var date = info.event.start.toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
-
-                    document.getElementById('summary').innerHTML = `
-                        <h6>${date}</h6>
-                        <p><strong>Course:</strong> ${info.event.title}</p>
-                        <p><strong>Estimated Students:</strong> ${studentsCount}</p>
+                    var event = info.event;
+                    var props = event.extendedProps;
+                    var html = `
+                        <div class="mb-2"><strong>Course:</strong> ${props.course}</div>
+                        <div class="mb-2"><strong>Date:</strong> ${event.start.toLocaleDateString('en-GB')}</div>
+                        <div class="mb-2"><strong>Time:</strong> ${event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${event.end ? event.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '-'}</div>
+                        <div class="mb-2"><strong>Status:</strong> <span class="badge bg-${props.status == 'completed' ? 'success' : (props.status == 'canceled' ? 'danger' : 'info')} text-white">${props.status}</span></div>
+                        <div class="mb-2"><strong>Venue:</strong> ${props.venue}</div>
+                        <div class="mb-2"><strong>Estimated Students:</strong> ${props.students}</div>
                     `;
+                    Swal.fire({
+                        title: 'Session Detail',
+                        html: html,
+                        icon: 'info',
+                        confirmButtonText: 'Close',
+                        customClass: { confirmButton: "btn btn-primary" }
+                    });
                 }
             });
             calendar.render();

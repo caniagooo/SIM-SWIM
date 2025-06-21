@@ -68,7 +68,7 @@ class CourseController extends Controller
         // Tambahkan orderBy di sini
         $query->orderBy('created_at', 'desc');
 
-        $courses = $query->with(['venue', 'trainers.user', 'students.user', 'payment', 'sessions'])->paginate(5);// misal 8 per halaman
+        $courses = $query->with(['venue', 'trainers.user', 'students.user', 'payment', 'sessions'])->paginate(5)->withQueryString();
         $allTrainers = \App\Models\Trainer::all();
         $allMaterials = \App\Models\CourseMaterial::all();
 
@@ -227,6 +227,7 @@ class CourseController extends Controller
 
 public function ajaxIndex(Request $request)
 {
+    // dd($request->all());
     $query = Course::query();
 
     if ($request->has('type') && $request->type) {
@@ -274,7 +275,10 @@ public function ajaxIndex(Request $request)
     // Tambahkan orderBy di sini
     $query->orderBy('created_at', 'desc');
 
-    $courses = $query->with(['venue', 'trainers.user', 'students.user', 'payment', 'sessions'])->paginate(); // misal  per halaman
-    return view('courses.partials.course-list', compact('courses'))->render();
+    $courses = $query->with(['venue', 'trainers.user', 'students.user', 'payment', 'sessions'])->paginate(5)->withQueryString();
+    $allTrainers = \App\Models\Trainer::all();
+    $allMaterials = \App\Models\CourseMaterial::all();
+
+    return view('courses.partials.course-list', compact('courses', 'allTrainers', 'allMaterials'))->render();
 }
 }

@@ -6,6 +6,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Apps\UserManagementController;
 use App\Http\Controllers\Apps\RoleManagementController;
 use App\Http\Controllers\Apps\PermissionManagementController;
@@ -20,6 +22,18 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\GeneralScheduleController;
 use App\Http\Controllers\CoursePaymentController;
+
+// Route login (GET dan POST)
+Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+
+// Password reset request (lupa password)
+Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+
+// Password reset form & submit
+Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.update');
 
 // Semua route di-protect auth & role:Super Admin|Admin
 Route::middleware(['auth', 'role:Super Admin|Admin'])->group(function () {
@@ -89,6 +103,7 @@ Route::middleware(['auth', 'role:Super Admin|Admin'])->group(function () {
     Route::get('/general-schedule', [GeneralScheduleController::class, 'index'])->name('general-schedule.index');
     Route::get('/general-schedule/export', [GeneralScheduleController::class, 'export'])->name('general-schedule.export');
     Route::get('/general-schedule/export-pdf', [GeneralScheduleController::class, 'exportPdf'])->name('general-schedule.export-pdf');
+    Route::resource('attendances', AttendanceController::class)->only(['index']);
 
     // Grade
     Route::post('/courses/{course}/students/{student}/grades', [GradeController::class, 'store'])->name('grades.store');

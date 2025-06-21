@@ -1,1 +1,0 @@
-<span class="ms-1" data-bs-toggle="tooltip" title="Specify a target priorty"><?php echo getIcon('information-5', 'text-gray-500 fs-6'); ?></span><?php /**PATH C:\Users\JITU\swim\resources\views\partials\general\_form-tooltip-hint.blade.php ENDPATH**/ ?>

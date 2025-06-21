@@ -39,6 +39,20 @@ class DashboardController extends Controller
             ->orderBy('cs.session_date')
             ->get();
 
-        return view('dashboard.index', compact('overview', 'activeCourses', 'calendarEvents'));
+        // Ambil jadwal sesi (misal ambil 10 sesi terdekat)
+        $sessionSchedules = \App\Models\CourseSession::with(['course'])
+            ->orderBy('session_date', 'asc')
+            ->where('session_date', '>=', now())
+            ->limit(10)
+            ->get()
+            ->map(function($session) {
+                return (object)[
+                    'session_date' => $session->session_date,
+                    'course_name'  => $session->course->name ?? '-',
+                    'status'       => $session->status ?? '-',
+                ];
+            });
+
+        return view('dashboard.index', compact('overview', 'activeCourses', 'calendarEvents', 'sessionSchedules'));
     }
 }
