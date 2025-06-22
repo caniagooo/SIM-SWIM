@@ -71,12 +71,27 @@
                         <div class="text-gray-500 fs-7 mb-1">Pelatih</div>
                         <div class="d-flex justify-content-center flex-wrap gap-1">
                             @forelse ($course->trainers as $trainer)
-                                <img src="{{ optional($trainer->user)->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png') }}"
-                                    alt="Avatar" class="symbol symbol-30px symbol-circle" width="28" height="28" title="{{ optional($trainer->user)->name ?? '-' }}">
+                                <img 
+                                    src="{{ optional($trainer->user)->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png') }}"
+                                    alt="Avatar" 
+                                    class="symbol symbol-30px symbol-circle" 
+                                    width="28" 
+                                    height="28" 
+                                    data-bs-toggle="tooltip" 
+                                    data-bs-placement="top" 
+                                    title="{{ optional($trainer->user)->name ?? '-' }}">
                             @empty
                                 <span class="text-muted fs-7">-</span>
                             @endforelse
                         </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                                tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                                    new bootstrap.Tooltip(tooltipTriggerEl);
+                                });
+                            });
+                        </script>
                     </div>
                 </div>
             </div>
@@ -87,7 +102,7 @@
             @php
                 $activeTab = request()->get('tab', 'students');
                 $tabList = [
-                    'students' => ['icon' => 'bi-people', 'label' => 'Siswa'],
+                    'students' => ['icon' => 'bi-people', 'label' => 'Peserta'],
                     'sessions' => ['icon' => 'bi-calendar-check', 'label' => 'Sesi'],
                     'materials' => ['icon' => 'bi-journal-bookmark', 'label' => 'Materi'],
                 ];
@@ -231,8 +246,20 @@
                     <div class="card-body p-</div>0">
                         <div class="d-flex justify-content-between align-items-center mb-3 px-3 pt-3">
                             <span class="fw-semibold text-primary"><i class="bi bi-calendar-check"></i> Sesi</span>
-                            <button class="btn btn-sm btn-light-primary" data-bs-toggle="modal" data-bs-target="#addScheduleModal"
-                                {{ $course->sessions->count() >= $course->max_sessions ? 'disabled' : '' }}>
+                            <button 
+                                class="btn btn-sm btn-light-primary" 
+                                data-bs-toggle="{{ $course->sessions->count() >= $course->max_sessions ? '' : 'modal' }}" 
+                                data-bs-target="{{ $course->sessions->count() >= $course->max_sessions ? '' : '#addScheduleModal' }}"
+                                {{ $course->sessions->count() >= $course->max_sessions ? 'type=button' : '' }}
+                                onclick="@if($course->sessions->count() >= $course->max_sessions) 
+                                    Swal.fire({
+                                        icon: 'info',
+                                        title: 'Maksimal Sesi Tercapai',
+                                        text: 'Kursus ini sudah mencapai jumlah sesi maksimal.'
+                                    }); 
+                                    @endif"
+                                {{ $course->sessions->count() >= $course->max_sessions ? '' : '' }}
+                            >
                                 <i class="bi bi-plus-circle"></i> Tambah
                             </button>
                         </div>

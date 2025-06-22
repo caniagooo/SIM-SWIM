@@ -15,16 +15,26 @@
             'this_month' => $sessions->where('session_date', '>=', now()->startOfMonth())->where('session_date', '<=', now()->endOfMonth())->count(),
             'next_month' => $sessions->where('session_date', '>', now()->endOfMonth())->count(),
         ];
-        // 5 sesi terdekat (belum lewat)
-        $upcomingSessions = $sessions->where('session_date', '>=', now()->toDateString())
-            ->sortBy(function($s) { return $s->session_date . ' ' . $s->start_time; })
-            ->take(5);
         // Sesi completed untuk datatables
         $completedSessions = $sessions->where('status', 'completed')->sortByDesc('session_date')->values();
         $perPage = 10;
         $page = request('page', 1);
-        $total = $completedSessions->count();
-        $logSessions = $completedSessions->slice(($page-1)*$perPage, $perPage);
+        $filterCourse = request('filter_course');
+        $filterTrainer = request('filter_trainer');
+        $filteredSessions = $completedSessions;
+        if ($filterCourse) {
+            $filteredSessions = $filteredSessions->filter(function($s) use ($filterCourse) {
+                return $s->course->id == $filterCourse;
+            });
+        }
+        if ($filterTrainer) {
+            $filteredSessions = $filteredSessions->filter(function($s) use ($filterTrainer) {
+                $trainer = $s->course->trainers->first();
+                return $trainer && $trainer->id == $filterTrainer;
+            });
+        }
+        $total = $filteredSessions->count();
+        $logSessions = $filteredSessions->slice(($page-1)*$perPage, $perPage);
         $paginator = new Illuminate\Pagination\LengthAwarePaginator(
             $logSessions,
             $total,
@@ -32,21 +42,47 @@
             $page,
             ['path' => request()->url(), 'query' => request()->query()]
         );
+        // Untuk filter dropdown
+        $allCourses = $sessions->pluck('course')->unique('id')->values();
+        $allTrainers = $sessions->map(function($s){ return $s->course->trainers->first(); })->filter()->unique('id')->values();
     ?>
 
-    <div class="container-xxl mt-6">
-        <div class="row g-5">
-            <!-- Kiri: Kalender & Statistik -->
-            <div class="col-12 col-lg-7">
-                <div class="card border-0 shadow-lg rounded-4 mb-5">
-                    <div class="card-header bg-gradient-info text-white rounded-top-4 py-4 px-4">
-                        <h4 class="card-title mb-0 fw-bold"><i class="bi bi-calendar3-event me-2"></i>Kalender Sesi</h4>
+    <div class="container py-3">
+        <!-- Header Card ala Students Show -->
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center p-4">
+                <div>
+                    <h4 class="mb-1 fw-bold text-gray-900">
+                        Jadwal Umum Sesi
+                    </h4>
+                    <div class="d-flex flex-wrap gap-2 small mb-1">
+                        <span class="badge badge-light-info fw-semibold">
+                            <i class="bi bi-calendar3-event me-1"></i> Total: <?php echo e($sessions->count()); ?> Sesi
+                        </span>
+                        <span class="badge badge-light-success fw-semibold">
+                            <i class="bi bi-calendar2-week me-1"></i> Bulan Ini: <?php echo e($stats['this_month'] ?? 0); ?>
+
+                        </span>
+                        <span class="badge badge-light-primary fw-semibold">
+                            <i class="bi bi-calendar2-plus me-1"></i> Bulan Depan: <?php echo e($stats['next_month'] ?? 0); ?>
+
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-primary text-white rounded-top-4 py-3 px-4">
+                        <h5 class="card-title mb-0 fw-bold"><i class="bi bi-calendar3-event me-2"></i>Kalender Sesi</h5>
                     </div>
                     <div class="card-body p-4">
                         <div id="kt_fullcalendar" style="min-height: 500px;"></div>
                     </div>
                 </div>
-                <div class="row g-4">
+                <div class="row g-3">
                     <div class="col-12 col-md-4">
                         <div class="card border-0 shadow-sm h-100 bg-light-primary">
                             <div class="card-body text-center py-4">
@@ -76,63 +112,41 @@
                     </div>
                 </div>
             </div>
-            <!-- Kanan: Jadwal Terdekat & Log Selesai -->
-            <div class="col-12 col-lg-5">
-                <!-- 5 Jadwal Sesi Terdekat -->
-                <div class="card border-0 shadow-lg rounded-4 mb-5">
-                    <div class="card-header bg-gradient-primary text-white rounded-top-4 py-4 px-4">
-                        <h5 class="card-title mb-0 fw-bold"><i class="bi bi-clock-history me-2"></i>5 Jadwal Sesi Terdekat</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        <?php $__empty_1 = true; $__currentLoopData = $upcomingSessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                            <?php
-                                $trainer = $session->course->trainers->first();
-                                $avatar = $trainer && $trainer->user && $trainer->user->avatar
-                                    ? asset('storage/'.$trainer->user->avatar)
-                                    : asset('assets/media/avatars/blank.png');
-                                $trainerName = $trainer && $trainer->user ? $trainer->user->name : '-';
-                            ?>
-                            <div class="d-flex align-items-center mb-4 pb-3 border-bottom gap-3">
-                                <img src="<?php echo e($avatar); ?>" alt="Trainer" class="rounded-circle border shadow-sm" width="40" height="40">
-                                <div class="flex-grow-1">
-                                    <div class="fs-7 text-muted mb-1"><?php echo e($session->course->name); ?></div>
-                                    <div class="fw-semibold"><?php echo e(\Carbon\Carbon::parse($session->session_date)->translatedFormat('d M Y')); ?>,
-                                        <?php echo e(\Carbon\Carbon::parse($session->start_time)->format('H:i')); ?> - <?php echo e(\Carbon\Carbon::parse($session->end_time)->format('H:i')); ?>
-
-                                    </div>
-                                    <div class="fs-8 text-gray-500">
-                                        <i class="bi bi-geo-alt"></i> <?php echo e($session->course->venue->name ?? '-'); ?>
-
-                                        &nbsp;|&nbsp;
-                                        <i class="bi bi-person-badge"></i> <?php echo e($trainerName); ?>
-
-                                    </div>
-                                </div>
-                                <a href="<?php echo e(route('courses.show', $session->course->id)); ?>" class="btn btn-sm btn-light-primary rounded-pill px-3 shadow-sm">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                            </div>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                            <div class="text-muted">Tidak ada sesi terdekat.</div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <!-- DataTable Sesi Completed -->
-                <div class="card border-0 shadow-lg rounded-4">
-                    <div class="card-header bg-gradient-success text-white rounded-top-4 py-4 px-4">
+            <!-- Log Sesi Selesai -->
+            <div class="col-12 col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-info text-white rounded-top-4 py-3 px-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                         <h5 class="card-title mb-0 fw-bold"><i class="bi bi-check2-circle me-2"></i>Log Sesi Selesai</h5>
+                        <!-- Filter -->
+                        <form method="GET" class="d-flex gap-2 align-items-center">
+                            <select name="filter_course" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="">Semua Kursus</option>
+                                <?php $__currentLoopData = $allCourses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($course->id); ?>" <?php if($filterCourse == $course->id): ?> selected <?php endif; ?>><?php echo e($course->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </select>
+                            <select name="filter_trainer" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="">Semua Pelatih</option>
+                                <?php $__currentLoopData = $allTrainers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $trainer): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($trainer->id); ?>" <?php if($filterTrainer == $trainer->id): ?> selected <?php endif; ?>><?php echo e($trainer->user->name ?? '-'); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </select>
+                            <?php if($filterCourse || $filterTrainer): ?>
+                                <a href="<?php echo e(route('general-schedule.index')); ?>" class="btn btn-sm btn-light-danger">Reset</a>
+                            <?php endif; ?>
+                        </form>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="fs-8">Kursus</th>
-                                        <th class="fs-8">Tanggal</th>
-                                        <th class="fs-8">Waktu</th>
-                                        <th class="fs-8">Venue</th>
-                                        <th class="fs-8">Pelatih</th>
-                                        <th class="fs-8">Aksi</th>
+                            <table class="table table-row-dashed table-row-gray-200 align-middle gy-2 mb-0">
+                                <thead>
+                                    <tr class="text-center fw-semibold text-gray-600 fs-7">
+                                        <th class="text-start">Kursus</th>
+                                        <th>Tanggal</th>
+                                        <th>Waktu</th>
+                                        <th>Venue</th>
+                                        <th>Pelatih</th>
+                                        <th>Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -145,16 +159,16 @@
                                             $trainerName = $trainer && $trainer->user ? $trainer->user->name : '-';
                                         ?>
                                         <tr>
-                                            <td class="fs-8 text-muted"><?php echo e($session->course->name); ?></td>
-                                            <td class="fs-8"><?php echo e(\Carbon\Carbon::parse($session->session_date)->translatedFormat('d M Y')); ?></td>
-                                            <td class="fs-8"><?php echo e(\Carbon\Carbon::parse($session->start_time)->format('H:i')); ?> - <?php echo e(\Carbon\Carbon::parse($session->end_time)->format('H:i')); ?></td>
-                                            <td class="fs-8"><?php echo e($session->course->venue->name ?? '-'); ?></td>
-                                            <td class="fs-8 d-flex align-items-center gap-2">
+                                            <td class="fs-8 text-muted text-start"><?php echo e($session->course->name); ?></td>
+                                            <td class="fs-8 text-center"><?php echo e(\Carbon\Carbon::parse($session->session_date)->translatedFormat('d M Y')); ?></td>
+                                            <td class="fs-8 text-center"><?php echo e(\Carbon\Carbon::parse($session->start_time)->format('H:i')); ?> - <?php echo e(\Carbon\Carbon::parse($session->end_time)->format('H:i')); ?></td>
+                                            <td class="fs-8 text-center"><?php echo e($session->course->venue->name ?? '-'); ?></td>
+                                            <td class="fs-8 d-flex align-items-center gap-2 justify-content-center">
                                                 <img src="<?php echo e($avatar); ?>" alt="Trainer" class="rounded-circle border" width="28" height="28">
                                                 <span><?php echo e($trainerName); ?></span>
                                             </td>
-                                            <td>
-                                                <a href="<?php echo e(route('courses.show', $session->course->id)); ?>" class="btn btn-sm btn-light-primary rounded-pill px-2 shadow-sm" title="Detail Kursus">
+                                            <td class="text-center">
+                                                <a href="<?php echo e(route('courses.show', $session->course->id)); ?>" class="btn btn-icon btn-sm btn-light-info" title="Detail Kursus">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
                                             </td>
@@ -238,7 +252,7 @@
                             <img src="${props.avatar}" alt="Trainer" class="rounded-circle border ms-2 me-2" width="32" height="32">
                             <span>${props.trainer}</span>
                         </div>
-                        <div class="mb-2"><strong>Estimated Students:</strong> ${props.students}</div>
+                        <div class="mb-2"><strong>Jumlah Peserta:</strong> ${props.students}</div>
                         <div class="mt-3">
                             <a href="${props.detail_url}" class="btn btn-sm btn-light-primary rounded-pill px-3 shadow-sm" target="_blank">
                                 <i class="bi bi-eye"></i> Detail Kursus
@@ -279,8 +293,25 @@
             background: #009ef7;
             color: #fff;
         }
-        .fs-8 { font-size: 0.85rem !important; }
+        .fs-8 { font-size: 0.88rem !important; }
         .fs-7 { font-size: 0.95rem !important; }
+        .btn-icon { padding: 0.3rem 0.5rem !important; }
+        .table th, .table td { vertical-align: middle !important; }
+        /* Style dari students/show.blade.php */
+        .symbol-60px { width: 60px; height: 60px; }
+        .symbol-80px { width: 80px; height: 80px; }
+        .text-gray-500 { color: #a1a5b7 !important; }
+        .fw-bold { font-weight: 600 !important; }
+        .fw-semibold { font-weight: 500 !important; }
+        .badge-light-info { background: #e1f0ff; color: #009ef7; }
+        .badge-light-success { background: #e8fff3; color: #50cd89; }
+        .badge-light-primary { background: #e3f0ff; color: #009ef7; }
+        .badge-light { background: #f5f8fa; color: #5e6278; }
+        .rounded-4 { border-radius: 1.25rem !important; }
+        @media (max-width: 576px) {
+            .card-body, .card-header { padding: 1rem !important; }
+            .table { font-size: 0.92rem; }
+        }
     </style>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>

@@ -87,6 +87,8 @@ Route::middleware(['auth', 'role:Super Admin|Admin'])->group(function () {
     Route::get('/course-payments/invoice/{course}', [CoursePaymentController::class, 'invoice'])->name('course-payments.invoice');
     Route::post('/course-payments/process/{course}', [CoursePaymentController::class, 'process'])->name('course-payments.process');
     Route::get('/payments/{payment}', [CoursePaymentController::class, 'show'])->name('payments.show');
+    Route::get('/payments/{payment}/edit', [CoursePaymentController::class, 'edit'])->name('payments.edit');
+    Route::put('/payments/{payment}', [CoursePaymentController::class, 'update'])->name('payments.update');
     Route::get('/payments', [CoursePaymentController::class, 'index'])->name('payments.index');
     
 

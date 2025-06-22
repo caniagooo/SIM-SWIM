@@ -139,4 +139,24 @@ class CoursePaymentController extends Controller
 
         return view('payments.index', compact('payments'));
     }
+
+    public function edit($paymentId)
+    {
+        $payment = CoursePayment::findOrFail($paymentId);
+        $students = Student::with('user')->get(); // Ambil semua murid untuk dropdown
+
+        return view('payments.edit', compact('payment', 'students'));
+    }
+    public function update(Request $request, $paymentId)
+    {
+        $request->validate([
+            'status' => 'required|in:paid,pending,failed',
+        ]);
+
+        $payment = CoursePayment::findOrFail($paymentId);
+        $payment->status = $request->status;
+        $payment->save();
+
+        return redirect()->route('payments.index')->with('success', 'Status pembayaran berhasil diubah.');
+    }
 }

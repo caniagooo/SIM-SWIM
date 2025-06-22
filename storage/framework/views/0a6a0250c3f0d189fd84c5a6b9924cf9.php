@@ -1,4 +1,13 @@
-<x-default-layout>
+<?php if (isset($component)) { $__componentOriginal1c2e2f4f77e507b499e79defc0d48b7e = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal1c2e2f4f77e507b499e79defc0d48b7e = $attributes; } ?>
+<?php $component = App\View\Components\DefaultLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('default-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\DefaultLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <div class="container py-3">
         <!-- Header Card -->
         <div class="card mb-4 border-0 shadow-sm">
@@ -9,7 +18,7 @@
                     </h4>
                     <div class="d-flex flex-wrap gap-2 small mb-1">
                         <span class="badge badge-light-info fw-semibold">
-                            <i class="bi bi-cash-stack me-1"></i> Total: {{ $payments->count() }} Pembayaran
+                            <i class="bi bi-cash-stack me-1"></i> Total: <?php echo e($payments->count()); ?> Pembayaran
                         </span>
                     </div>
                 </div>
@@ -58,58 +67,61 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($payments as $payment)
+                                <?php $__currentLoopData = $payments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
-                                    <td class="text-center text-gray-500 fs-8">{{ $loop->iteration }}</td>
+                                    <td class="text-center text-gray-500 fs-8"><?php echo e($loop->iteration); ?></td>
                                     <td class="fs-8">
-                                        @if($payment->course)
-                                            <a href="{{ route('courses.show', $payment->course->id) }}">
-                                                {{ $payment->course->name }}
+                                        <?php if($payment->course): ?>
+                                            <a href="<?php echo e(route('courses.show', $payment->course->id)); ?>">
+                                                <?php echo e($payment->course->name); ?>
+
                                             </a>
-                                        @else
+                                        <?php else: ?>
                                             -
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td class="fs-8">
                                         <div class="d-flex align-items-center">
-                                            @if($payment->course && $payment->course->students)
-                                                @foreach($payment->course->students->take(5) as $student)
-                                                    @php
+                                            <?php if($payment->course && $payment->course->students): ?>
+                                                <?php $__currentLoopData = $payment->course->students->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <?php
                                                         $sAvatar = $student->user && $student->user->profile_photo_path
                                                             ? asset('storage/'.$student->user->profile_photo_path)
                                                             : asset('assets/media/avatars/default-avatar.png');
-                                                    @endphp
-                                                    <img src="{{ $sAvatar }}" alt="Peserta" class="rounded-circle border me-n2" width="24" height="24" title="{{ $student->user->name ?? '' }}">
-                                                @endforeach
-                                                @if($payment->course->students->count() > 5)
-                                                    <span class="badge bg-light text-muted ms-1">+{{ $payment->course->students->count() - 5 }}</span>
-                                                @endif
-                                            @else
+                                                    ?>
+                                                    <img src="<?php echo e($sAvatar); ?>" alt="Peserta" class="rounded-circle border me-n2" width="24" height="24" title="<?php echo e($student->user->name ?? ''); ?>">
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                <?php if($payment->course->students->count() > 5): ?>
+                                                    <span class="badge bg-light text-muted ms-1">+<?php echo e($payment->course->students->count() - 5); ?></span>
+                                                <?php endif; ?>
+                                            <?php else: ?>
                                                 <span class="text-muted">-</span>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                     </td>
-                                    <td class="fs-8 fw-bold text-success">Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
+                                    <td class="fs-8 fw-bold text-success">Rp <?php echo e(number_format($payment->amount, 0, ',', '.')); ?></td>
                                     <td class="fs-8">
-                                        <span class="badge bg-{{ $payment->type == 'dp' ? 'info' : 'success' }} text-white">
-                                            {{ strtoupper($payment->type) }}
+                                        <span class="badge bg-<?php echo e($payment->type == 'dp' ? 'info' : 'success'); ?> text-white">
+                                            <?php echo e(strtoupper($payment->type)); ?>
+
                                         </span>
                                     </td>
-                                    <td class="fs-8">{{ \Carbon\Carbon::parse($payment->payment_date)->translatedFormat('d M Y') }}</td>
+                                    <td class="fs-8"><?php echo e(\Carbon\Carbon::parse($payment->payment_date)->translatedFormat('d M Y')); ?></td>
                                     <td class="fs-8">
-                                        <span class="badge bg-{{ $payment->status == 'paid' ? 'success' : ($payment->status == 'pending' ? 'warning' : 'danger') }} text-white">
-                                            {{ ucfirst($payment->status) }}
+                                        <span class="badge bg-<?php echo e($payment->status == 'paid' ? 'success' : ($payment->status == 'pending' ? 'warning' : 'danger')); ?> text-white">
+                                            <?php echo e(ucfirst($payment->status)); ?>
+
                                         </span>
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-1">
-                                            <a href="{{ route('payments.edit', $payment->id) }}" class="btn btn-icon btn-sm btn-light-info" title="Detail">
+                                            <a href="<?php echo e(route('payments.edit', $payment->id)); ?>" class="btn btn-icon btn-sm btn-light-info" title="Detail">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                         </div>
                                     </td>
                                 </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                     </div>
@@ -225,4 +237,13 @@
             });
         });
     </script>
-</x-default-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal1c2e2f4f77e507b499e79defc0d48b7e)): ?>
+<?php $attributes = $__attributesOriginal1c2e2f4f77e507b499e79defc0d48b7e; ?>
+<?php unset($__attributesOriginal1c2e2f4f77e507b499e79defc0d48b7e); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal1c2e2f4f77e507b499e79defc0d48b7e)): ?>
+<?php $component = $__componentOriginal1c2e2f4f77e507b499e79defc0d48b7e; ?>
+<?php unset($__componentOriginal1c2e2f4f77e507b499e79defc0d48b7e); ?>
+<?php endif; ?><?php /**PATH C:\Users\JITU\swim\resources\views/payments/index.blade.php ENDPATH**/ ?>
