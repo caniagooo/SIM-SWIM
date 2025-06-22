@@ -28,4 +28,11 @@ class CoursePayment extends Model
     {
         return $this->belongsTo(Course::class);
     }
+
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'student_id');
+    }
+
+
 }

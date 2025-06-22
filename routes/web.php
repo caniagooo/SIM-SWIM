@@ -61,7 +61,7 @@ Route::middleware(['auth', 'role:Super Admin|Admin'])->group(function () {
     // Trainer, Student, Payment
     Route::resource('trainers', TrainerController::class);
     Route::resource('students', StudentController::class);
-    Route::resource('payments', PaymentController::class);
+    
 
     // Student Payments
     Route::get('students/{student}/payments', [StudentController::class, 'payments'])->name('students.payments');
@@ -87,6 +87,8 @@ Route::middleware(['auth', 'role:Super Admin|Admin'])->group(function () {
     Route::get('/course-payments/invoice/{course}', [CoursePaymentController::class, 'invoice'])->name('course-payments.invoice');
     Route::post('/course-payments/process/{course}', [CoursePaymentController::class, 'process'])->name('course-payments.process');
     Route::get('/payments/{payment}', [CoursePaymentController::class, 'show'])->name('payments.show');
+    Route::get('/payments', [CoursePaymentController::class, 'index'])->name('payments.index');
+    
 
     // Course Sessions
     Route::prefix('courses/{course}/sessions')->group(function () {

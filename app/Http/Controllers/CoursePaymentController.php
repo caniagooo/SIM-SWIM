@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use Illuminate\Http\Request;
+use App\Models\CoursePayment;
+use App\Models\Student;
 
 class CoursePaymentController extends Controller
 {
@@ -125,5 +127,16 @@ class CoursePaymentController extends Controller
         $payment->save();
 
         return response()->json(['message' => 'Payment successful!']);
+    }
+
+
+    public function index()
+    {
+        $payments = CoursePayment::with([
+            'course.students.user', // untuk kolom peserta
+            'student.user'          // untuk murid utama
+        ])->paginate(15); // gunakan paginate agar pagination di blade berfungsi
+
+        return view('payments.index', compact('payments'));
     }
 }
