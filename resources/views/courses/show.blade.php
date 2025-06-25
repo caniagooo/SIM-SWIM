@@ -264,7 +264,7 @@
                             </button>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-row-dashed table-row-gray-200 align-middle gy-2 mb-0">
+                            <table id="sessionsTable" class="table table-row-dashed table-row-gray-200 align-middle gy-2 mb-0">
                                 <thead>
                                     <tr class="text-center fw-semibold text-gray-600 fs-7">
                                         <th>#</th>

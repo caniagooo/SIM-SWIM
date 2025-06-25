@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Trainer;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TrainerController extends Controller
 {
@@ -53,4 +54,25 @@ class TrainerController extends Controller
         $trainer->delete();
         return redirect()->route('trainers.index')->with('success', 'Trainer berhasil dihapus.');
     }
+
+    public function show($id)
+    {
+        // Ambil trainer + relasi
+        $trainer = Trainer::with([
+            'user', 
+            'courses.sessions', 
+            'courses.venue', 
+            'courses.students'
+        ])->findOrFail($id);
+
+        // Ambil daftar sesi dari view
+        $sessions = DB::table('trainer_sessions_view')
+            ->where('trainer_id', $trainer->id)
+            ->orderBy('session_date')
+            ->get();
+
+        return view('trainers.show', compact('trainer', 'sessions'));
+    }
+
+    
 }

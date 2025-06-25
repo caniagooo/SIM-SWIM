@@ -1,4 +1,3 @@
-<?php
 <table>
     <thead>
         <tr>

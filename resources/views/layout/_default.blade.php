@@ -42,4 +42,10 @@
 
     @include('partials/_scrolltop')
 
+    
+    @livewireStyles
+
+    @livewireScripts
+
+
 @endsection

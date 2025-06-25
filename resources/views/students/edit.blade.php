@@ -1,56 +1,217 @@
 <x-default-layout>
-
-    <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
-        <div class="container-xxl" id="kt_content_container">
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <div class="card card-custom">
-                <div class="card-header">
-                    <h3 class="card-title">Edit Murid</h3>
-                </div>
-                <form action="{{ route('students.update', $student->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label>User</label>
-                            <select name="user_id" class="form-control" required>
-                                @foreach ($users as $user)
-                                    <option value="{{ $user->id }}" {{ $student->user_id == $user->id ? 'selected' : '' }}>
-                                        {{ $user->name }} ({{ $user->email }})
-                                    </option>
-                                @endforeach
-                            </select>
+    <div class="container py-3">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="card card-flush border-0 shadow-sm rounded-4">
+                    <div class="card-header align-items-center py-5 gap-2 gap-md-5 rounded-top-4">
+                        <div class="card-title">
+                            <h2 class="fw-bold mb-0">
+                                <span class="svg-icon svg-icon-2 me-2">
+                                    <i class="bi-person-plus"></i>
+                                </span>
+                                Edit Murid
+                            </h2>
                         </div>
-                        <div class="form-group">
-                            <label>Tanggal Lahir</label>
-                            <input type="date" name="birth_date" class="form-control" value="{{ $student->birth_date }}" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Kelompok Usia</label>
-                            <select name="age_group" class="form-control" required>
-                                <option value="balita" {{ $student->age_group == 'balita' ? 'selected' : '' }}>Balita</option>
-                                <option value="anak-anak" {{ $student->age_group == 'anak-anak' ? 'selected' : '' }}>Anak-anak</option>
-                                <option value="remaja" {{ $student->age_group == 'remaja' ? 'selected' : '' }}>Remaja</option>
-                                <option value="dewasa" {{ $student->age_group == 'dewasa' ? 'selected' : '' }}>Dewasa</option>
-                            </select>
+                        <div class="card-toolbar">
+                            <a href="{{ route('students.index') }}" class="btn btn-light-primary btn-sm">
+                                <span class="svg-icon svg-icon-2 me-1">
+                                    <i class="bi-arrow-left"></i>
+                                </span>
+                                Kembali ke Daftar Murid
+                            </a>
                         </div>
                     </div>
-                    <div class="card-footer">
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                        <a href="{{ route('students.index') }}" class="btn btn-secondary">Batal</a>
+                    <div class="card-body px-4 py-4">
+                        @if ($errors->any())
+                            <div class="alert alert-danger mb-3">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <form action="{{ route('students.update', $student->id) }}" method="POST" autocomplete="off">
+                            @csrf
+                            @method('PUT')
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">User</label>
+                                <select name="user_id" class="form-control form-control-lg" required id="user_id_select" style="width:100%;">
+                                    @foreach ($users as $user)
+                                        <option value="{{ $user->id }}"
+                                            data-name="{{ $user->name }}"
+                                            data-birthdate="{{ $user->birth_date ? \Carbon\Carbon::parse($user->birth_date)->format('d M Y') : '' }}"
+                                            data-gender="{{ $user->gender ?? '' }}"
+                                            data-phone="{{ $user->phone ?? '' }}"
+                                            data-alamat="{{ $user->alamat ?? '' }}"
+                                            {{ $student->user_id == $user->id ? 'selected' : '' }}>
+                                            {{ $user->name }} ({{ $user->email }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div id="existing-user-info" class="mb-4" style="display:none;">
+                                <div class="card border-0 shadow-sm bg-light-subtle rounded-4">
+                                    <div class="card-body d-flex align-items-center gap-4 p-3">
+                                        <div class="flex-shrink-0">
+                                            <span class="avatar avatar-lg rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="width:56px;height:56px;">
+                                                <i class="bi bi-person-circle fs-1 text-primary"></i>
+                                            </span>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="row g-2">
+                                                <div class="col-12 col-md-6">
+                                                    <div class="d-flex align-items-center mb-1">
+                                                        <i class="bi bi-calendar me-2 text-success"></i>
+                                                        <span class="text-muted small" id="existing-user-birthdate"></span>
+                                                    </div>
+                                                    <div class="d-flex align-items-center mb-1">
+                                                        <i class="bi bi-gender-ambiguous me-2 text-info"></i>
+                                                        <span class="text-muted small" id="existing-user-gender"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-6">
+                                                    <div class="d-flex align-items-center mb-1">
+                                                        <i class="bi bi-telephone me-2 text-warning"></i>
+                                                        <span class="text-muted small" id="existing-user-phone"></span>
+                                                    </div>
+                                                    <div class="d-flex align-items-center mb-1">
+                                                        <i class="bi bi-geo-alt me-2 text-danger"></i>
+                                                        <span class="text-muted small" id="existing-user-alamat"></span>
+                                                    </div>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-geo-fill me-2 text-secondary"></i>
+                                                        <span class="text-muted small" id="existing-user-kelurahan"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Data murid -->
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Tanggal Lahir <span class="text-danger">*</span></label>
+                                    <input type="date" name="birth_date" class="form-control form-control-lg" id="birth_date_input"
+                                        value="{{ old('birth_date', $student->user->birth_date ?? '') }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Jenis Kelamin <span class="text-danger">*</span></label>
+                                    <select name="gender" class="form-control form-control-lg" required>
+                                        <option value="">Pilih jenis kelamin</option>
+                                        <option value="pria" {{ (old('gender', $student->user->gender ?? '') == 'pria') ? 'selected' : '' }}>Pria</option>
+                                        <option value="wanita" {{ (old('gender', $student->user->gender ?? '') == 'wanita') ? 'selected' : '' }}>Wanita</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">No. HP</label>
+                                    <input type="text" name="phone" class="form-control form-control-lg"
+                                        value="{{ old('phone', $student->user->phone ?? '') }}" placeholder="08xxxxxxxxxx">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Alamat</label>
+                                    <input type="text" name="alamat" class="form-control form-control-lg"
+                                        value="{{ old('alamat', $student->user->alamat ?? '') }}" placeholder="Alamat lengkap">
+                                </div>
+                            </div>
+
+                            <div class="card-footer d-flex justify-content-end gap-2 border-0 px-0 pb-0 mt-4">
+                                <a href="{{ route('students.index') }}" class="btn btn-light btn-lg">
+                                    <i class="bi bi-arrow-left"></i> Batal
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-save"></i> Simpan
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
-    
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Select2
+            $('#user_id_select').select2({
+                placeholder: "Pilih user...",
+                allowClear: false,
+                disabled: true,
+                width: '100%'
+            });
+
+            // Show user info & kelompok usia
+            function showUserInfo() {
+                let val = $('#user_id_select').val();
+                if (!val) {
+                    $('#existing-user-info').hide();
+                    $('#age_group_input').val('');
+                    return;
+                }
+                let selected = $('#user_id_select').find('option:selected');
+                $('#existing-user-name').text(selected.data('name'));
+                $('#existing-user-birthdate').text(selected.data('birthdate') || '-');
+                $('#existing-user-gender').text(selected.data('gender') || '-');
+                $('#existing-user-phone').text(selected.data('phone') || '-');
+                $('#existing-user-alamat').text(selected.data('alamat') || '-');
+                
+                $('#existing-user-info').show();
+                setAgeGroup(selected.data('birthdate'));
+            }
+
+            $('#user_id_select').on('change', showUserInfo);
+
+            // On page load, show info for selected user
+            showUserInfo();
+
+            // Kelompok usia otomatis
+            $('#birth_date_input').on('change', function() {
+                setAgeGroup(this.value);
+            });
+
+            function setAgeGroup(birthDate) {
+                let ageGroupInput = document.getElementById('age_group_input');
+                if (!birthDate) {
+                    ageGroupInput.value = '';
+                    return;
+                }
+                const today = new Date();
+                const birth = new Date(birthDate);
+                let age = today.getFullYear() - birth.getFullYear();
+                const m = today.getMonth() - birth.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+                    age--;
+                }
+                let group = '';
+                if (age < 5) group = 'balita';
+                else if (age < 12) group = 'anak-anak';
+                else if (age < 18) group = 'remaja';
+                else group = 'dewasa';
+                ageGroupInput.value = group;
+            }
+
+            // Set kelompok usia saat load jika ada birth_date
+            @if(old('birth_date', $student->user->birth_date ?? false))
+                setAgeGroup("{{ old('birth_date', $student->user->birth_date) }}");
+            @endif
+        });
+    </script>
+    <style>
+        .form-label { font-size: 0.97rem; }
+        .form-select-lg, .form-control-lg { font-size: 0.97rem; }
+        .card { border-radius: 1.25rem !important; }
+        .btn-lg { font-size: 0.93rem; }
+        .fw-semibold { font-weight: 500 !important; }
+        .alert-info { font-size: 0.95rem; }
+        .rounded-top-4 { border-top-left-radius: 1.25rem !important; border-top-right-radius: 1.25rem !important; }
+        @media (max-width: 576px) {
+            .card-body, .card-header { padding: 1rem !important; }
+            .form-label, .form-select-lg, .form-control-lg { font-size: 0.92rem !important; }
+        }
+    </style>
 </x-default-layout>

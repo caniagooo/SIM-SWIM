@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +12,6 @@ class Student extends Model
 
     protected $fillable = [
         'user_id',
-        'birth_date',
         'age_group',
         // Kolom lain di tabel students
     ];
@@ -22,10 +22,12 @@ class Student extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Metode untuk menghitung usia
+    // Usia diambil dari user
     public function getAgeAttribute()
     {
-        return Carbon::parse($this->birth_date)->age;
+        return $this->user && $this->user->birth_date
+            ? Carbon::parse($this->user->birth_date)->age
+            : null;
     }
 
     public function courses()
@@ -47,7 +49,6 @@ class Student extends Model
     {
         return $this->hasMany(Attendance::class, 'student_id', 'id');
     }
-
 
     public function gradeScores()
     {
@@ -72,15 +73,21 @@ class Student extends Model
         return $this->attendances()->count();
     }
 
+    // Kelompok usia berdasarkan birth_date user
     public function getAgeGroupAttribute()
     {
-        $age = \Carbon\Carbon::parse($this->birth_date)->age;
-        if ($age < 5) {
-            return 'Balita';
-        } elseif ($age <= 18) {
-            return 'Remaja';
-        } else {
-            return 'Dewasa';
+        if ($this->user && $this->user->birth_date) {
+            $age = Carbon::parse($this->user->birth_date)->age;
+            if ($age < 5) {
+                return 'Balita';
+            } elseif ($age < 12) {
+                return 'Anak-anak';
+            } elseif ($age < 18) {
+                return 'Remaja';
+            } else {
+                return 'Dewasa';
+            }
         }
+        return null;
     }
 }

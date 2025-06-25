@@ -15,11 +15,6 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
     use HasRoles;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -28,26 +23,22 @@ class User extends Authenticatable implements MustVerifyEmail
         'last_login_ip',
         'profile_photo_path',
         'type',
+        'birth_date',
+        'phone',
+        'gender',
+        'alamat',
+        'kelurahan_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'last_login_at' => 'datetime',
+        'birth_date' => 'date',
     ];
 
     public function getProfilePhotoUrlAttribute()
@@ -59,16 +50,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->profile_photo_path;
     }
 
-    public function addresses()
-    {
-        return $this->hasMany(Address::class);
-    }
-
-    public function getDefaultAddressAttribute()
-    {
-        return $this->addresses?->first();
-    }
-
+    
     public function trainer()
     {
         return $this->hasOne(Trainer::class, 'user_id');
@@ -78,8 +60,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(Student::class);
     }
+
     public function getAvatarAttribute()
     {
         return $this->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png');
     }
+
+   
+
 }
