@@ -76,13 +76,4 @@ class Trainer extends Model
     }
 
 
-    public function getProfilePhotoUrlAttribute()
-    {
-        return $this->user?->profile_photo_url;
-    }
-
-    public function getAvatarAttribute()
-    {
-        return $this->user?->avatar;
-    }
 }

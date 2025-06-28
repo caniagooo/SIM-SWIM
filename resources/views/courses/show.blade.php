@@ -275,8 +275,11 @@
                                         <th></th>
                                     </tr>
                                 </thead>
+                                @php
+                                    $filteredSessions = $course->sessions->whereIn('status', ['scheduled', 'completed','rescheduled','canceled']);
+                                @endphp
                                 <tbody>
-                                    @foreach ($course->sessions->whereIn('status', ['scheduled', 'completed','rescheduled','canceled']) as $session)
+                                    @forelse ($filteredSessions as $session)
                                         <tr>
                                             <td class="text-center text-gray-500 fs-8">{{ $loop->iteration }}</td>
                                             <td class="text-center fs-8">{{ \Carbon\Carbon::parse($session->session_date)->format('d M Y') }}</td>
@@ -309,14 +312,13 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                    @endforeach
-                                    @if($course->sessions->count() == 0)
+                                    @empty
                                         <tr>
-                                            <td colspan="6" class="text-center text-muted fs-8">Belum ada sesi.</td>
+                                            <td class="text-center text-muted fs-8">Belum ada sesi.</td>
                                         </tr>
-                                    @endif
+                                    @endforelse
                                 </tbody>
-                            </table>
+                            </table>  
                         </div>
                     </div>
                 </div>
@@ -434,4 +436,5 @@
             font-weight: 500;
         }
     </style>
+    
 </x-default-layout>

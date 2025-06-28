@@ -187,3 +187,23 @@ FROM course_sessions cs
 WHERE cs.session_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH)
                           AND DATE_ADD(CURRENT_DATE, INTERVAL 1 MONTH)
 GROUP BY period;
+
+-- trainer sessions view --
+CREATE OR REPLACE VIEW trainer_sessions_view AS
+SELECT 
+    t.id AS trainer_id,
+    u.name AS trainer_name,
+    c.id AS course_id,
+    c.name AS course_name,
+    cs.id AS session_id,
+    cs.session_date,
+    cs.start_time,
+    cs.end_time,
+    cs.status,
+    v.name AS venue_name
+FROM course_sessions cs
+JOIN courses c ON c.id = cs.course_id
+JOIN course_trainer ct ON ct.course_id = c.id
+JOIN trainers t ON t.id = ct.trainer_id
+JOIN users u ON u.id = t.user_id
+LEFT JOIN venues v ON v.id = c.venue_id;

@@ -90,4 +90,17 @@ class Student extends Model
         }
         return null;
     }
+    
+    public function gradeFor($materialId)
+    {
+        // Menggunakan accessor grades (sudah ada)
+        return $this->grades[$materialId] ?? null;
+    }
+
+    // Jika ingin remarks juga:
+    public function remarksFor($materialId)
+    {
+        $grade = $this->gradeScores()->where('material_id', $materialId)->first();
+        return $grade ? $grade->remarks : null;
+    }
 }

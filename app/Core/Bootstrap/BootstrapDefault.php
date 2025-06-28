@@ -78,8 +78,8 @@ class BootstrapDefault
     public function initLightHeaderLayout()
     {
         addHtmlAttribute('body', 'data-kt-app-layout', 'light-header');
-        addHtmlAttribute('body', 'data-kt-app-header-fixed', 'true');
-        addHtmlAttribute('body', 'data-kt-app-toolbar-enabled', 'true');
+        addHtmlAttribute('body', 'data-kt-app-header-fixed', 'false');
+        addHtmlAttribute('body', 'data-kt-app-toolbar-enabled', 'false');
 
         addHtmlClass('body', 'app-default');
     }
