@@ -72,8 +72,8 @@
 @yield('content')
 
 <!--begin::Javascript-->
-<script src="{{ asset('assets/js/courses-index.js') }}?v={{ filemtime(public_path('assets/js/courses-index.js')) }}"></script>
-<script src="{{ asset('assets/js/courses.js') }}?v={{ filemtime(public_path('assets/js/courses.js')) }}"></script>
+<script src="{{ asset('assets/js/courses-index.js') }}?v={{ config('app.asset_version') }}"></script>
+<script src="{{ asset('assets/js/courses.js') }}?v={{ config('app.asset_version') }}"></script>
 <!--begin::Global Javascript Bundle(mandatory for all pages)-->
 @foreach(getGlobalAssets() as $path)
     {!! sprintf('<script src="%s"></script>', asset($path)) !!}
