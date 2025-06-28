@@ -149,14 +149,7 @@
             </div>
             <!--end:Menu item-->
 
-            <!--begin:Menu item-->
-            <div class="menu-item">
-                <a class="menu-link <?php echo e(request()->routeIs('general-schedule.index') ? 'active' : ''); ?>" href="<?php echo e(route('general-schedule.index')); ?>">
-                    <span class="menu-icon"><?php echo getIcon('calendar', 'fs-2'); ?></span>
-                    <span class="menu-title">Jadwal</span>
-                </a>
-            </div>
-            <!--end:Menu item-->
+            
         </div>
         <!--end::Menu-->
     </div>

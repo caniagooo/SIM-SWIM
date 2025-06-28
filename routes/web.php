@@ -103,11 +103,6 @@ Route::middleware(['auth', 'role:Super Admin|Admin'])->group(function () {
         Route::post('/{session}/attendance', [AttendanceController::class, 'saveAttendance'])->name('sessions.attendance.save');
     });
 
-    // General Schedule
-    Route::get('/general-schedule', [GeneralScheduleController::class, 'index'])->name('general-schedule.index');
-    Route::get('/general-schedule/export', [GeneralScheduleController::class, 'export'])->name('general-schedule.export');
-    Route::get('/general-schedule/export-pdf', [GeneralScheduleController::class, 'exportPdf'])->name('general-schedule.export-pdf');
-    Route::resource('attendances', AttendanceController::class)->only(['index']);
 
     // Grade
     Route::post('/courses/{course}/students/{student}/grades', [GradeController::class, 'store'])->name('grades.store');
