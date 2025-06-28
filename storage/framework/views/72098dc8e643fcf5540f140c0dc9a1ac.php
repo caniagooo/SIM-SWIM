@@ -78,8 +78,8 @@
 <?php echo $__env->yieldContent('content'); ?>
 
 <!--begin::Javascript-->
-<script src="<?php echo e(asset('assets/js/courses-index.js')); ?>?v=<?php echo e(config('app.asset_version')); ?>"></script>
-<script src="<?php echo e(asset('assets/js/courses.js')); ?>?v=<?php echo e(config('app.asset_version')); ?>"></script>
+<script src="<?php echo e(asset('assets/js/courses-index.js')); ?>?v=<?php echo e(filemtime(public_path('assets/js/courses-index.js'))); ?>"></script>
+<script src="<?php echo e(asset('assets/js/courses.js')); ?>?v=<?php echo e(filemtime(public_path('assets/js/courses.js'))); ?>"></script>
 <!--begin::Global Javascript Bundle(mandatory for all pages)-->
 <?php $__currentLoopData = getGlobalAssets(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $path): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <?php echo sprintf('<script src="%s"></script>', asset($path)); ?>

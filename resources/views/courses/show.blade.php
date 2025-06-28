@@ -243,7 +243,7 @@
             <!-- Sesi Tab -->
             <div class="tab-pane fade" id="sessions" role="tabpanel">
                 <div class="card card-flush border-0 shadow-sm mb-3">
-                    <div class="card-body p-</div>0">
+                    <div class="card-body p-0">
                         <div class="d-flex justify-content-between align-items-center mb-3 px-3 pt-3">
                             <span class="fw-semibold text-primary"><i class="bi bi-calendar-check"></i> Sesi</span>
                             <button 
@@ -272,21 +272,18 @@
                                         <th>Mulai</th>
                                         <th>Selesai</th>
                                         <th>Status</th>
-                                        <th></th>
+                                        <th>Aksi</th>
                                     </tr>
                                 </thead>
-                                @php
-                                    $filteredSessions = $course->sessions->whereIn('status', ['scheduled', 'completed','rescheduled','canceled']);
-                                @endphp
                                 <tbody>
                                     @forelse ($filteredSessions as $session)
-                                        <tr>
+                                        <tr id="sessionRow{{ $session->id }}">
                                             <td class="text-center text-gray-500 fs-8">{{ $loop->iteration }}</td>
                                             <td class="text-center fs-8">{{ \Carbon\Carbon::parse($session->session_date)->format('d M Y') }}</td>
                                             <td class="text-center fs-8">{{ \Carbon\Carbon::parse($session->start_time)->format('H:i') }}</td>
                                             <td class="text-center fs-8">{{ \Carbon\Carbon::parse($session->end_time)->format('H:i') }}</td>
                                             <td class="text-center">
-                                                <span class="badge
+                                                <span id="sessionsStatus{{ $session->id }}" class="badge
                                                     @if($session->status === 'scheduled') badge-light-info
                                                     @elseif($session->status === 'rescheduled') badge-light-warning
                                                     @elseif($session->status === 'canceled') badge-light-danger
@@ -314,7 +311,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td class="text-center text-muted fs-8">Belum ada sesi.</td>
+                                            <td colspan="6" class="text-center text-muted fs-8">Belum ada sesi.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

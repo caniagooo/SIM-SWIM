@@ -1,21 +1,20 @@
 <x-default-layout>
-    <div class="container mt-5">
+    <div class="container mt-4 mb-4">
         <form id="course-form" method="POST" action="{{ route('courses.update', $course->id) }}">
             @csrf
             @method('PUT')
 
-            <!-- Progress Tab -->
             <div class="card card-flush">
-                <div class="card-header align-items-center py-5 gap-2 gap-md-5">
+                <div class="card-header align-items-center py-4 gap-2 gap-md-5 flex-column flex-md-row">
                     <div class="card-title">
-                        <h2 class="fw-bold mb-0">
+                        <h2 class="fw-bold mb-0 d-flex align-items-center">
                             <span class="svg-icon svg-icon-2 me-2 text-primary">
                                 <i class="bi-book"></i>
                             </span>
                             Edit Kursus
                         </h2>
                     </div>
-                    <div class="card-toolbar">
+                    <div class="card-toolbar mt-2 mt-md-0">
                         <a href="{{ route('courses.show', $course->id) }}" class="btn btn-light-primary btn-sm">
                             <span class="svg-icon svg-icon-2 me-1">
                                 <i class="bi-arrow-left"></i>
@@ -35,7 +34,7 @@
                         </div>
                     @endif
 
-                    <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6" id="progressTab" role="tablist">
+                    <ul class="nav nav-tabs nav-line-tabs mb-4 fs-6 flex-nowrap overflow-auto" id="progressTab" role="tablist" style="white-space:nowrap;">
                         <li class="nav-item">
                             <button class="nav-link active" id="step1-tab" data-bs-toggle="tab" data-bs-target="#step1" type="button" role="tab" aria-controls="step1" aria-selected="true">
                                 Step 1: Detail Kursus
@@ -57,11 +56,11 @@
                         <!-- Step 1 -->
                         <div class="tab-pane fade show active" id="step1" role="tabpanel" aria-labelledby="step1-tab">
                             <div class="row">
-                                <div class="col-md-6 mb-3">
+                                <div class="col-12 col-md-6 mb-3">
                                     <label class="form-label mb-2">Tipe Kursus</label>
-                                    <div class="d-flex gap-3">
+                                    <div class="d-flex gap-2 flex-column flex-sm-row">
                                         <input type="hidden" name="type" id="type" value="{{ old('type', $course->type) }}">
-                                        <div class="card course-type-card border-primary position-relative" data-type="private" style="cursor:pointer; min-width:200px;">
+                                        <div class="card course-type-card border-primary position-relative flex-fill" data-type="private" style="cursor:pointer; min-width:150px;">
                                             <div class="position-absolute top-0 end-0 m-2 z-index-2">
                                                 <div class="form-check form-check-sm form-check-custom form-check-solid">
                                                     <input class="form-check-input course-type-checkbox" type="checkbox" id="type-private-checkbox" value="private" disabled {{ old('type', $course->type) == 'private' ? 'checked' : '' }}>
@@ -72,7 +71,7 @@
                                                 <div class="fw-bold mt-2">Private</div>
                                             </div>
                                         </div>
-                                        <div class="card course-type-card position-relative" data-type="group" style="cursor:pointer; min-width:200px;">
+                                        <div class="card course-type-card position-relative flex-fill" data-type="group" style="cursor:pointer; min-width:150px;">
                                             <div class="position-absolute top-0 end-0 m-2 z-index-2">
                                                 <div class="form-check form-check-sm form-check-custom form-check-solid">
                                                     <input class="form-check-input course-type-checkbox" type="checkbox" id="type-group-checkbox" value="group" disabled {{ old('type', $course->type) == 'group' ? 'checked' : '' }}>
@@ -106,7 +105,7 @@
                                         });
                                     </script>
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="col-12 col-md-6 mb-3">
                                     <label for="basic_skills" class="form-label">Catatan terkait murid</label>
                                     <textarea name="basic_skills" id="basic_skills" class="form-control" rows="4">{{ old('basic_skills', $course->basic_skills) }}</textarea>
                                 </div>
@@ -148,8 +147,8 @@
                                     <!-- Group: Table with Checkbox & Search -->
                                     <div id="students-table-section" style="{{ old('type', $course->type) == 'group' ? '' : 'display:none;' }}">
                                         <input type="text" id="student-search" class="form-control mb-2" placeholder="Search students by name or email">
-                                        <div style="max-height: 300px; overflow-y: auto;">
-                                            <table class="table table-bordered table-hover" id="students-table">
+                                        <div class="table-responsive" style="max-height: 300px; overflow-x: auto;">
+                                            <table class="table table-bordered table-hover mb-0" id="students-table">
                                                 <thead>
                                                     <tr>
                                                         <th style="width:40px;">
@@ -197,6 +196,10 @@
                                 .course-type-card.selected, .course-type-card:hover {
                                     border-color: #0d6efd !important;
                                     box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+                                }
+                                @media (max-width: 576px) {
+                                    .course-type-card { min-width: 120px !important; }
+                                    .card-body { padding: 1rem !important; }
                                 }
                             </style>
                             <script>
@@ -258,8 +261,8 @@
 
                         <!-- Step 2 -->
                         <div class="tab-pane fade" id="step2" role="tabpanel" aria-labelledby="step2-tab">
-                            <div class="row g-4">
-                                <div class="col-md-6">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
                                     <label for="venue_id" class="form-label fw-semibold">Venue</label>
                                     <select name="venue_id" id="venue_id" class="form-select" required>
                                         <option value="">-- Select Venue --</option>
@@ -270,36 +273,32 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label for="price" class="form-label fw-semibold">Harga Kursus</label>
                                     <div class="input-group">
                                         <span class="input-group-text">Rp</span>
                                         <input type="number" min="0" name="price" id="price" class="form-control" value="{{ old('price', $course->price) }}" required>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row g-4 mt-1">
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label for="max_sessions" class="form-label fw-semibold">Total Sesi</label>
                                     <div class="input-group">
                                         <input type="number" min="1" name="max_sessions" id="max_sessions" class="form-control" value="{{ old('max_sessions', $course->max_sessions) }}" required>
                                         <span class="input-group-text">Sesi</span>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label for="duration_days" class="form-label fw-semibold">Durasi</label>
                                     <div class="input-group">
                                         <input type="number" min="1" name="duration_days" id="duration_days" class="form-control" value="{{ old('duration_days', $course->duration_days) }}" required>
                                         <span class="input-group-text">hari</span>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row g-4 mt-1">
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label for="start_date" class="form-label fw-semibold">Tanggal Mulai</label>
                                     <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date', $course->start_date ? $course->start_date->format('Y-m-d') : '') }}" required>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-12 col-md-6">
                                     <label for="valid_until" class="form-label fw-semibold">Tanggal Berakhir</label>
                                     <input type="date" name="valid_until" id="valid_until" class="form-control" value="{{ old('valid_until', $course->valid_until ? $course->valid_until->format('Y-m-d') : '') }}" readonly>
                                 </div>
@@ -332,23 +331,20 @@
                         <div class="tab-pane fade" id="step3" role="tabpanel" aria-labelledby="step3-tab">
                             <div class="row">
                                 <!-- Trainers List -->
-                                <div class="row mb-4">
+                                <div class="col-12 mb-4">
                                     <label class="form-label mb-2 fw-semibold fs-5">Pilih Pelatih</label>
-                                    @php
-                                        $shuffledTrainers = $trainers->shuffle();
-                                    @endphp
                                     <div class="position-relative">
-                                        <button type="button" id="trainers-prev" class="btn btn-light btn-sm position-absolute top-50 start-0 translate-middle-y z-index-2 shadow" style="left: -30px; border-radius: 50%; width: 36px; height: 36px; display: none;">
+                                        <button type="button" id="trainers-prev" class="btn btn-light btn-sm position-absolute top-50 start-0 translate-middle-y z-index-2 shadow d-none d-md-block" style="left: -30px; border-radius: 50%; width: 36px; height: 36px;">
                                             <i class="bi bi-chevron-left fs-3"></i>
                                         </button>
-                                        <button type="button" id="trainers-next" class="btn btn-light btn-sm position-absolute top-50 end-0 translate-middle-y z-index-2 shadow" style="right: -30px; border-radius: 50%; width: 36px; height: 36px; display: none;">
+                                        <button type="button" id="trainers-next" class="btn btn-light btn-sm position-absolute top-50 end-0 translate-middle-y z-index-2 shadow d-none d-md-block" style="right: -30px; border-radius: 50%; width: 36px; height: 36px;">
                                             <i class="bi bi-chevron-right fs-3"></i>
                                         </button>
-                                        <div id="trainers-carousel-viewport" class="overflow-hidden w-100" style="min-height: 240px;">
-                                            <div id="trainers-carousel" class="d-flex flex-row" style="gap: 2rem; transition: transform 0.3s;">
-                                                @foreach ($shuffledTrainers as $trainer)
-                                                    <div class="trainer-card-wrapper flex-shrink-0" style="width: 100%; max-width: 280px;">
-                                                        <div class="card card-flush h-100 border border-solid  position-relative trainer-card box-shadow" style="cursor:pointer;">
+                                        <div id="trainers-carousel-viewport" class="overflow-auto w-100" style="min-height: 240px;">
+                                            <div id="trainers-carousel" class="d-flex flex-row flex-nowrap" style="gap: 1rem; transition: transform 0.3s;">
+                                                @foreach ($trainers->shuffle() as $trainer)
+                                                    <div class="trainer-card-wrapper flex-shrink-0" style="width: 100%; max-width: 260px;">
+                                                        <div class="card card-flush h-100 border border-solid position-relative trainer-card box-shadow" style="cursor:pointer;">
                                                             <div class="position-absolute top-0 end-0 m-2 z-index-2">
                                                                 <div class="form-check form-check-sm form-check-custom form-check-solid">
                                                                     <input class="form-check-input trainer-checkbox" type="checkbox" name="trainers[]" value="{{ $trainer->id }}" id="trainer-{{ $trainer->id }}"
@@ -385,115 +381,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <style>
-                                    #trainers-carousel-viewport {
-                                        width: 100%;
-                                        overflow: hidden;
-                                        position: relative;
-                                    }
-                                    #trainers-carousel {
-                                        transition: transform 0.3s;
-                                        will-change: transform;
-                                    }
-                                    .trainer-card-wrapper {
-                                        min-width: 200px;
-                                        max-width: 250px;
-                                        width: 100%;
-                                    }
-                                    @media (max-width: 991.98px) {
-                                        .trainer-card-wrapper {
-                                            min-width: 260px;
-                                            max-width: 280px;
-                                        }
-                                    }
-                                </style>
-                                <script>
-                                    document.addEventListener('DOMContentLoaded', function () {
-                                        // Only allow one trainer to be selected
-                                        document.querySelectorAll('.trainer-checkbox').forEach(function(checkbox) {
-                                            checkbox.addEventListener('change', function() {
-                                                if (this.checked) {
-                                                    document.querySelectorAll('.trainer-checkbox').forEach(function(cb) {
-                                                        if (cb !== checkbox) cb.checked = false;
-                                                    });
-                                                }
-                                            });
-                                        });
-                                        // Card click toggles checkbox
-                                        document.querySelectorAll('.trainer-card').forEach(function(card) {
-                                            const checkbox = card.querySelector('.trainer-checkbox');
-                                            card.addEventListener('click', function(e) {
-                                                if (e.target !== checkbox) {
-                                                    checkbox.checked = !checkbox.checked;
-                                                    checkbox.dispatchEvent(new Event('change'));
-                                                }
-                                            });
-                                            checkbox.addEventListener('click', function(e) {
-                                                e.stopPropagation();
-                                            });
-                                        });
-
-                                        // Carousel logic
-                                        const carousel = document.getElementById('trainers-carousel');
-                                        const wrappers = carousel.querySelectorAll('.trainer-card-wrapper');
-                                        const prevBtn = document.getElementById('trainers-prev');
-                                        const nextBtn = document.getElementById('trainers-next');
-                                        let visibleCount = 3;
-                                        let currentIndex = 0;
-
-                                        function updateVisibleCount() {
-                                            if (window.innerWidth < 768) {
-                                                visibleCount = 1;
-                                            } else if (window.innerWidth < 992) {
-                                                visibleCount = 2;
-                                            } else {
-                                                visibleCount = 3;
-                                            }
-                                        }
-
-                                        function getCardWidth() {
-                                            const wrapper = wrappers[0];
-                                            if (!wrapper) return 320;
-                                            const style = window.getComputedStyle(wrapper);
-                                            const width = wrapper.offsetWidth;
-                                            const marginRight = parseInt(style.marginRight) || 16;
-                                            return width + marginRight;
-                                        }
-
-                                        function updateCarousel() {
-                                            const cardWidth = getCardWidth();
-                                            if (currentIndex + visibleCount > wrappers.length) {
-                                                currentIndex = Math.max(0, wrappers.length - visibleCount);
-                                            }
-                                            carousel.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
-                                            prevBtn.style.display = currentIndex > 0 ? '' : 'none';
-                                            nextBtn.style.display = (currentIndex + visibleCount) < wrappers.length ? '' : 'none';
-                                        }
-
-                                        prevBtn.addEventListener('click', function () {
-                                            if (currentIndex > 0) {
-                                                currentIndex--;
-                                                updateCarousel();
-                                            }
-                                        });
-                                        nextBtn.addEventListener('click', function () {
-                                            if ((currentIndex + visibleCount) < wrappers.length) {
-                                                currentIndex++;
-                                                updateCarousel();
-                                            }
-                                        });
-
-                                        window.addEventListener('resize', function () {
-                                            updateVisibleCount();
-                                            updateCarousel();
-                                        });
-
-                                        updateVisibleCount();
-                                        updateCarousel();
-                                    });
-                                </script>
                                 <!-- Materials List -->
-                                <div class="row mb-3">
+                                <div class="col-12 mb-3">
                                     <label class="form-label mb-2 fw-semibold fs-5">Pilih Materi</label>
                                     <div id="materialsAccordion" class="accordion accordion-icon-toggle">
                                         @php
@@ -514,7 +403,7 @@
                                                 </h2>
                                                 <div id="collapseLevel{{ $level }}" class="accordion-collapse collapse" aria-labelledby="headingLevel{{ $level }}" data-bs-parent="#materialsAccordion">
                                                     <div class="accordion-body p-0">
-                                                        <div class="table-responsive" style="max-height: 220px; overflow-y: auto;">
+                                                        <div class="table-responsive" style="max-height: 220px; overflow-x: auto;">
                                                             <table class="table align-middle table-row-dashed gy-3 mb-0">
                                                                 <thead class="bg-light-primary">
                                                                     <tr class="fw-semibold text-gray-700">
@@ -555,7 +444,7 @@
                                         @endforeach
                                     </div>
                                     <div class="mt-3">
-                                        <div class="d-flex align-items-center gap-4">
+                                        <div class="d-flex flex-wrap align-items-center gap-3">
                                             <div class="d-flex align-items-center">
                                                 <span class="svg-icon svg-icon-2 text-primary me-1">
                                                     <i class="ki-duotone ki-check-circle"></i>
@@ -611,11 +500,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-footer d-flex justify-content-between">
-                    <button type="button" class="btn btn-secondary" id="prevBtn" style="display: none;">Prev</button>
-                    <div>
-                        <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Submit</button>
+                <div class="card-footer d-flex flex-column flex-md-row justify-content-between gap-2">
+                    <button type="button" class="btn btn-secondary w-100 w-md-auto" id="prevBtn" style="display: none;">Prev</button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary w-100 w-md-auto" id="nextBtn">Next</button>
+                        <button type="submit" class="btn btn-primary w-100 w-md-auto" id="submitBtn" style="display: none;">Submit</button>
                     </div>
                 </div>
                 <script>
@@ -674,6 +563,17 @@
             </div>
         </form>
     </div>
+    <style>
+        @media (max-width: 576px) {
+            .card { margin-bottom: 1rem !important; }
+            .nav-tabs .nav-link { font-size: 0.95rem; padding: .5rem .5rem; }
+            .form-label, .fw-bold, .fw-semibold { font-size: 0.97rem !important; }
+            .table { font-size: 0.92rem; }
+            .accordion-button { font-size: 1rem !important; }
+            .btn { font-size: 0.97rem !important; }
+        }
+        .overflow-auto { overflow-x: auto !important; }
+    </style>
 </x-default-layout>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
