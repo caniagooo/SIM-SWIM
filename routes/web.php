@@ -36,7 +36,7 @@ Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])-
 Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.update');
 
 // Semua route di-protect auth & role:Super Admin|Admin
-Route::middleware(['auth', 'role:Super Admin|Admin'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
