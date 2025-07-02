@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class UsersSeeder extends Seeder
 {
@@ -16,34 +17,16 @@ class UsersSeeder extends Seeder
     public function run()
     {
         // Seeder untuk 1 super admin
-        User::create([
-            'name'              => 'Jitu Teknologi',
-            'email'             => 'admin@jitu.com',
-            'password'          => Hash::make('password'),
-            'type'              => 'member', // pastikan field 'role' ada di tabel users
-        ]);
+        $user = User::updateOrCreate(
+            ['email' => 'admin@jitu.com'],
+            [
+                'name'     => 'Jitu Teknologi',
+                'password' => Hash::make('password'),
+                'type'     => 'member', // atau 'role' jika field-nya role
+            ]
+        );
 
-        // Seeder untuk 10 user biasa dengan nama Indonesia
-        $names = [
-            'Budi Santoso',
-            'Siti Aminah',
-            'Agus Prabowo',
-            'Dewi Lestari',
-            'Rina Marlina',
-            'Andi Wijaya',
-            'Fitriani Putri',
-            'Joko Susilo',
-            'Teguh Saputra',
-            'Maya Sari'
-        ];
-
-        foreach ($names as $index => $name) {
-            User::create([
-                'name'              => $name,
-                'email'             => 'user' . ($index + 1) . '@jitu.com',
-                'password'          => Hash::make('password'),
-                'type'              => 'member', // pastikan field 'role' ada di tabel users
-            ]);
-        }
+        // Assign role Super Admin
+        $user->assignRole('Super Admin');
     }
 }

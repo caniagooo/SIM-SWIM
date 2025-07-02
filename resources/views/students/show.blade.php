@@ -193,20 +193,20 @@
                         <div class="table-responsive">
                             <table class="table table-row-dashed table-row-gray-200 align-middle gy-2 mb-0">
                                 <thead>
-                                    <tr class="text-center fw-semibold text-gray-600 fs-7">
-                                        <th>#</th>
-                                        <th>Nama Kursus</th>
-                                        <th>Jumlah Sesi</th>
-                                        <th>Venue</th>
-                                        <th>Status</th>
-                                        <th>Nilai Kumulatif</th>
+                                    <tr class="fw-bold text-gray-700 fs-7 text-center align-middle">
+                                        <th class="text-center align-middle" style="width: 40px;">#</th>
+                                        <th class="text-start align-middle">Nama Kursus</th>
+                                        <th class="text-center align-middle" style="width: 100px;">Jumlah Sesi</th>
+                                        <th class="text-center align-middle" style="width: 120px;">Venue</th>
+                                        <th class="text-center align-middle" style="width: 100px;">Status</th>
+                                        <th class="text-center align-middle" style="width: 120px;">Nilai Kumulatif</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($student->courses->take(5) as $course)
+                                    @forelse ($student->courses as $course)
                                     <tr>
                                         <td class="text-center text-gray-500 fs-8">{{ $loop->iteration }}</td>
-                                        <td>
+                                        <td class="text-start align-middle">
                                             <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#courseDetailModal{{ $course->id }}">
                                                 {{ $course->name }}
                                             </a>
@@ -220,7 +220,11 @@
                                         </td>
                                         <td class="text-center fs-8">-</td>
                                     </tr>
-                                    @endforeach
+                                    @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted fs-8">Belum ada kursus.</td>
+                                    </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
@@ -234,26 +238,30 @@
                         <div class="table-responsive">
                             <table class="table table-row-dashed table-row-gray-200 align-middle gy-2 mb-0">
                                 <thead>
-                                    <tr class="text-center fw-semibold text-gray-600 fs-7">
-                                        <th>#</th>
-                                        <th>Nama Materi</th>
-                                        <th>Nama Kursus</th>
-                                        <th>Tanggal Penilaian</th>
-                                        <th>Nilai</th>
-                                        <th>Nama Pelatih</th>
+                                    <tr class="fw-bold text-gray-700 fs-7 text-center align-middle">
+                                        <th class="text-center align-middle" style="width: 40px;">#</th>
+                                        <th class="text-start align-middle">Nama Materi</th>
+                                        <th class="text-start align-middle">Nama Kursus</th>
+                                        <th class="text-center align-middle" style="width: 120px;">Tanggal Penilaian</th>
+                                        <th class="text-center align-middle" style="width: 80px;">Nilai</th>
+                                        <th class="text-center align-middle" style="width: 120px;">Nama Pelatih</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @for ($i = 1; $i <= 5; $i++)
+                                    @forelse ($student->grades as $grade)
                                     <tr>
-                                        <td class="text-center text-gray-500 fs-8">{{ $i }}</td>
-                                        <td class="fs-8">Materi {{ $i }}</td>
-                                        <td class="fs-8">Kursus {{ $i }}</td>
-                                        <td class="fs-8">{{ now()->subDays($i)->format('Y-m-d') }}</td>
-                                        <td class="fs-8">{{ rand(70, 100) }}</td>
-                                        <td class="fs-8">Pelatih {{ $i }}</td>
+                                        <td class="text-center text-gray-500 fs-8">{{ $loop->iteration }}</td>
+                                        <td class="text-start fs-8">{{ $grade->material->name ?? '-' }}</td>
+                                        <td class="text-start fs-8">{{ $grade->course->name ?? '-' }}</td>
+                                        <td class="text-center fs-8">{{ $grade->created_at ? $grade->created_at->format('Y-m-d') : '-' }}</td>
+                                        <td class="text-center fs-8">{{ $grade->score ?? '-' }}</td>
+                                        <td class="text-center fs-8">{{ $grade->trainer->user->name ?? '-' }}</td>
                                     </tr>
-                                    @endfor
+                                    @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted fs-8">Belum ada penilaian materi.</td>
+                                    </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
@@ -314,3 +322,13 @@
         </script>
     </div>
 </x-default-layout>
+
+<style>
+    .table th, .table td { vertical-align: middle !important; }
+    .table th { text-align: center !important; }
+    .table td { font-size: 0.95rem; }
+    .badge { font-size: 0.93rem; }
+    @media (max-width: 576px) {
+        .table { font-size: 0.92rem; }
+    }
+</style>

@@ -9,6 +9,8 @@ class CoursePayment extends Model
 {
     use HasFactory;
 
+    protected $table = 'course_payments';
+
     protected $fillable = [
         'course_id',
         'invoice_number',

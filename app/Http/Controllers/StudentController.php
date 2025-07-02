@@ -28,7 +28,7 @@ class StudentController extends Controller
             'user_id' => 'nullable|exists:users,id|unique:students,user_id',
             'name' => 'required_without:user_id|max:255',
             'email' => 'required_without:user_id|email|unique:users,email',
-            'birth_date' => 'nullable|exists:user_id|date',
+            'birth_date' => 'nullable|date',
             'gender' => 'required_without:user_id|in:pria,wanita',
             'phone' => 'nullable',
             'alamat' => 'nullable',
@@ -131,7 +131,7 @@ class StudentController extends Controller
 
     public function show(Student $student)
     {
-        $payments = $student->payments()->with('course')->get();
+        $payments = $student->coursePayments()->with('course')->get();
         return view('students.show', compact('student', 'payments'));
     }
 

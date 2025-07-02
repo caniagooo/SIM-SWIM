@@ -35,9 +35,16 @@ class Student extends Model
         return $this->belongsToMany(Course::class, 'course_student', 'student_id', 'course_id');
     }
     
-    public function payments()
+    public function coursePayments()
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasManyThrough(
+            \App\Models\CoursePayment::class,
+            \App\Models\Course::class,
+            'id', // Foreign key on courses table...
+            'course_id', // Foreign key on course_payments table...
+            'id', // Local key on students table...
+            'id'  // Local key on courses table...
+        );
     }
 
     public function sessions()

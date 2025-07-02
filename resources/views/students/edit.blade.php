@@ -39,7 +39,7 @@
                                 <label class="form-label fw-semibold">User</label>
                                 <select name="user_id" class="form-control form-control-lg" required id="user_id_select" style="width:100%;">
                                     @foreach ($users as $user)
-                                        <option value="{{ $user->id }}"
+                                        <option value="{{ $user->id }}" {{ $student->user_id == $user->id ? 'selected' : '' }}
                                             data-name="{{ $user->name }}"
                                             data-birthdate="{{ $user->birth_date ? \Carbon\Carbon::parse($user->birth_date)->format('d M Y') : '' }}"
                                             data-gender="{{ $user->gender ?? '' }}"
@@ -141,7 +141,6 @@
             $('#user_id_select').select2({
                 placeholder: "Pilih user...",
                 allowClear: false,
-                disabled: true,
                 width: '100%'
             });
 

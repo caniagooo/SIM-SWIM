@@ -48,23 +48,23 @@
         <div class="col-12">
             <div class="px-5 py-5 card card-flush border-0 shadow-sm">
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table id="students_table" class="table table-row-dashed table-row-gray-200 align-middle gy-2 mb-0">
+                    <div class="table-responsive text-center">
+                        <table id="students_table" class="table table-row-dashed table-row-gray-200 gy-2 mb-0 align-middle">
                             <thead>
-                                <tr class="text-center fw-semibold text-gray-600 fs-7">
-                                    <th>Profile</th>
-                                    <th>Tanggal Lahir</th>
-                                    <th>Kelompok Usia</th>
-                                    <th>Kursus</th>
-                                    <th>Sesi</th>
-                                    <th>Aksi</th>
+                                <tr class="fw-bold text-gray-700 fs-7 text-center align-middle">
+                                    <th class="text-center align-middle" style="width: 180px;">Profile</th>
+                                    <th class="text-center align-middle" style="width: 140px;">Tanggal Lahir</th>
+                                    <th class="text-center align-middle" style="width: 120px;">Kelompok Usia</th>
+                                    <th class="text-center align-middle" style="width: 80px;">Kursus</th>
+                                    <th class="text-center align-middle" style="width: 80px;">Sesi</th>
+                                    <th class="text-center align-middle" style="width: 110px;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($students as $student)
                                 <tr>
                                     <!-- Profile Picture & Nama -->
-                                    <td>
+                                    <td class="text-start align-middle">
                                         <div class="d-flex align-items-center gap-2">
                                             <img src="{{ $student->user->profile_picture ?? asset('assets/media/avatars/default-avatar.png') }}" alt="Avatar" class="symbol symbol-30px symbol-circle">
                                             <div>
@@ -74,24 +74,24 @@
                                         </div>
                                     </td>
                                     <!-- Tanggal Lahir & Usia -->
-                                    <td class="text-center">
-                                        <div class="fw-semibold text-gray-800">{{ $student->birth_date }}</div>
-                                        <div class="text-gray-500 fs-8">{{ \Carbon\Carbon::parse($student->birth_date)->age }} tahun</div>
+                                    <td class="text-center align-middle">
+                                        <div class="fw-semibold text-gray-800 fs-8">{{ \Carbon\Carbon::parse($student->user->birth_date)->translatedFormat('d F Y') }}</div>
+                                        <div class="text-gray-500 fs-8">{{ \Carbon\Carbon::parse($student->user->birth_date)->age }} tahun</div>
                                     </td>
                                     <!-- Kelompok Usia -->
-                                    <td class="text-center">
+                                    <td class="text-center align-middle">
                                         <span class="badge badge-light-info fw-semibold">{{ ucfirst($student->age_group) }}</span>
                                     </td>
                                     <!-- Kursus -->
-                                    <td class="text-center">
+                                    <td class="text-center align-middle">
                                         <span class="badge badge-light-success fw-semibold">{{ $student->courses_count }}</span>
                                     </td>
                                     <!-- Sesi -->
-                                    <td class="text-center">
+                                    <td class="text-center align-middle">
                                         <span class="badge badge-light-primary fw-semibold">{{ $student->sessions_count }}</span>
                                     </td>
                                     <!-- Aksi -->
-                                    <td class="text-center">
+                                    <td class="text-center align-middle">
                                         <div class="d-flex justify-content-center gap-1">
                                             <a href="{{ route('students.show', $student->id) }}" class="btn btn-icon btn-sm btn-light-info" title="Detail">
                                                 <i class="bi bi-eye"></i>
@@ -136,6 +136,9 @@
     <style>
         .symbol-30px { width: 30px; height: 30px; }
         .fs-8 { font-size: 0.88rem !important; }
+        #students_table th, #students_table td { vertical-align: middle !important; }
+        #students_table th { text-align: center !important; }
+        #students_table td { padding-top: 0.65rem !important; padding-bottom: 0.65rem !important; }
         #students_table_footer select { min-width: 50px; }
         #students_table_footer { font-size: 0.93rem; }
         @media (max-width: 576px) {

@@ -29,6 +29,22 @@ return new class extends Migration
         Schema::table('students', function (Blueprint $table) {
             $table->dropColumn('birth_date');
         });
+
+        // attendances
+        Schema::create('attendances', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('course_id')->nullable();
+            $table->unsignedBigInteger('course_session_id');
+            $table->unsignedBigInteger('student_id')->nullable();
+            $table->unsignedBigInteger('trainer_id')->nullable();
+            $table->enum('status', ['hadir', 'tidak hadir', 'terlambat'])->default('hadir');
+            $table->text('remarks')->nullable();
+            $table->timestamps();
+
+            $table->foreign('course_session_id')->references('id')->on('course_sessions')->onDelete('cascade');
+            $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
+            $table->foreign('trainer_id')->references('id')->on('trainers')->onDelete('cascade');
+        });
     }
 
     public function down()
