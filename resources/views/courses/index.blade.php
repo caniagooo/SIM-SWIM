@@ -1,12 +1,14 @@
-<x-default-layout>
-    <div class="container">
-        <!-- Header Card (Selaras dengan students index) -->
+@extends('layout.minimal')
+@section('title', 'Daftar Kursus')
+
+@section('content')
+
+    <div class="container mt-4 mb-4">
+        <!-- Header Card -->
         <div class="card mb-4 border-0 shadow-sm">
             <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 p-4">
                 <div>
-                    <h4 class="mb-1 fw-bold text-gray-900">
-                        Manajemen Kursus
-                    </h4>
+                    <h4 class="mb-1 fw-bold text-gray-900">Manajemen Kursus</h4>
                     <div class="d-flex flex-wrap gap-2 small mb-1">
                         <span class="badge badge-light-info fw-semibold">
                             <i class="bi bi-journal-bookmark me-1"></i> Total: {{ $courses->count() }} Kursus
@@ -47,28 +49,28 @@
                         <ul class="dropdown-menu shadow-sm">
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ !request('status') ? 'active fw-bold' : '' }}"
-                                href="{{ route('courses.index', request()->except('status')) }}">
+                                   href="{{ route('courses.index', request()->except('status')) }}">
                                     Total
                                     <span class="badge bg-primary text-white ms-2 px-2 py-1 rounded-pill">{{ $countTotal }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ request('status') == 'active' ? 'active fw-bold' : '' }}"
-                                href="?status=active">
+                                   href="?status=active">
                                     Aktif
                                     <span class="badge bg-success text-white ms-2 px-2 py-1 rounded-pill">{{ $countActive }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ request('status') == 'expired' ? 'active fw-bold' : '' }}"
-                                href="?status=expired">
+                                   href="?status=expired">
                                     Expired
                                     <span class="badge bg-danger text-white ms-2 px-2 py-1 rounded-pill">{{ $countExpired }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ request('status') == 'unpaid' ? 'active fw-bold' : '' }}"
-                                href="?status=unpaid">
+                                   href="?status=unpaid">
                                     Unpaid
                                     <span class="badge bg-warning text-dark ms-2 px-2 py-1 rounded-pill">{{ $countUnpaid }}</span>
                                 </a>
@@ -77,7 +79,7 @@
                     </div>
                     @if(request('status'))
                         <a href="{{ route('courses.index', request()->except('status')) }}"
-                            class="btn btn-light btn-sm border ms-1 shadow-sm" title="Clear Selection">
+                           class="btn btn-light btn-sm border ms-1 shadow-sm" title="Clear Selection">
                             <i class="bi bi-x-circle"></i>
                         </a>
                     @endif
@@ -146,4 +148,8 @@
     @endforeach
 
     @include('courses.partials.invoice-course-modal')
-</x-default-layout>
+@endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/js/courses-index.js') }}"></script>
+@endpush

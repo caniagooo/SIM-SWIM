@@ -1,4 +1,7 @@
-<x-default-layout>
+@extends('layout.minimal')
+@section('title', 'Detail Kursus')
+
+@section('content')
     <div class="container py-3">
         <!-- Header Card -->
         <div class="card mb-4 border-0 shadow-sm">
@@ -11,7 +14,6 @@
                         </span>
                     </h5>
                     <div class="d-flex flex-wrap gap-2 small mb-1">
-                        
                         <span class="badge badge-light-secondary fw-semibold">
                             <i class="bi bi-geo-alt me-1"></i> {{ $course->venue->name ?? 'N/A' }}
                         </span>
@@ -84,14 +86,6 @@
                                 <span class="text-muted fs-7">-</span>
                             @endforelse
                         </div>
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function () {
-                                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-                                tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-                                    new bootstrap.Tooltip(tooltipTriggerEl);
-                                });
-                            });
-                        </script>
                     </div>
                 </div>
             </div>
@@ -128,53 +122,53 @@
         </ul>
         <style>
             .nav-pills-custom {
-            background: #f5f8fa;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            border: 1px solid #e4e6ef;
-            margin-bottom: 1rem;
+                background: #f5f8fa;
+                border-radius: 0.5rem;
+                overflow: hidden;
+                border: 1px solid #e4e6ef;
+                margin-bottom: 1rem;
             }
             .nav-pills-custom .nav-link {
-            border-radius: 0;
-            font-weight: 500;
-            color: #5e6278;
-            transition: background 0.2s, color 0.2s, border-bottom 0.2s;
-            border: none;
-            background: none;
-            padding: 0.85rem 0.5rem;
-            font-size: 1rem;
-            position: relative;
+                border-radius: 0;
+                font-weight: 500;
+                color: #5e6278;
+                transition: background 0.2s, color 0.2s, border-bottom 0.2s;
+                border: none;
+                background: none;
+                padding: 0.85rem 0.5rem;
+                font-size: 1rem;
+                position: relative;
             }
             .nav-pills-custom .nav-link.active,
             .nav-pills-custom .nav-link:focus,
             .nav-pills-custom .nav-link:hover {
-            background: #fff !important;
-            color: #009ef7 !important;
-            border-bottom: 2.5px solid #009ef7;
-            z-index: 2;
+                background: #fff !important;
+                color: #009ef7 !important;
+                border-bottom: 2.5px solid #009ef7;
+                z-index: 2;
             }
             .nav-pills-custom .nav-link:not(.active):hover {
-            background: #f1faff !important;
-            color: #009ef7 !important;
+                background: #f1faff !important;
+                color: #009ef7 !important;
             }
             .nav-pills-custom .nav-link i {
-            font-size: 1.1em;
-            vertical-align: middle;
-            margin-right: 0.25em;
+                font-size: 1.1em;
+                vertical-align: middle;
+                margin-right: 0.25em;
             }
             .nav-pills-custom .nav-link.active i {
-            color: #009ef7;
+                color: #009ef7;
             }
             .nav-pills-custom .nav-link:disabled {
-            color: #b5b5c3 !important;
-            background: none !important;
-            cursor: not-allowed;
+                color: #b5b5c3 !important;
+                background: none !important;
+                cursor: not-allowed;
             }
             @media (max-width: 576px) {
-            .nav-pills-custom .nav-link {
-                font-size: 0.95rem;
-                padding: .5rem .1rem;
-            }
+                .nav-pills-custom .nav-link {
+                    font-size: 0.95rem;
+                    padding: .5rem .1rem;
+                }
             }
         </style>
         
@@ -225,7 +219,7 @@
                                             </td>
                                             <td class="text-center">
                                                 <button class="btn btn-icon btn-sm btn-light-primary" data-bs-toggle="modal" data-bs-target="#gradeModal{{ $student->id }}">
-                                                    <i class="</button></button>fas fa-edit"></i>
+                                                    <i class="fas fa-edit"></i>
                                                 </button>
                                             </td>
                                         </tr>
@@ -258,7 +252,6 @@
                                         text: 'Kursus ini sudah mencapai jumlah sesi maksimal.'
                                     }); 
                                     @endif"
-                                {{ $course->sessions->count() >= $course->max_sessions ? '' : '' }}
                             >
                                 <i class="bi bi-plus-circle"></i> Tambah
                             </button>
@@ -332,11 +325,10 @@
                         <div class="row g-0">
                             <!-- Kolom Kiri: Daftar Materi -->
                             <div class="col-md-7 border-end px-4 py-3">
-                                
                                 @if($course->materials->count() > 0)
                                     <ul>
                                         @foreach($course->materials as $material)
-                                            <li class="list-group-item px-0 py-3"></li>
+                                            <li class="list-group-item px-0 py-3">
                                                 <div class="fw-semibold mb-1">{{ $material->name }}</div>
                                                 <div class="d-flex flex-wrap gap-2 mb-3" style="border-bottom: 1px dashed #e4e6ef; padding-bottom: 0.5rem;">
                                                     <span class="badge badge-light-info fw-semibold">
@@ -433,5 +425,8 @@
             font-weight: 500;
         }
     </style>
-    
-</x-default-layout>
+@endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/js/courses-show.js') }}"></script>
+@endpush
