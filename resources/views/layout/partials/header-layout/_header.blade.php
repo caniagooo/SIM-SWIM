@@ -11,8 +11,7 @@
 		<!--end::Logo-->
 		<!--begin::Header wrapper-->
 		<div class="d-flex align-items-stretch justify-content-between flex-lg-grow-1" id="kt_app_header_wrapper">
-			@include(config('settings.KT_THEME_LAYOUT_DIR').'/partials/header-layout/header/_menu/_menu')
-			@include(config('settings.KT_THEME_LAYOUT_DIR').'/partials/header-layout/header/_navbar')
+			
 		</div>
 		<!--end::Header wrapper-->
 	</div>
