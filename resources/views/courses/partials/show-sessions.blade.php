@@ -25,7 +25,7 @@
                         {{ \Carbon\Carbon::parse($session->end_time)->format('H:i') }}
                     </td>
                     <td>
-                        <span class="badge 
+                        <span id="sessionsStatus{{ $session->id }}" class="badge 
                             @if($session->status === 'completed') badge-light-success
                             @elseif($session->status === 'scheduled') badge-light-info
                             @else badge-light-secondary
@@ -35,15 +35,17 @@
                         </span>
                     </td>
                     <td class="text-end">
-                        <div class="btn-group btn-group-sm" role="group" aria-label="Aksi">
+                        <div class="btn-group btn-group-sm gap-1" role="group" aria-label="Aksi">
                             <button type="button"
                                 class="btn btn-icon btn-light-success btnAttendance"
                                 data-session-id="{{ $session->id }}"
                                 data-bs-toggle="tooltip"
                                 data-bs-placement="top"
                                 title="Presensi"
+                                data-bs-target="#attendanceModal-{{ $session->id }}"
                                 data-bs-toggle="modal"
-                                data-bs-target="#attendanceModal-{{ $session->id }}">
+                                tabindex="0"
+                                aria-label="Presensi">
                                 <i class="bi bi-person-check"></i>
                             </button>
                             @if($session->status === 'scheduled')
@@ -53,8 +55,10 @@
                                     data-bs-toggle="tooltip"
                                     data-bs-placement="top"
                                     title="Edit Jadwal"
+                                    data-bs-target="#editScheduleModal-{{ $session->id }}"
                                     data-bs-toggle="modal"
-                                    data-bs-target="#editScheduleModal-{{ $session->id }}">
+                                    tabindex="0"
+                                    aria-label="Edit Jadwal">
                                     <i class="bi bi-pencil"></i>
                                 </button>
                             @endif
@@ -63,7 +67,9 @@
                                 data-session-id="{{ $session->id }}"
                                 data-bs-toggle="tooltip"
                                 data-bs-placement="top"
-                                title="Hapus Sesi">
+                                title="Hapus Sesi"
+                                tabindex="0"
+                                aria-label="Hapus Sesi">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
@@ -81,11 +87,17 @@
 </button>
 
 <script>
-    // Aktifkan tooltip Bootstrap 5 pada semua tombol aksi
-    document.addEventListener('DOMContentLoaded', function () {
+    // Fungsi untuk mengaktifkan tooltip pada semua tombol aksi
+    function activateSessionTooltips() {
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-            new bootstrap.Tooltip(tooltipTriggerEl);
+            if (!tooltipTriggerEl._tooltip) {
+                tooltipTriggerEl._tooltip = new bootstrap.Tooltip(tooltipTriggerEl);
+            }
         });
-    });
+    }
+    document.addEventListener('DOMContentLoaded', activateSessionTooltips);
+
+    // Jika Anda menambah baris via AJAX, panggil activateSessionTooltips() lagi setelah update tabel
+    // Contoh di JS: activateSessionTooltips();
 </script>
