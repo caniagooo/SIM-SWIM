@@ -16,134 +16,97 @@
 
     <?php echo includeFavicon(); ?>
 
-
-    <!--begin::Fonts-->
     <?php echo includeFonts(); ?>
 
-    <!--end::Fonts-->
 
-    <!--begin::Global Stylesheets Bundle(used by all pages)-->
+    <!--begin::Global Stylesheets Bundle (used by all pages)-->
     <?php $__currentLoopData = getGlobalAssets('css'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $path): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <?php echo sprintf('<link rel="stylesheet" href="%s">', asset($path)); ?>
-
+        <link rel="stylesheet" href="<?php echo e(asset($path)); ?>">
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     <!--end::Global Stylesheets Bundle-->
-    
 
-    <!--begin::Vendor Stylesheets(used by this page)-->
+    <!--begin::Vendor Stylesheets (used by this page)-->
     <?php $__currentLoopData = getVendors('css'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $path): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <?php echo sprintf('<link rel="stylesheet" href="%s">', asset($path)); ?>
-
+        <link rel="stylesheet" href="<?php echo e(asset($path)); ?>">
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     <!--end::Vendor Stylesheets-->
 
-    <!--begin::Custom Stylesheets(optional)-->
+    <!--begin::Custom Stylesheets (optional)-->
     <?php $__currentLoopData = getCustomCss(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $path): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <?php echo sprintf('<link rel="stylesheet" href="%s">', asset($path)); ?>
-
+        <link rel="stylesheet" href="<?php echo e(asset($path)); ?>">
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    <!--end::Custom Stylesheets--> 
+    <!--end::Custom Stylesheets-->
 
-    <!--begin:custom JS-->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- Toastr -->
+    <!-- Ekstra plugin CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-
-    <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
-    
-    
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
-    
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    
-
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     
-    
-    <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
-
 </head>
 <!--end::Head-->
 
 <!--begin::Body-->
 <body <?php echo printHtmlClasses('body'); ?> <?php echo printHtmlAttributes('body'); ?>>
 
-<?php echo $__env->make('partials/theme-mode/_init', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <?php echo $__env->make('partials/theme-mode/_init', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
-<?php echo $__env->yieldContent('content'); ?>
+    <?php echo $__env->yieldContent('content'); ?>
 
-<!--begin::Javascript-->
-<script src="<?php echo e(asset('assets/js/courses-index.js')); ?>?v=<?php echo e(filemtime(public_path('assets/js/courses-index.js'))); ?>"></script>
-<script src="<?php echo e(asset('assets/js/courses.js')); ?>?v=<?php echo e(filemtime(public_path('assets/js/courses.js'))); ?>"></script>
-<!--begin::Global Javascript Bundle(mandatory for all pages)-->
-<?php $__currentLoopData = getGlobalAssets(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $path): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-    <?php echo sprintf('<script src="%s"></script>', asset($path)); ?>
+    <!--begin::Javascript-->
+    <!-- jQuery (wajib sebelum plugin lain) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-<!--end::Global Javascript Bundle-->
+    <!--begin::Global Javascript Bundle (mandatory for all pages)-->
+    <?php $__currentLoopData = getGlobalAssets('js'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $path): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <script src="<?php echo e(asset($path)); ?>"></script>
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    <!--end::Global Javascript Bundle-->
 
-<!--begin::Vendors Javascript(used by this page)-->
-<?php $__currentLoopData = getVendors('js'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $path): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-    <?php echo sprintf('<script src="%s"></script>', asset($path)); ?>
+    <!--begin::Vendors Javascript (used by this page)-->
+    <?php $__currentLoopData = getVendors('js'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $path): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <script src="<?php echo e(asset($path)); ?>"></script>
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    <!--end::Vendors Javascript-->
 
-<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-<!--end::Vendors Javascript-->
+    <!--begin::Custom Javascript (optional)-->
+    <?php $__currentLoopData = getCustomJs(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $path): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <script src="<?php echo e(asset($path)); ?>"></script>
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    <!--end::Custom Javascript-->
 
-<!--begin::Custom Javascript(optional)-->
-<?php $__currentLoopData = getCustomJs(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $path): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-    <?php echo sprintf('<script src="%s"></script>', asset($path)); ?>
+    <!-- Ekstra Plugin JS -->
+    
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
-<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-<!--end::Custom Javascript-->
+    <!-- Custom JS -->
+    <script src="<?php echo e(asset('assets/js/courses-index.js')); ?>?v=<?php echo e(filemtime(public_path('assets/js/courses-index.js'))); ?>"></script>
+    <script src="<?php echo e(asset('assets/js/courses.js')); ?>?v=<?php echo e(filemtime(public_path('assets/js/courses.js'))); ?>"></script>
 
-<!-- Toastr -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <?php echo $__env->yieldPushContent('scripts'); ?>
+    <!--end::Javascript-->
 
-<!-- SweetAlert -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
-<?php echo $__env->yieldPushContent('scripts'); ?>
-<!--end::Javascript-->
-
-<script>
-    document.addEventListener('livewire:init', () => {
-        Livewire.on('success', (message) => {
-            toastr.success(message);
-        });
-        Livewire.on('error', (message) => {
-            toastr.error(message);
-        });
-
-        Livewire.on('swal', (message, icon, confirmButtonText) => {
-            if (typeof icon === 'undefined') {
-                icon = 'success';
-            }
-            if (typeof confirmButtonText === 'undefined') {
-                confirmButtonText = 'Ok, got it!';
-            }
-            Swal.fire({
-                text: message,
-                icon: icon,
-                buttonsStyling: false,
-                confirmButtonText: confirmButtonText,
-                customClass: {
-                    confirmButton: 'btn btn-primary'
-                }
+    <script>
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('success', (message) => { toastr.success(message); });
+            Livewire.on('error', (message) => { toastr.error(message); });
+            Livewire.on('swal', (message, icon = 'success', confirmButtonText = 'Ok, got it!') => {
+                Swal.fire({
+                    text: message,
+                    icon: icon,
+                    buttonsStyling: false,
+                    confirmButtonText: confirmButtonText,
+                    customClass: { confirmButton: 'btn btn-primary' }
+                });
             });
         });
-    });
-</script>
+    </script>
 
-<?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
-
+ 
 </body>
 <!--end::Body-->
-
 </html>
 <?php /**PATH C:\Users\JITU\swim\resources\views/layout/master.blade.php ENDPATH**/ ?>

@@ -1,8 +1,5 @@
-@extends('layout.minimal')
-@section('title', 'Courses')
-
-@section('content')
-<div class="container mt-4 mb-4">
+<x-default-layout>
+<div class="container mt-0 mb-4">
     @if ($errors->any())
         <div class="alert alert-danger mb-3">
             <ul class="mb-0">
@@ -362,7 +359,7 @@
         </div>
     </form>
 </div>
-@endsection
+</x-default-layout>
 
 @push('styles')
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />

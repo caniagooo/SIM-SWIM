@@ -1,6 +1,4 @@
-@extends('layout.minimal')
-
-@section('content')
+<x-default-layout>
 <div class="container py-3">
     <!-- Header Card -->
     <div class="card mb-4 border-0 shadow-sm">
@@ -68,7 +66,7 @@
                                 <!-- Profile Picture & Nama -->
                                 <td class="text-start align-middle">
                                     <div class="d-flex align-items-center gap-2">
-                                        <img src="{{ $student->user->profile_picture ?? asset('assets/media/avatars/default-avatar.png') }}" alt="Avatar" class="symbol symbol-30px symbol-circle">
+                                        <img src="{{ $student->user->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png') }}" alt="Avatar" class="symbol symbol-30px symbol-circle">
                                         <div>
                                             <div class="fw-semibold text-gray-800">{{ $student->user->name }}</div>
                                             <div class="text-gray-500 fs-8">{{ $student->user->email }}</div>
@@ -135,6 +133,7 @@
         </div>
     </div>
 </div>
+</x-default-layout>
 <style>
     .symbol-30px { width: 30px; height: 30px; }
     .fs-8 { font-size: 0.88rem !important; }
@@ -153,4 +152,3 @@
 @push('scripts')
     <script src="{{ asset('assets/js/students-index.js') }}"></script>
 @endpush
-@endsection

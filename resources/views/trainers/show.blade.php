@@ -1,6 +1,4 @@
-@extends('layout.minimal')
-
-@section('content')
+<x-default-layout>
 <div class="container py-3">
     <!-- Header Card -->
     <div class="card mb-4 border-0 shadow-sm">
@@ -276,4 +274,4 @@
     @endforeach
 
 </div>
-@endsection
+</x-default-layout>

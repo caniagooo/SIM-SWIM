@@ -1,4 +1,4 @@
-@extends('layout.minimal')
+<x-default-layout>
 
 @section('title')
     Permissions
@@ -67,7 +67,7 @@
 </div>
 
 <livewire:permission.permission-modal></livewire:permission.permission-modal>
-@endsection
+</x-default-layout>
 
 @push('scripts')
     {{ $dataTable->scripts() }}

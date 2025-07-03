@@ -15,124 +15,95 @@
     <link rel="canonical" href="{{ url()->current() }}"/>
 
     {!! includeFavicon() !!}
-
-    <!--begin::Fonts-->
     {!! includeFonts() !!}
-    <!--end::Fonts-->
 
-    <!--begin::Global Stylesheets Bundle(used by all pages)-->
+    <!--begin::Global Stylesheets Bundle (used by all pages)-->
     @foreach(getGlobalAssets('css') as $path)
-        {!! sprintf('<link rel="stylesheet" href="%s">', asset($path)) !!}
+        <link rel="stylesheet" href="{{ asset($path) }}">
     @endforeach
     <!--end::Global Stylesheets Bundle-->
-    
 
-    <!--begin::Vendor Stylesheets(used by this page)-->
+    <!--begin::Vendor Stylesheets (used by this page)-->
     @foreach(getVendors('css') as $path)
-        {!! sprintf('<link rel="stylesheet" href="%s">', asset($path)) !!}
+        <link rel="stylesheet" href="{{ asset($path) }}">
     @endforeach
     <!--end::Vendor Stylesheets-->
 
-    <!--begin::Custom Stylesheets(optional)-->
+    <!--begin::Custom Stylesheets (optional)-->
     @foreach(getCustomCss() as $path)
-        {!! sprintf('<link rel="stylesheet" href="%s">', asset($path)) !!}
+        <link rel="stylesheet" href="{{ asset($path) }}">
     @endforeach
-    <!--end::Custom Stylesheets--> 
+    <!--end::Custom Stylesheets-->
 
-    <!--begin:custom JS-->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- Toastr -->
+    <!-- Ekstra plugin CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-
-    <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
-    
-    
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
-    
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    
-
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     
-    
-    @livewireStyles
 </head>
 <!--end::Head-->
 
 <!--begin::Body-->
 <body {!! printHtmlClasses('body') !!} {!! printHtmlAttributes('body') !!}>
 
-@include('partials/theme-mode/_init')
+    @include('partials/theme-mode/_init')
 
-@yield('content')
+    @yield('content')
 
-<!--begin::Javascript-->
-<script src="{{ asset('assets/js/courses-index.js') }}?v={{ filemtime(public_path('assets/js/courses-index.js')) }}"></script>
-<script src="{{ asset('assets/js/courses.js') }}?v={{ filemtime(public_path('assets/js/courses.js')) }}"></script>
-<!--begin::Global Javascript Bundle(mandatory for all pages)-->
-@foreach(getGlobalAssets() as $path)
-    {!! sprintf('<script src="%s"></script>', asset($path)) !!}
-@endforeach
-<!--end::Global Javascript Bundle-->
+    <!--begin::Javascript-->
+    <!-- jQuery (wajib sebelum plugin lain) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!--begin::Vendors Javascript(used by this page)-->
-@foreach(getVendors('js') as $path)
-    {!! sprintf('<script src="%s"></script>', asset($path)) !!}
-@endforeach
-<!--end::Vendors Javascript-->
+    <!--begin::Global Javascript Bundle (mandatory for all pages)-->
+    @foreach(getGlobalAssets('js') as $path)
+        <script src="{{ asset($path) }}"></script>
+    @endforeach
+    <!--end::Global Javascript Bundle-->
 
-<!--begin::Custom Javascript(optional)-->
-@foreach(getCustomJs() as $path)
-    {!! sprintf('<script src="%s"></script>', asset($path)) !!}
-@endforeach
-<!--end::Custom Javascript-->
+    <!--begin::Vendors Javascript (used by this page)-->
+    @foreach(getVendors('js') as $path)
+        <script src="{{ asset($path) }}"></script>
+    @endforeach
+    <!--end::Vendors Javascript-->
 
-<!-- Toastr -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <!--begin::Custom Javascript (optional)-->
+    @foreach(getCustomJs() as $path)
+        <script src="{{ asset($path) }}"></script>
+    @endforeach
+    <!--end::Custom Javascript-->
 
-<!-- SweetAlert -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Ekstra Plugin JS -->
+    
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
+    <!-- Custom JS -->
+    <script src="{{ asset('assets/js/courses-index.js') }}?v={{ filemtime(public_path('assets/js/courses-index.js')) }}"></script>
+    <script src="{{ asset('assets/js/courses.js') }}?v={{ filemtime(public_path('assets/js/courses.js')) }}"></script>
 
-@stack('scripts')
-<!--end::Javascript-->
+    @stack('scripts')
+    <!--end::Javascript-->
 
-<script>
-    document.addEventListener('livewire:init', () => {
-        Livewire.on('success', (message) => {
-            toastr.success(message);
-        });
-        Livewire.on('error', (message) => {
-            toastr.error(message);
-        });
-
-        Livewire.on('swal', (message, icon, confirmButtonText) => {
-            if (typeof icon === 'undefined') {
-                icon = 'success';
-            }
-            if (typeof confirmButtonText === 'undefined') {
-                confirmButtonText = 'Ok, got it!';
-            }
-            Swal.fire({
-                text: message,
-                icon: icon,
-                buttonsStyling: false,
-                confirmButtonText: confirmButtonText,
-                customClass: {
-                    confirmButton: 'btn btn-primary'
-                }
+    <script>
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('success', (message) => { toastr.success(message); });
+            Livewire.on('error', (message) => { toastr.error(message); });
+            Livewire.on('swal', (message, icon = 'success', confirmButtonText = 'Ok, got it!') => {
+                Swal.fire({
+                    text: message,
+                    icon: icon,
+                    buttonsStyling: false,
+                    confirmButtonText: confirmButtonText,
+                    customClass: { confirmButton: 'btn btn-primary' }
+                });
             });
         });
-    });
-</script>
+    </script>
 
-@livewireScripts
+ 
 </body>
 <!--end::Body-->
-
 </html>

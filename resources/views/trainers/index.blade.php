@@ -1,6 +1,4 @@
-@extends('layout.minimal')
-
-@section('content')
+<x-default-layout>
 <div class="container py-3">
     <!-- Header Card ala Metronic -->
     <div class="card mb-4 border-0 shadow-sm">
@@ -120,6 +118,7 @@
         </div>
     </div>
 </div>
+</x-default-layout>
 <style>
     .symbol-30px { width: 30px; height: 30px; }
     .fs-8 { font-size: 0.88rem !important; }
@@ -140,4 +139,3 @@
 @push('scripts')
     <script src="{{ asset('assets/js/trainers-index.js') }}"></script>
 @endpush
-@endsection

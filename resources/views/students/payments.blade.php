@@ -1,6 +1,4 @@
-@extends('layout.minimal')
-
-@section('content')
+<x-default-layout>
 <div class="container py-3">
     <div class="card card-flush border-0 shadow-sm rounded-4">
         <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 py-4">
@@ -43,6 +41,7 @@
         </div>
     </div>
 </div>
+</x-default-layout>
 <style>
     .card { border-radius: 1.25rem !important; }
     .fw-bold { font-weight: 600 !important; }
@@ -55,4 +54,3 @@
         .table { font-size: 0.875rem; }
     }
 </style>
-@endsection

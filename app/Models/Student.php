@@ -13,7 +13,7 @@ class Student extends Model
     protected $fillable = [
         'user_id',
         'age_group',
-        // Kolom lain di tabel students
+        'profile_photo_path'
     ];
 
     // Relasi ke model User

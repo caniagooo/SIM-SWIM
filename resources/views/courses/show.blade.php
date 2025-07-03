@@ -1,8 +1,5 @@
-@extends('layout.minimal')
-@section('title', 'Detail Kursus')
-
-@section('content')
-    <div class="container py-3">
+<x-default-layout>
+    <div class="container mt-0">
         <!-- Header Card -->
         <div class="card mb-4 border-0 shadow-sm">
             <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 p-4">
@@ -211,7 +208,7 @@
             font-weight: 500;
         }
     </style>
-@endsection
+</x-default-layout>
 
 @push('scripts')
     

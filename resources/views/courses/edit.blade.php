@@ -1,8 +1,5 @@
-@extends('layout.minimal')
-@section('title', 'Edit Kursus')
-
-@section('content')
-<div class="container mt-4 mb-4">
+<x-default-layout>
+<div class="container mt-0 mb-4">
     <form id="course-form" method="POST" action="{{ route('courses.update', $course->id) }}">
         @csrf
         @method('PUT')
@@ -355,7 +352,7 @@
         </div>
     </form>
 </div>
-@endsection
+</x-default-layout>
 
 @push('styles')
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />

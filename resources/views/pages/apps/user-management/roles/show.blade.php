@@ -1,4 +1,4 @@
-@extends('layout.minimal')
+<x-default-layout>
 
 @section('title')
     Roles
@@ -101,7 +101,7 @@
 <!--begin::Modal-->
 <livewire:permission.role-modal></livewire:permission.role-modal>
 <!--end::Modal-->
-@endsection
+</x-default-layout>
 
 @push('scripts')
     {{ $dataTable->scripts() }}

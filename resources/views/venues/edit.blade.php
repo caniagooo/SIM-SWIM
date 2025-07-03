@@ -1,6 +1,4 @@
-@extends('layout.minimal')
-
-@section('content')
+<x-default-layout>
 <div class="container py-3">
     <div class="row justify-content-center">
         <div class="col-12 col-md-8 col-lg-6">
@@ -52,6 +50,7 @@
         </div>
     </div>
 </div>
+</x-default-layout>
 <style>
     .form-label { font-size: 0.97rem; }
     .form-select-lg, .form-control-lg { font-size: 0.97rem; }
@@ -64,4 +63,3 @@
         .form-label, .form-select-lg, .form-control-lg { font-size: 0.92rem !important; }
     }
 </style>
-@endsection

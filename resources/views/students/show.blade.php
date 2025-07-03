@@ -1,6 +1,4 @@
-@extends('layout.minimal')
-
-@section('content')
+<x-default-layout>
 <div class="container py-3">
     <!-- Header Card -->
     <div class="card mb-4 border-0 shadow-sm">
@@ -17,7 +15,7 @@
         <div class="col-12 col-md-4 col-lg-3">
             <div class="card card-flush border-0 shadow-sm h-100 text-center">
                 <div class="card-body d-flex flex-column align-items-center justify-content-center py-4">
-                    <img src="{{ $student->user->profile_picture ?? asset('assets/media/avatars/default-avatar.png') }}"
+                    <img src="{{ $student->user->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png') }}"
                          alt="Avatar" class="symbol symbol-80px symbol-circle border mb-3" width="80" height="80">
                     <h5 class="fw-bold mb-1">{{ $student->user->name }}</h5>
                     <div class="mt-2">
@@ -284,7 +282,7 @@
             </div>
         </div>
     </div>
-
+</x-default-layout>
     <!-- Modal Detail Kursus -->
     @foreach ($student->courses->take(5) as $course)
     <div class="modal fade" id="courseDetailModal{{ $course->id }}" tabindex="-1" aria-labelledby="courseDetailModalLabel{{ $course->id }}" aria-hidden="true">
@@ -306,4 +304,3 @@
     </div>
     @endforeach
 </div>
-@endsection

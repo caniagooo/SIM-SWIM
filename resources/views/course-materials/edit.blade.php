@@ -1,8 +1,5 @@
-@extends('layout.minimal')
-@section('title', 'Edit Materi Kursus')
-
-@section('content')
-<div class="container mt-4 mb-4">
+<x-default-layout>
+<div class="container mt-0 mb-4">
     <div class="card card-flush border-0 shadow-sm">
         <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 p-4">
             <h3 class="mb-0 fw-bold">Edit Materi Kursus</h3>
@@ -32,4 +29,4 @@
         </div>
     </div>
 </div>
-@endsection
+</x-default-layout>

@@ -1,8 +1,5 @@
-@extends('layout.minimal')
-@section('title', 'Daftar Materi Kursus')
-
-@section('content')
-<div class="container py-3">
+<x-default-layout>
+<div class="container mt-0">
     <!-- Header Card ala Metronic -->
     <div class="card mb-4 border-0 shadow-sm">
         <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 p-4">
@@ -92,6 +89,7 @@
         </div>
     </div>
 </div>
+</x-default-layout>
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -109,4 +107,3 @@
 @push('scripts')
 <script src="{{ asset('assets/js/course-materials-index.js') }}"></script>
 @endpush
-@endsection

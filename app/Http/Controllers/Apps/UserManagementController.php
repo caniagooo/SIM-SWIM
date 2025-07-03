@@ -52,9 +52,31 @@ class UserManagementController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, $id)
     {
-        //
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'birth_date' => 'nullable|date',
+            'phone' => 'nullable|string|max:20',
+            'gender' => 'nullable|in:pria,wanita',
+            'alamat' => 'nullable|string|max:255',
+            'type' => 'required|in:member,reguler,organisasi',
+            'profile_photo_path' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $validated['profile_photo_path'] = $path;
+        }
+
+        $user->update($validated);
+
+        return redirect()->route('user-management.users.show', $user->id)
+            ->with('success', 'User berhasil diupdate');
     }
 
     /**

@@ -15,8 +15,8 @@
 		</div>
 		<!--end::Mobile logo-->
 		<!--begin::Header wrapper-->
-		<div class="d-flex align-items-stretch justify-content-between flex-lg-grow-1" id="kt_app_header_wrapper">
-			@include(config('settings.KT_THEME_LAYOUT_DIR').'/partials/sidebar-layout/header/_menu/_menu')
+		<div class="d-flex align-items-stretch justify-content-end flex-lg-grow-1" id="kt_app_header_wrapper">
+			
 			@include(config('settings.KT_THEME_LAYOUT_DIR').'/partials/sidebar-layout/header/_navbar')
 		</div>
 		<!--end::Header wrapper-->

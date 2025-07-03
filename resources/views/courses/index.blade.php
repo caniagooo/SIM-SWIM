@@ -1,9 +1,5 @@
-@extends('layout.minimal')
-@section('title', 'Daftar Kursus')
-
-@section('content')
-
-    <div class="container mt-4 mb-4">
+<x-default-layout>
+    <div class="container mt-0 mb-4">
         <!-- Header Card -->
         <div class="card mb-4 border-0 shadow-sm">
             <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 p-4">
@@ -133,7 +129,7 @@
     @endforeach
 
     @include('courses.partials.invoice-course-modal')
-@endsection
+</x-default-layout>
 
 @push('scripts')
     <script src="{{ asset('assets/js/courses-index.js') }}"></script>

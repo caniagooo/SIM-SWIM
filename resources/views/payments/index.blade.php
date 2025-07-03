@@ -1,6 +1,4 @@
-@extends('layout.minimal')
-
-@section('content')
+<x-default-layout>
 <div class="container py-3">
     <!-- Header Card -->
     <div class="card mb-4 border-0 shadow-sm">
@@ -135,7 +133,7 @@
         </div>
     </div>
 </div>
-
+</x-default-layout>
 <style>
     .fs-8 { font-size: 0.88rem !important; }
     .me-n2 { margin-right: -0.5rem !important; }
@@ -150,4 +148,3 @@
 @push('scripts')
     <script src="{{ asset('assets/js/payments-index.js') }}"></script>
 @endpush
-@endsection

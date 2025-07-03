@@ -1,9 +1,5 @@
-@extends('layout.minimal')
-
-@section('title', 'Dashboard')
-
-@section('content')
-<div class="container-xxl mt-8">
+<x-default-layout>
+<div class="container mt-0">
     <div class="row g-5 align-items-stretch">
         <!-- KIRI: Daftar Kursus Aktif -->
         <div class="col-12 col-lg-7 d-flex flex-column">
@@ -171,7 +167,7 @@
         </div>
     </div>
 </div>
-@endsection
+</x-default-layout>
 
 @push('scripts')
 <script>
