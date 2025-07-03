@@ -29,12 +29,12 @@
     @stack('styles')
 </head>
 <body {!! printHtmlClasses('body') !!} {!! printHtmlAttributes('body') !!}>
-
+    
     <div class="d-flex flex-row flex-root">
         <!--begin::Sidebar-->
         @include('layout.partials.sidebar-layout._sidebar')
         <!--end::Sidebar-->
-
+    
         <!--begin::Main-->
         <div class="page d-flex flex-column flex-row-fluid">
             <main class="d-flex flex-column flex-grow-1">
@@ -43,7 +43,8 @@
         </div>
         <!--end::Main-->
     </div>
-
+    
+    
     <!-- Global JS Bundle -->
     @foreach(getGlobalAssets('js') as $path)
         <script src="{{ asset($path) }}"></script>
@@ -59,15 +60,17 @@
         <script src="{{ asset($path) }}"></script>
     @endforeach
 
-
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <!-- Datatables -->
 
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-
+    <script src="{{ asset('assets/js/courses.js') }}"></script>
 
     @livewireScripts
-    
+
 
     <script>
         document.addEventListener('livewire:init', () => {

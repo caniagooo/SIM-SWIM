@@ -27,19 +27,16 @@ class CourseController extends Controller
             $query->where('type', $request->type);
         }
 
-           // Filter by trainer
         if ($request->filled('trainer_id')) {
             $query->whereHas('trainers', function($q) use ($request) {
                 $q->where('trainers.id', $request->trainer_id);
             });
         }
 
-        // Filter by venue
         if ($request->filled('venue_id')) {
             $query->where('venue_id', $request->venue_id);
         }
 
-        // Filter by status
         if ($request->filled('status')) {
             $now = now();
             $query->with(['payment', 'sessions']);
@@ -63,18 +60,140 @@ class CourseController extends Controller
             });
         }
 
-
-
-        // Tambahkan orderBy di sini
         $query->orderBy('created_at', 'desc');
 
         $courses = $query->with(['venue', 'trainers.user', 'students.user', 'payment', 'sessions'])->paginate(5)->withQueryString();
-        $allTrainers = \App\Models\Trainer::all();
-        $allMaterials = \App\Models\CourseMaterial::all();
+        $allTrainers = Trainer::with('user')->get();
+        $allMaterials = CourseMaterial::all();
 
-        
+        // === LOGIC UNTUK CARD KURSUS ===
+        $cards = $courses->map(function($course) {
+            $payment = $course->payment;
+            $isPending = $payment && $payment->status === 'pending';
+            $isPaid = $payment && $payment->status === 'paid';
+            $sessions = $course->sessions ?? collect();
+            $sessionsCompleted = $sessions->where('status', 'completed')->count() ?? 0;
 
-        return view('courses.index', compact('courses', 'allCourses', 'allTrainers', 'allMaterials'));
+            $now = now();
+            $isExpired = $now->greaterThan($course->valid_until);
+            $maxSessionReached = $course->max_sessions ? ($sessionsCompleted >= $course->max_sessions) : false;
+
+            $isActive = false;
+            $statusText = '';
+            $statusClass = '';
+            if ($payment && $payment->status === 'paid' && !$isExpired && !$maxSessionReached) {
+                $isActive = true;
+                $statusText = 'Aktif';
+                $statusClass = 'badge-light-success';
+            } elseif ($isExpired || $maxSessionReached) {
+                $statusText = 'Expired';
+                $statusClass = 'badge-light-danger';
+            } else {
+                $statusText = 'Unpaid';
+                $statusClass = 'badge-light-warning';
+            }
+
+            $start = $course->start_date;
+            $end = $course->valid_until;
+            $totalDays = $start->diffInDays($end) ?: 1;
+            $elapsedDays = $start->lte($now) ? $start->diffInDays(min($now, $end)) : 0;
+            $progress = min(100, max(0, round(($elapsedDays / $totalDays) * 100)));
+
+            if ($now->gt($end)) {
+                $progressBg = 'background-color: rgba(255,76,81,0.15);';
+                $progressBarBg = 'background: #F1416C; color: #fff;';
+            } elseif ($progress >= 1) {
+                $progressBg = 'background-color: rgba(80,205,137,0.15);';
+                $progressBarBg = 'background: #50CD89; color: #fff;';
+            } else {
+                $progressBg = 'background-color: rgba(0,158,247,0.15);';
+                $progressBarBg = 'background: #009EF7; color: #fff;';
+            }
+
+            $maxAvatars = 3;
+            $students = $course->students->take($maxAvatars);
+            $studentNames = $course->students->pluck('user.name')->implode(', ');
+            $isGroup = $course->type === 'group';
+
+            // Sessions siap pakai untuk modal
+            $sessionsSorted = ($course->sessions ?? collect())->sortBy('date')->values();
+
+            return [
+                'course' => $course,
+                'payment' => $payment,
+                'isPending' => $isPending,
+                'isPaid' => $isPaid,
+                'sessionsCompleted' => $sessionsCompleted,
+                'isExpired' => $isExpired,
+                'maxSessionReached' => $maxSessionReached,
+                'isActive' => $isActive,
+                'statusText' => $statusText,
+                'statusClass' => $statusClass,
+                'progress' => $progress,
+                'progressBg' => $progressBg,
+                'progressBarBg' => $progressBarBg,
+                'maxAvatars' => $maxAvatars,
+                'students' => $students,
+                'studentNames' => $studentNames,
+                'isGroup' => $isGroup,
+                'sessions' => $sessionsSorted, // <-- Tambahkan ini!
+            ];
+        });
+
+        // Hitung statistik untuk filter badge
+        $countTotal = $allCourses->count();
+        $countActive = $allCourses->filter(function($c) {
+            return optional($c->payment)->status === 'paid'
+                && now()->lte($c->valid_until)
+                && (!$c->max_sessions || ($c->sessions ?? collect())->where('status','completed')->count() < $c->max_sessions);
+        })->count();
+        $countExpired = $allCourses->filter(function($c) {
+            return optional($c->payment)->status === 'paid'
+                && (now()->gt($c->valid_until)
+                    || ($c->max_sessions && ($c->sessions ?? collect())->where('status','completed')->count() >= $c->max_sessions));
+        })->count();
+        $countUnpaid = $allCourses->filter(function($c) {
+            return optional($c->payment)->status === 'pending';
+        })->count();
+
+        // Tentukan label dan badge class
+        $status = request('status');
+        if ($status == 'active') {
+            $statusLabel = 'Aktif';
+            $statusCount = $countActive;
+            $statusBadgeClass = 'bg-success';
+        } elseif ($status == 'expired') {
+            $statusLabel = 'Expired';
+            $statusCount = $countExpired;
+            $statusBadgeClass = 'bg-danger';
+        } elseif ($status == 'unpaid') {
+            $statusLabel = 'Unpaid';
+            $statusCount = $countUnpaid;
+            $statusBadgeClass = 'bg-warning text-dark';
+        } else {
+            $statusLabel = 'Total';
+            $statusCount = $countTotal;
+            $statusBadgeClass = 'bg-light text-dark';
+        }
+
+        // Untuk filter venue di advanced filter
+        $uniqueVenues = $courses->pluck('venue')->unique('id')->filter();
+
+        return view('courses.index', [
+            'courses' => $courses,
+            'allCourses' => $allCourses,
+            'allTrainers' => $allTrainers,
+            'allMaterials' => $allMaterials,
+            'cards' => $cards,
+            'countTotal' => $countTotal,
+            'countActive' => $countActive,
+            'countExpired' => $countExpired,
+            'countUnpaid' => $countUnpaid,
+            'statusLabel' => $statusLabel,
+            'statusCount' => $statusCount,
+            'statusBadgeClass' => $statusBadgeClass,
+            'uniqueVenues' => $uniqueVenues,
+        ]);
     }
 
     public function create()
@@ -89,10 +208,11 @@ class CourseController extends Controller
 
     public function store(Request $request)
     {
+        \Log::info('Course store called', $request->all());
         $validatedData = $request->validate([
             'type' => 'required|in:private,group',
             'venue_id' => 'required|exists:venues,id',
-            'start_date' => 'required|date|after_or_equal:today',
+            'start_date' => 'required|date',
             'duration_days' => 'required|integer|min:1',
             'max_sessions' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
@@ -102,6 +222,7 @@ class CourseController extends Controller
             // 'payment_status' => 'required|in:pending,paid', // HAPUS dari validasi request!
             // 'payment_method' => 'nullable|in:cash,bank_transfer,credit_card',
         ]);
+        \Log::info('Course validation passed');
 
         // Hitung end date berdasarkan start date dan duration_days
         $startDate = \Carbon\Carbon::parse($validatedData['start_date']);
@@ -132,17 +253,72 @@ class CourseController extends Controller
                 'payment_method' => null,
             ]);
         }
-
+        \Log::info('Course created', ['id' => $course->id]);
         // Redirect ke halaman index kursus
         return redirect()->route('courses.index')->with('success', 'Course created successfully.');
     }
 
     public function show($courseId, Request $request)
     {
-        $course = Course::with(['sessions', 'sessions.attendances','students.user','materials',])->findOrFail($courseId);
-        $activeTab = $request->get('tab', 'overview'); // Default tab adalah 'overview'
+        $course = Course::with([
+            'students.user',
+            'materials',
+            'trainers.user',
+            'venue',
+            'payment'
+        ])->findOrFail($courseId);
 
-        return view('courses.show', compact('course', 'activeTab'));
+        // Ambil sessions langsung dari tabel, pastikan up-to-date
+        $sessions = \App\Models\CourseSession::where('course_id', $course->id)
+            ->orderBy('session_date')
+            ->orderBy('start_time')
+            ->get();
+
+        // Tab aktif
+        $activeTab = $request->get('tab', 'students');
+
+        // Info cards
+        $startDate = $course->start_date ? $course->start_date->translatedFormat('d M Y') : 'N/A';
+        $endDate = $course->valid_until ? $course->valid_until->translatedFormat('d M Y') : 'N/A';
+        $sessionsCompleted = $sessions->where('status', 'completed')->count();
+        $maxSessions = $course->max_sessions ?? 'N/A';
+
+        // Pelatih
+        $trainers = $course->trainers;
+
+        // Students
+        $students = $course->students;
+
+        // Materials
+        $materials = $course->materials;
+
+        // Basic skills (array)
+        $basicSkills = is_array($course->basic_skills)
+            ? $course->basic_skills
+            : (empty($course->basic_skills) ? [] : explode(',', $course->basic_skills));
+
+        // Summary materi
+        $totalEstimatedSessions = $materials->sum('estimated_sessions');
+        $averageMinScore = $materials->count() > 0
+            ? number_format($materials->avg('minimum_score'), 1)
+            : '-';
+
+        // Payment status
+        $paymentStatus = $course->payment->status ?? 'unpaid';
+        $isPaid = in_array(strtolower($paymentStatus), ['lunas', 'paid']);
+
+        // Tab list
+        $tabList = [
+            'students' => ['icon' => 'bi-people', 'label' => 'Peserta'],
+            'sessions' => ['icon' => 'bi-calendar-check', 'label' => 'Sesi'],
+            'materials' => ['icon' => 'bi-journal-bookmark', 'label' => 'Materi'],
+        ];
+
+        return view('courses.show', compact(
+            'course', 'activeTab', 'startDate', 'endDate', 'sessionsCompleted', 'maxSessions',
+            'trainers', 'students', 'sessions', 'materials', 'basicSkills',
+            'totalEstimatedSessions', 'averageMinScore', 'paymentStatus', 'isPaid', 'tabList'
+        ));
     }
 
     public function edit($id)
@@ -276,9 +452,82 @@ public function ajaxIndex(Request $request)
     $query->orderBy('created_at', 'desc');
 
     $courses = $query->with(['venue', 'trainers.user', 'students.user', 'payment', 'sessions'])->paginate(5)->withQueryString();
-    $allTrainers = \App\Models\Trainer::all();
-    $allMaterials = \App\Models\CourseMaterial::all();
+    $allTrainers = Trainer::with('user')->get();
+    $allMaterials = CourseMaterial::all();
 
-    return view('courses.partials.course-list', compact('courses', 'allTrainers', 'allMaterials'))->render();
+        $cards = $courses->map(function($course) {
+        $payment = $course->payment;
+        $isPending = $payment && $payment->status === 'pending';
+        $isPaid = $payment && $payment->status === 'paid';
+        $sessions = $course->sessions ?? collect();
+        $sessionsCompleted = $sessions->where('status', 'completed')->count();
+
+        $now = now();
+        $isExpired = $now->greaterThan($course->valid_until);
+        $maxSessionReached = $course->max_sessions ? ($sessionsCompleted >= $course->max_sessions) : false;
+
+        $isActive = false;
+        $statusText = '';
+        $statusClass = '';
+        if ($payment && $payment->status === 'paid' && !$isExpired && !$maxSessionReached) {
+            $isActive = true;
+            $statusText = 'Aktif';
+            $statusClass = 'badge-light-success';
+        } elseif ($isExpired || $maxSessionReached) {
+            $statusText = 'Expired';
+            $statusClass = 'badge-light-danger';
+        } else {
+            $statusText = 'Unpaid';
+            $statusClass = 'badge-light-warning';
+        }
+
+        $start = $course->start_date;
+        $end = $course->valid_until;
+        $totalDays = $start->diffInDays($end) ?: 1;
+        $elapsedDays = $start->lte($now) ? $start->diffInDays(min($now, $end)) : 0;
+        $progress = min(100, max(0, round(($elapsedDays / $totalDays) * 100)));
+
+        if ($now->gt($end)) {
+            $progressBg = 'background-color: rgba(255,76,81,0.15);';
+            $progressBarBg = 'background: #F1416C; color: #fff;';
+        } elseif ($progress >= 1) {
+            $progressBg = 'background-color: rgba(80,205,137,0.15);';
+            $progressBarBg = 'background: #50CD89; color: #fff;';
+        } else {
+            $progressBg = 'background-color: rgba(0,158,247,0.15);';
+            $progressBarBg = 'background: #009EF7; color: #fff;';
+        }
+
+        $maxAvatars = 3;
+        $students = $course->students->take($maxAvatars);
+        $studentNames = $course->students->pluck('user.name')->implode(', ');
+        $isGroup = $course->type === 'group';
+
+        // Sessions siap pakai untuk modal
+        $sessionsSorted = ($course->sessions ?? collect())->sortBy('date')->values();
+
+        return [
+            'course' => $course,
+            'payment' => $payment,
+            'isPending' => $isPending,
+            'isPaid' => $isPaid,
+            'sessionsCompleted' => $sessionsCompleted,
+            'isExpired' => $isExpired,
+            'maxSessionReached' => $maxSessionReached,
+            'isActive' => $isActive,
+            'statusText' => $statusText,
+            'statusClass' => $statusClass,
+            'progress' => $progress,
+            'progressBg' => $progressBg,
+            'progressBarBg' => $progressBarBg,
+            'maxAvatars' => $maxAvatars,
+            'students' => $students,
+            'studentNames' => $studentNames,
+            'isGroup' => $isGroup,
+            'sessions' => $sessionsSorted, // <-- untuk modal
+        ];
+    });
+
+    return view('courses.partials.course-list', compact('cards', 'allTrainers', 'allMaterials'))->render();
 }
 }

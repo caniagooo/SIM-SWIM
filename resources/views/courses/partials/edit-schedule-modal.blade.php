@@ -1,4 +1,4 @@
-<div class="modal fade" id="editScheduleModal{{ $session->id }}" tabindex="-1" aria-labelledby="editScheduleModalLabel{{ $session->id }}" aria-hidden="true">
+<div class="modal fade" id="editScheduleModal-{{ $session->id }}" tabindex="-1" aria-labelledby="editScheduleModalLabel{{ $session->id }}" aria-hidden="true">
     <div class="modal-dialog">
         <form id="editScheduleForm{{ $session->id }}"
               action="{{ route('sessions.update', ['course' => $course->id, 'session' => $session->id]) }}"
@@ -84,17 +84,16 @@
                     <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary btn-sm">Simpan Perubahan</button>
                 </div>
-                
             </div>
             <!-- Alert Container -->
-                <div id="alertContainer" class="alert d-none alert-dismissible fade show mt-4" role="alert">
-                    <div class="d-flex align-items-center">
-                        <i id="alertIcon" class="bi me-2"></i>
-                        <span id="alertMessage"></span>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div id="alertContainer" class="alert d-none alert-dismissible fade show mt-4" role="alert">
+                <div class="d-flex align-items-center">
+                    <i id="alertIcon" class="bi me-2"></i>
+                    <span id="alertMessage"></span>
                 </div>
-                <!-- end Alert Container -->
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <!-- end Alert Container -->
         </form>
     </div>
 </div>

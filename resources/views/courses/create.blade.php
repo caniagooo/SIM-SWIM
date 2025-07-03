@@ -3,6 +3,15 @@
 
 @section('content')
 <div class="container mt-4 mb-4">
+    @if ($errors->any())
+        <div class="alert alert-danger mb-3">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <form id="course-form" method="POST" action="{{ route('courses.store') }}">
         @csrf
 
@@ -55,7 +64,7 @@
                                     <div class="card course-type-card border-primary position-relative flex-fill" data-type="private" style="cursor:pointer; min-width:150px;">
                                         <div class="position-absolute top-0 end-0 m-2 z-index-2">
                                             <div class="form-check form-check-sm form-check-custom form-check-solid">
-                                                <input class="form-check-input course-type-checkbox" type="checkbox" id="type-private-checkbox" value="private" disabled checked>
+                                                <input class="form-check-input course-type-checkbox" type="checkbox" id="type-private-checkbox" value="private">
                                             </div>
                                         </div>
                                         <div class="card-body text-center py-3">
@@ -66,7 +75,7 @@
                                     <div class="card course-type-card position-relative flex-fill" data-type="group" style="cursor:pointer; min-width:150px;">
                                         <div class="position-absolute top-0 end-0 m-2 z-index-2">
                                             <div class="form-check form-check-sm form-check-custom form-check-solid">
-                                                <input class="form-check-input course-type-checkbox" type="checkbox" id="type-group-checkbox" value="group" disabled>
+                                                <input class="form-check-input course-type-checkbox" type="checkbox" id="type-group-checkbox" value="group">
                                             </div>
                                         </div>
                                         <div class="card-body text-center py-3">

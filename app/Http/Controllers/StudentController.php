@@ -64,11 +64,16 @@ class StudentController extends Controller
                 'kelurahan_id' => $request->kelurahan_id,
                 'type' => 'member',
             ]);
+            $user->assignRole('murid');
             $user_id = $user->id;
             // Kirim email password ke user di sini jika diinginkan
         } else {
             $user_id = $request->user_id;
+            $user = User::find($user_id);
+            if ($user && !$user->hasRole('murid')) {
+                $user->assignRole('murid');
         }
+    }
 
         Student::create([
             'user_id' => $user_id,
@@ -92,7 +97,7 @@ class StudentController extends Controller
             'gender' => 'required|in:pria,wanita',
             'phone' => 'nullable',
             'alamat' => 'nullable',
-            'kelurahan_id' => 'nullable|exists:kelurahans,id',
+            
         ]);
 
         // Update data user terkait
@@ -102,7 +107,7 @@ class StudentController extends Controller
             'gender' => $request->gender,
             'phone' => $request->phone,
             'alamat' => $request->alamat,
-            'kelurahan_id' => $request->kelurahan_id,
+            
         ]);
 
         // Hitung ulang age_group

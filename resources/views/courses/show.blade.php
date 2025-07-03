@@ -20,8 +20,8 @@
                         <span class="badge badge-light-success fw-semibold">
                             <i class="bi bi-cash-stack me-1"></i> Rp {{ number_format($course->price) }}
                         </span>
-                        <span class="badge {{ (isset($course->payment) && (strtolower($course->payment->status) === 'lunas' || strtolower($course->payment->status) === 'paid')) ? 'badge-light-success' : 'badge-light-danger' }} fw-semibold">
-                            {{ $course->payment->status ?? 'unpaid' }}
+                        <span class="badge {{ $isPaid ? 'badge-light-success' : 'badge-light-danger' }} fw-semibold">
+                            {{ $paymentStatus }}
                         </span>
                     </div>
                     @if($course->description)
@@ -45,7 +45,7 @@
                 <div class="card card-flush text-center border-0 shadow-sm h-100">
                     <div class="card-body py-3 px-2">
                         <div class="text-gray-500 fs-7 mb-1">Mulai</div>
-                        <div class="fw-bold fs-6">{{ $course->start_date ? $course->start_date->translatedFormat('d M Y') : 'N/A' }}</div>
+                        <div class="fw-bold fs-6">{{ $startDate }}</div>
                     </div>
                 </div>
             </div>
@@ -53,7 +53,7 @@
                 <div class="card card-flush text-center border-0 shadow-sm h-100">
                     <div class="card-body py-3 px-2">
                         <div class="text-gray-500 fs-7 mb-1">Selesai</div>
-                        <div class="fw-bold fs-6">{{ $course->valid_until ? $course->valid_until->translatedFormat('d M Y') : 'N/A' }}</div>
+                        <div class="fw-bold fs-6">{{ $endDate }}</div>
                     </div>
                 </div>
             </div>
@@ -62,7 +62,7 @@
                     <div class="card-body py-3 px-2">
                         <div class="text-gray-500 fs-7 mb-1">Sesi</div>
                         <div class="fw-bold fs-6">
-                            {{ $course->sessions->where('status', 'completed')->count() }} / {{ $course->max_sessions ?? 'N/A' }}
+                            {{ $sessionsCompleted }} / {{ $maxSessions }}
                         </div>
                     </div>
                 </div>
@@ -72,7 +72,7 @@
                     <div class="card-body py-3 px-2">
                         <div class="text-gray-500 fs-7 mb-1">Pelatih</div>
                         <div class="d-flex justify-content-center flex-wrap gap-1">
-                            @forelse ($course->trainers as $trainer)
+                            @forelse ($trainers as $trainer)
                                 <img 
                                     src="{{ optional($trainer->user)->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png') }}"
                                     alt="Avatar" 
@@ -93,14 +93,6 @@
 
         <!-- Tabs -->
         <ul class="nav nav-pills nav-pills-custom mb-3" id="courseTabs" role="tablist" style="background: #f5f8fa; border-radius: 0.2rem; overflow: hidden;">
-            @php
-                $activeTab = request()->get('tab', 'students');
-                $tabList = [
-                    'students' => ['icon' => 'bi-people', 'label' => 'Peserta'],
-                    'sessions' => ['icon' => 'bi-calendar-check', 'label' => 'Sesi'],
-                    'materials' => ['icon' => 'bi-journal-bookmark', 'label' => 'Materi'],
-                ];
-            @endphp
             @foreach($tabList as $tabKey => $tab)
                 <li class="nav-item flex-fill text-center" role="presentation" style="min-width: 110px;">
                     <button
@@ -175,232 +167,26 @@
         <div class="tab-content" id="courseTabsContent">
             <!-- Siswa Tab -->
             <div class="tab-pane fade show active" id="students" role="tabpanel">
-                <div class="card card-flush border-0 shadow-sm mb-3">
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-row-dashed table-row-gray-200 align-middle gy-2 mb-0">
-                                <thead>
-                                    <tr class="text-center fw-semibold text-gray-600 fs-7">
-                                        <th>#</th>
-                                        <th>Foto</th>
-                                        <th>Nama</th>
-                                        <th>Kehadiran</th>
-                                        <th>Nilai</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($course->students as $student)
-                                        @php
-                                            $attendanceCount = $student->sessions->where('course_id', $course->id)->count();
-                                            $maxSessions = $course->max_sessions ?? 0;
-                                            $materialIds = $course->materials->pluck('id');
-                                            $totalScore = \DB::table('student_grades')
-                                                ->where('student_id', $student->id)
-                                                ->whereIn('material_id', $materialIds)
-                                                ->avg('score');
-                                            $averageScore = $totalScore ? number_format($totalScore, 1) : '-';
-                                        @endphp
-                                        <tr>
-                                            <td class="text-center text-gray-500 fs-8">{{ $loop->iteration }}</td>
-                                            <td class="text-center">
-                                                <img src="{{ optional($student->user)->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png') }}" alt="Avatar" class="symbol symbol-30px symbol-circle">
-                                            </td>
-                                            <td>
-                                                <a href="{{ route('students.show', $student->id) }}" class="fw-semibold text-primary text-hover-dark fs-8 text-decoration-none">
-                                                    {{ optional($student->user)->name ?? '-' }}
-                                                </a>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge badge-light-info fw-semibold">{{ $attendanceCount }}/{{ $maxSessions }}</span>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge badge-light-success fw-semibold">{{ $averageScore }}</span>
-                                            </td>
-                                            <td class="text-center">
-                                                <button class="btn btn-icon btn-sm btn-light-primary" data-bs-toggle="modal" data-bs-target="#gradeModal{{ $student->id }}">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="7" class="text-center text-muted fs-8">Belum ada siswa terdaftar.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                @include('courses.partials.show-students', compact('students', 'course'))
             </div>
             <!-- Sesi Tab -->
             <div class="tab-pane fade" id="sessions" role="tabpanel">
-                <div class="card card-flush border-0 shadow-sm mb-3">
-                    <div class="card-body p-0">
-                        <div class="d-flex justify-content-between align-items-center mb-3 px-3 pt-3">
-                            <span class="fw-semibold text-primary"><i class="bi bi-calendar-check"></i> Sesi</span>
-                            <button 
-                                class="btn btn-sm btn-light-primary" 
-                                data-bs-toggle="{{ $course->sessions->count() >= $course->max_sessions ? '' : 'modal' }}" 
-                                data-bs-target="{{ $course->sessions->count() >= $course->max_sessions ? '' : '#addScheduleModal' }}"
-                                {{ $course->sessions->count() >= $course->max_sessions ? 'type=button' : '' }}
-                                onclick="@if($course->sessions->count() >= $course->max_sessions) 
-                                    Swal.fire({
-                                        icon: 'info',
-                                        title: 'Maksimal Sesi Tercapai',
-                                        text: 'Kursus ini sudah mencapai jumlah sesi maksimal.'
-                                    }); 
-                                    @endif"
-                            >
-                                <i class="bi bi-plus-circle"></i> Tambah
-                            </button>
-                        </div>
-                        <div class="table-responsive">
-                            <table id="sessionsTable" class="table table-row-dashed table-row-gray-200 align-middle gy-2 mb-0">
-                                <thead>
-                                    <tr class="text-center fw-semibold text-gray-600 fs-7">
-                                        <th>#</th>
-                                        <th>Tanggal</th>
-                                        <th>Mulai</th>
-                                        <th>Selesai</th>
-                                        <th>Status</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($filteredSessions as $session)
-                                        <tr id="sessionRow{{ $session->id }}">
-                                            <td class="text-center text-gray-500 fs-8">{{ $loop->iteration }}</td>
-                                            <td class="text-center fs-8">{{ \Carbon\Carbon::parse($session->session_date)->format('d M Y') }}</td>
-                                            <td class="text-center fs-8">{{ \Carbon\Carbon::parse($session->start_time)->format('H:i') }}</td>
-                                            <td class="text-center fs-8">{{ \Carbon\Carbon::parse($session->end_time)->format('H:i') }}</td>
-                                            <td class="text-center">
-                                                <span id="sessionsStatus{{ $session->id }}" class="badge
-                                                    @if($session->status === 'scheduled') badge-light-info
-                                                    @elseif($session->status === 'rescheduled') badge-light-warning
-                                                    @elseif($session->status === 'canceled') badge-light-danger
-                                                    @else badge-light-success
-                                                    @endif
-                                                    fw-semibold">
-                                                    {{ ucfirst($session->status) }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex justify-content-end gap-1">
-                                                    <button class="btn btn-icon btn-sm btn-light-success btnAttendance" data-session-id="{{ $session->id }}" title="Kehadiran">
-                                                        <i class="fas fa-clipboard-check"></i>
-                                                    </button>
-                                                    @if($session->status === 'scheduled')
-                                                        <button class="btn btn-icon btn-sm btn-light-warning btnEditSession" data-session-id="{{ $session->id }}" title="Edit">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                    @endif
-                                                    <button class="btn btn-icon btn-sm btn-light-danger btnDeleteSession" data-session-id="{{ $session->id }}" title="Hapus">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="6" class="text-center text-muted fs-8">Belum ada sesi.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>  
-                        </div>
-                    </div>
-                </div>
+                @include('courses.partials.show-sessions', compact('sessions', 'course'))
             </div>
             <!-- Materi Tab -->
-            <div class="tab-pane fade {{ $activeTab === 'materials' ? 'show active' : '' }}" id="materials" role="tabpanel" aria-labelledby="materials-tab">
-                <div class="card card-flush border-0 shadow-sm mb-3">
-                    <div class="card-body p-0">
-                        <div class="d-flex align-items-center mb-3 px-4 pt-3">
-                            <span class="fw-semibold text-primary">
-                                <i class="bi bi-journal-bookmark"></i> Materi
-                            </span>
-                        </div>
-                        <div class="row g-0">
-                            <!-- Kolom Kiri: Daftar Materi -->
-                            <div class="col-md-7 border-end px-4 py-3">
-                                @if($course->materials->count() > 0)
-                                    <ul>
-                                        @foreach($course->materials as $material)
-                                            <li class="list-group-item px-0 py-3">
-                                                <div class="fw-semibold mb-1">{{ $material->name }}</div>
-                                                <div class="d-flex flex-wrap gap-2 mb-3" style="border-bottom: 1px dashed #e4e6ef; padding-bottom: 0.5rem;">
-                                                    <span class="badge badge-light-info fw-semibold">
-                                                        Estimasi Sesi: {{ $material->estimated_sessions ?? '-' }}
-                                                    </span>
-                                                    <span class="badge badge-light-warning fw-semibold">
-                                                        Min. Skor: {{ $material->minimum_score ?? '-' }}
-                                                    </span>
-                                                    <span class="badge badge-light-primary fw-semibold">
-                                                        Kategori: {{ $material->level ?? '-' }}
-                                                    </span>
-                                                </div>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @else
-                                    <div class="text-muted fs-8">Belum ada materi untuk kursus ini.</div>
-                                @endif
-                            </div>
-                            <!-- Kolom Kanan: Catatan Basic Skills & Summary Materi -->
-                            <div class="col-md-5 px-4 py-3">
-                                <div class="mb-4">
-                                    <div class="fw-semibold fs-8 text-gray-700 mb-2">
-                                        <i class="bi bi-lightbulb text-warning me-1"></i> Catatan Basic Skills (Acuan Pelatih):
-                                    </div>
-                                    @if(!empty($course->basic_skills))
-                                        <ul class="mb-3 ps-3 fs-8" style="list-style: disc;">
-                                            @foreach(is_array($course->basic_skills) ? $course->basic_skills : explode(',', $course->basic_skills) as $skill)
-                                                <li class="mb-1 text-gray-800">{{ trim($skill) }}</li>
-                                            @endforeach
-                                        </ul>
-                                    @else
-                                        <div class="text-muted fs-8 mb-3 fst-italic">Tidak ada catatan.</div>
-                                    @endif
-                                </div>
-
-                                <div>
-                                    <div class="fw-semibold fs-8 text-gray-700 mb-2 mt-2">
-                                        <i class="bi bi-graph-up-arrow text-primary me-1"></i> Summary Materi:
-                                    </div>
-                                    @php
-                                        $totalEstimatedSessions = $course->materials->sum('estimated_sessions');
-                                        $averageMinScore = $course->materials->count() > 0
-                                            ? number_format($course->materials->avg('minimum_score'), 1)
-                                            : '-';
-                                    @endphp
-                                    <ul class="mb-0 ps-3 fs-8" style="list-style: circle;">
-                                        <li class="mb-1">
-                                            <span class="text-gray-600">Total Estimasi Sesi:</span>
-                                            <span class="fw-bold text-primary">{{ $totalEstimatedSessions ?: '-' }}</span>
-                                        </li>
-                                        <li>
-                                            <span class="text-gray-600">Rata-rata Minimum Skor:</span>
-                                            <span class="fw-bold text-success">{{ $averageMinScore }}</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="tab-pane fade" id="materials" role="tabpanel">
+                @include('courses.partials.show-materials', compact('materials', 'basicSkills', 'totalEstimatedSessions', 'averageMinScore', 'course'))
             </div>
         </div>
 
         <!-- Modals Section -->
-        @foreach ($course->sessions as $session)
+        @foreach ($sessions as $session)
             @include('courses.partials.attendance-modal', ['session' => $session, 'course' => $course])
             @if($session->status === 'scheduled')
                 @include('courses.partials.edit-schedule-modal', ['session' => $session, 'course' => $course])
             @endif
         @endforeach
-        @foreach ($course->students as $student)
+        @foreach ($students as $student)
             @include('courses.partials.score-student-modal', ['student' => $student, 'course' => $course])
         @endforeach
         @include('courses.partials.add-schedule-modal', ['course' => $course])
@@ -428,5 +214,6 @@
 @endsection
 
 @push('scripts')
+    
     <script src="{{ asset('assets/js/courses-show.js') }}"></script>
 @endpush

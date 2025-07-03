@@ -20,57 +20,34 @@
                     <div class="dropdown mb-2 mb-md-0">
                         <button class="btn btn-light-primary btn-sm dropdown-toggle d-flex align-items-center shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-filter me-1"></i>
-                            @php
-                                $countTotal = $allCourses->count();
-                                $countActive = $allCourses->filter(fn($c) => optional($c->payment)->status === 'paid' && now()->lte($c->valid_until) && (!$c->max_sessions || $c->sessions->where('status','completed')->count() < $c->max_sessions))->count();
-                                $countExpired = $allCourses->filter(fn($c) => optional($c->payment)->status === 'paid' && (now()->gt($c->valid_until) || ($c->max_sessions && $c->sessions->where('status','completed')->count() >= $c->max_sessions)))->count();
-                                $countUnpaid = $allCourses->filter(fn($c) => optional($c->payment)->status === 'pending')->count();
-
-                                $statusLabel = 'Total';
-                                $statusCount = $countTotal;
-                                $statusBadgeClass = 'bg-light text-dark';
-                                if(request('status') == 'active') {
-                                    $statusLabel = 'Aktif';
-                                    $statusCount = $countActive;
-                                    $statusBadgeClass = 'bg-success';
-                                } elseif(request('status') == 'expired') {
-                                    $statusLabel = 'Expired';
-                                    $statusCount = $countExpired;
-                                    $statusBadgeClass = 'bg-danger';
-                                } elseif(request('status') == 'unpaid') {
-                                    $statusLabel = 'Unpaid';
-                                    $statusCount = $countUnpaid;
-                                    $statusBadgeClass = 'bg-warning text-dark';
-                                }
-                            @endphp
                             <span class="fw-semibold">{{ $statusLabel }}</span>
                             <span class="badge {{ $statusBadgeClass }} ms-2 px-2 py-1 rounded-pill">{{ $statusCount }}</span>
                         </button>
                         <ul class="dropdown-menu shadow-sm">
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ !request('status') ? 'active fw-bold' : '' }}"
-                                   href="{{ route('courses.index', request()->except('status')) }}">
+                                href="{{ route('courses.index', request()->except('status')) }}">
                                     Total
                                     <span class="badge bg-primary text-white ms-2 px-2 py-1 rounded-pill">{{ $countTotal }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ request('status') == 'active' ? 'active fw-bold' : '' }}"
-                                   href="?status=active">
+                                href="?status=active">
                                     Aktif
                                     <span class="badge bg-success text-white ms-2 px-2 py-1 rounded-pill">{{ $countActive }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ request('status') == 'expired' ? 'active fw-bold' : '' }}"
-                                   href="?status=expired">
+                                href="?status=expired">
                                     Expired
                                     <span class="badge bg-danger text-white ms-2 px-2 py-1 rounded-pill">{{ $countExpired }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ request('status') == 'unpaid' ? 'active fw-bold' : '' }}"
-                                   href="?status=unpaid">
+                                href="?status=unpaid">
                                     Unpaid
                                     <span class="badge bg-warning text-dark ms-2 px-2 py-1 rounded-pill">{{ $countUnpaid }}</span>
                                 </a>
@@ -106,7 +83,7 @@
                                     <label class="form-label fw-semibold">Nama Venue</label>
                                     <select name="venue_id" class="form-select">
                                         <option value="">Semua Venue</option>
-                                        @foreach($courses->pluck('venue')->unique('id')->filter() as $venue)
+                                        @foreach($uniqueVenues as $venue)
                                             <option value="{{ $venue->id }}" {{ request('venue_id') == $venue->id ? 'selected' : '' }}>
                                                 {{ $venue->name }}
                                             </option>
@@ -129,7 +106,7 @@
 
         <!-- Course List -->
         <div id="courseList">
-            @include('courses.partials.course-list', ['courses' => $courses])
+            @include('courses.partials.course-list', ['cards' => $cards])
         </div>
 
         <!-- Success Message -->
@@ -141,10 +118,18 @@
         @endif
     </div>
 
+    {{-- Modal Assign Trainer & Materials --}}
     @foreach ($courses as $course)
         @include('courses.partials.assign-trainer-modal', ['course' => $course, 'allTrainers' => $allTrainers])
         @include('courses.partials.assign-materials-modal', ['course' => $course, 'allMaterials' => $allMaterials])
-        @include('courses.partials.sessions-modal', ['course' => $course])
+    @endforeach
+
+    {{-- Modal Sessions: gunakan data dari $cards --}}
+    @foreach ($cards as $card)
+        @include('courses.partials.sessions-modal', [
+            'course' => $card['course'],
+            'sessions' => $card['sessions'],
+        ])
     @endforeach
 
     @include('courses.partials.invoice-course-modal')

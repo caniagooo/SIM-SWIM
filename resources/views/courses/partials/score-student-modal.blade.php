@@ -1,5 +1,5 @@
 <!-- Modal Penilaian Modern Metronic -->
-<div class="modal fade" id="gradeModal{{ $student->id }}" tabindex="-1" aria-labelledby="gradeModalLabel{{ $student->id }}" aria-hidden="true">
+<div class="modal fade" id="scoreStudentModal-{{ $student->id }}" tabindex="-1" aria-labelledby="scoreStudentModalLabel{{ $student->id }}" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered mw-650px">
         <form method="POST"
             action="{{ route('grades.store', [$course->id, $student->id]) }}"
@@ -10,7 +10,7 @@
             <div class="modal-content rounded-4 shadow-lg border-0">
                 <div class="modal-header bg-primary px-8 py-5 rounded-top-4 d-flex align-items-center">
                     <div class="symbol symbol-60px me-4">
-                        <img src="{{ $student->user->profile_photo_path }}"
+                        <img src="{{ $student->user->profile_photo_path ?? asset('assets/media/avatars/default-avatar.png') }}"
                              alt="Avatar" class="symbol-label rounded-circle border border-3 border-white" width="56" height="56">
                     </div>
                     <div>

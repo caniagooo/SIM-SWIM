@@ -53,7 +53,7 @@
                 </div>
                 <!-- Tabel Sesi -->
                 @php
-                    $sessions = $course->sessions->sortBy('date');
+                    $sessions = ($course->sessions ?? collect())->sortBy('date');
                 @endphp
                 @if($sessions->count())
                     <div class="table-responsive">
