@@ -53,6 +53,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Profile (lihat catatan di bawah untuk murid)
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+        Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
         // Logout
         Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
