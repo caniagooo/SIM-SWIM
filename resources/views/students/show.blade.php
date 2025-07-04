@@ -282,7 +282,7 @@
             </div>
         </div>
     </div>
-</x-default-layout>
+
     <!-- Modal Detail Kursus -->
     @foreach ($student->courses->take(5) as $course)
     <div class="modal fade" id="courseDetailModal{{ $course->id }}" tabindex="-1" aria-labelledby="courseDetailModalLabel{{ $course->id }}" aria-hidden="true">
@@ -304,3 +304,4 @@
     </div>
     @endforeach
 </div>
+</x-default-layout>

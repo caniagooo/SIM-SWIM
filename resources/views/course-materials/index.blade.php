@@ -89,7 +89,7 @@
         </div>
     </div>
 </div>
-</x-default-layout>
+
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -107,3 +107,4 @@
 @push('scripts')
 <script src="{{ asset('assets/js/course-materials-index.js') }}"></script>
 @endpush
+</x-default-layout>

@@ -50,7 +50,7 @@
         </div>
     </div>
 </div>
-</x-default-layout>
+
 <style>
     .form-label { font-size: 0.97rem; }
     .form-select-lg, .form-control-lg { font-size: 0.97rem; }
@@ -63,3 +63,4 @@
         .form-label, .form-select-lg, .form-control-lg { font-size: 0.92rem !important; }
     }
 </style>
+</x-default-layout>

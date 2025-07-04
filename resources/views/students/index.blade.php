@@ -133,7 +133,7 @@
         </div>
     </div>
 </div>
-</x-default-layout>
+
 <style>
     .symbol-30px { width: 30px; height: 30px; }
     .fs-8 { font-size: 0.88rem !important; }
@@ -152,3 +152,4 @@
 @push('scripts')
     <script src="{{ asset('assets/js/students-index.js') }}"></script>
 @endpush
+</x-default-layout>

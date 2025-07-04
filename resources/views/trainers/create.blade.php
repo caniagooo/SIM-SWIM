@@ -175,7 +175,7 @@
         </div>
     </div>
 </div>
-</x-default-layout>
+
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -194,3 +194,4 @@
         .form-label, .form-select-lg, .form-control-lg { font-size: 0.92rem !important; }
     }
 </style>
+</x-default-layout>

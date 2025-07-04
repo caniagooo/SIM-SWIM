@@ -41,7 +41,7 @@
         </div>
     </div>
 </div>
-</x-default-layout>
+
 <style>
     .card { border-radius: 1.25rem !important; }
     .fw-bold { font-weight: 600 !important; }
@@ -54,3 +54,4 @@
         .table { font-size: 0.875rem; }
     }
 </style>
+</x-default-layout>
