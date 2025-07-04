@@ -38,88 +38,91 @@ Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('p
 // Semua route di-protect auth & role:Super Admin|Admin
 Route::middleware(['auth'])->group(function () {
 
-    // Dashboard
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard', [DashboardController::class, 'index']);
-
-    // User Management
-    Route::prefix('user-management')->name('user-management.')->group(function () {
+    // User Management: hanya untuk super admin & admin
+    Route::middleware(['role:Super Admin|Admin'])->prefix('user-management')->name('user-management.')->group(function () {
         Route::resource('users', UserManagementController::class);
         Route::resource('roles', RoleManagementController::class);
         Route::resource('permissions', PermissionManagementController::class);
     });
 
-    // Profile
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    // Route lain: super admin, admin, pelatih
+    Route::middleware(['role:Super Admin|Admin|Pelatih'])->group(function () {
+        // Dashboard
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index']);
 
-    // Logout
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+        // Profile (lihat catatan di bawah untuk murid)
+        Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
 
-    // Venue
-    Route::resource('venues', VenueController::class);
+        // Logout
+        Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-    // Trainer, Student, Payment
-    Route::resource('trainers', TrainerController::class);
-    Route::resource('students', StudentController::class);
-    
+        // Venue
+        Route::resource('venues', VenueController::class);
 
-    // Student Payments
-    Route::get('students/{student}/payments', [StudentController::class, 'payments'])->name('students.payments');
+        // Trainer, Student, Payment
+        Route::resource('trainers', TrainerController::class);
+        Route::resource('students', StudentController::class);
+        
 
-    // Course Materials
-    Route::resource('course-materials', CourseMaterialController::class);
-    Route::post('course-materials/{material}/courses', [CourseMaterialController::class, 'attachCourse'])->name('course-materials.attach-course');
-    Route::delete('course-materials/{material}/courses/{course}', [CourseMaterialController::class, 'detachCourse'])->name('course-materials.detach-course');
-    Route::get('/materials', [CourseMaterialController::class, 'index'])->name('materials.index');
-    Route::get('/materials/{material}/edit', [CourseMaterialController::class, 'edit'])->name('materials.edit');
-    Route::post('/course-materials', [CourseMaterialController::class, 'store'])->name('course-materials.store');
-    Route::get('/course-materials/create', [CourseMaterialController::class, 'create'])->name('course-materials.create');
+        // Student Payments
+        Route::get('students/{student}/payments', [StudentController::class, 'payments'])->name('students.payments');
 
-    // Course AJAX (letakkan sebelum resource!)
-    Route::get('/courses/ajax', [CourseController::class, 'ajaxIndex'])->name('courses.ajax');
-    Route::get('/courses/{course}/sessions/table', [CourseSessionController::class, 'ajaxTable'])->name('sessions.ajaxTable');
+        // Course Materials
+        Route::resource('course-materials', CourseMaterialController::class);
+        Route::post('course-materials/{material}/courses', [CourseMaterialController::class, 'attachCourse'])->name('course-materials.attach-course');
+        Route::delete('course-materials/{material}/courses/{course}', [CourseMaterialController::class, 'detachCourse'])->name('course-materials.detach-course');
+        Route::get('/materials', [CourseMaterialController::class, 'index'])->name('materials.index');
+        Route::get('/materials/{material}/edit', [CourseMaterialController::class, 'edit'])->name('materials.edit');
+        Route::post('/course-materials', [CourseMaterialController::class, 'store'])->name('course-materials.store');
+        Route::get('/course-materials/create', [CourseMaterialController::class, 'create'])->name('course-materials.create');
 
-    // Courses
-    Route::resource('courses', CourseController::class);
-    Route::post('/courses/{course}/assign', [CourseController::class, 'assign'])->name('courses.assign');
+        // Course AJAX (letakkan sebelum resource!)
+        Route::get('/courses/ajax', [CourseController::class, 'ajaxIndex'])->name('courses.ajax');
+        Route::get('/courses/{course}/sessions/table', [CourseSessionController::class, 'ajaxTable'])->name('sessions.ajaxTable');
 
-    // Course Payments
-    Route::post('/course-payments/create/{course}', [CoursePaymentController::class, 'createInvoice'])->name('course-payments.create');
-    Route::get('/course-payments/invoice/{course}', [CoursePaymentController::class, 'invoice'])->name('course-payments.invoice');
-    Route::post('/course-payments/process/{course}', [CoursePaymentController::class, 'process'])->name('course-payments.process');
-    Route::get('/payments/{payment}', [CoursePaymentController::class, 'show'])->name('payments.show');
-    Route::get('/payments/{payment}/edit', [CoursePaymentController::class, 'edit'])->name('payments.edit');
-    Route::put('/payments/{payment}', [CoursePaymentController::class, 'update'])->name('payments.update');
-    Route::get('/payments', [CoursePaymentController::class, 'index'])->name('payments.index');
-    
+        // Courses
+        Route::resource('courses', CourseController::class);
+        Route::post('/courses/{course}/assign', [CourseController::class, 'assign'])->name('courses.assign');
 
-    // Course Sessions
-    Route::prefix('courses/{course}/sessions')->group(function () {
-        Route::get('/', [CourseSessionController::class, 'index'])->name('sessions.index');
-        Route::get('/create', [CourseSessionController::class, 'create'])->name('sessions.create');
-        Route::post('/', [CourseSessionController::class, 'store'])->name('sessions.store');
-        Route::get('/{session}/edit', [CourseSessionController::class, 'edit'])->name('sessions.edit');
-        Route::put('/{session}', [CourseSessionController::class, 'update'])->name('sessions.update');
-        Route::delete('/{session}', [CourseSessionController::class, 'destroy'])->name('sessions.destroy');
-        Route::post('/{session}/attendance', [AttendanceController::class, 'saveAttendance'])->name('sessions.attendance.save');
-    });
+        // Course Payments
+        Route::post('/course-payments/create/{course}', [CoursePaymentController::class, 'createInvoice'])->name('course-payments.create');
+        Route::get('/course-payments/invoice/{course}', [CoursePaymentController::class, 'invoice'])->name('course-payments.invoice');
+        Route::post('/course-payments/process/{course}', [CoursePaymentController::class, 'process'])->name('course-payments.process');
+        Route::get('/payments/{payment}', [CoursePaymentController::class, 'show'])->name('payments.show');
+        Route::get('/payments/{payment}/edit', [CoursePaymentController::class, 'edit'])->name('payments.edit');
+        Route::put('/payments/{payment}', [CoursePaymentController::class, 'update'])->name('payments.update');
+        Route::get('/payments', [CoursePaymentController::class, 'index'])->name('payments.index');
+        
+
+        // Course Sessions
+        Route::prefix('courses/{course}/sessions')->group(function () {
+            Route::get('/', [CourseSessionController::class, 'index'])->name('sessions.index');
+            Route::get('/create', [CourseSessionController::class, 'create'])->name('sessions.create');
+            Route::post('/', [CourseSessionController::class, 'store'])->name('sessions.store');
+            Route::get('/{session}/edit', [CourseSessionController::class, 'edit'])->name('sessions.edit');
+            Route::put('/{session}', [CourseSessionController::class, 'update'])->name('sessions.update');
+            Route::delete('/{session}', [CourseSessionController::class, 'destroy'])->name('sessions.destroy');
+            Route::post('/{session}/attendance', [AttendanceController::class, 'saveAttendance'])->name('sessions.attendance.save');
+        });
 
 
-    // Grade
-    Route::post('/courses/{course}/students/{student}/grades', [GradeController::class, 'store'])->name('grades.store');
+        // Grade
+        Route::post('/courses/{course}/students/{student}/grades', [GradeController::class, 'store'])->name('grades.store');
 
-    // API Materials (for AJAX select2, etc)
-    Route::get('/api/materials', function (Request $request) {
-        $level = $request->query('level');
-        \Log::info('Level:', ['level' => $level]);
-        $materials = \App\Models\CourseMaterial::where('level', $level)->get();
-        \Log::info('Materials:', $materials->toArray());
-        return $materials;
-    });
+        // API Materials (for AJAX select2, etc)
+        Route::get('/api/materials', function (Request $request) {
+            $level = $request->query('level');
+            \Log::info('Level:', ['level' => $level]);
+            $materials = \App\Models\CourseMaterial::where('level', $level)->get();
+            \Log::info('Materials:', $materials->toArray());
+            return $materials;
+        });
 
-    // Error test
-    Route::get('/error', function () {
-        abort(500);
+        // Error test
+        Route::get('/error', function () {
+            abort(500);
+        });
     });
 });
 
