@@ -360,6 +360,7 @@ class CourseController extends Controller
                 'amount' => $validatedData['price'],
             ]);
         }
+        
 
         return redirect()->route('courses.index')->with('success', 'Course updated successfully.');
     }
@@ -524,10 +525,10 @@ public function ajaxIndex(Request $request)
             'students' => $students,
             'studentNames' => $studentNames,
             'isGroup' => $isGroup,
-            'sessions' => $sessionsSorted, // <-- untuk modal
+            'sessions' => $course->sessions()->orderBy('session_date')->get(),
         ];
     });
 
-    return view('courses.partials.course-list', compact('cards', 'allTrainers', 'allMaterials'))->render();
-}
+        return view('courses.partials.course-list', compact('cards', 'allTrainers', 'allMaterials'))->render();
+    }
 }

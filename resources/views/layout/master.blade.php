@@ -87,21 +87,7 @@
     @stack('scripts')
     <!--end::Javascript-->
 
-    <script>
-        document.addEventListener('livewire:init', () => {
-            Livewire.on('success', (message) => { toastr.success(message); });
-            Livewire.on('error', (message) => { toastr.error(message); });
-            Livewire.on('swal', (message, icon = 'success', confirmButtonText = 'Ok, got it!') => {
-                Swal.fire({
-                    text: message,
-                    icon: icon,
-                    buttonsStyling: false,
-                    confirmButtonText: confirmButtonText,
-                    customClass: { confirmButton: 'btn btn-primary' }
-                });
-            });
-        });
-    </script>
+    
 
  
 </body>

@@ -1,3 +1,4 @@
+
 <x-default-layout>
     <div class="container mt-0 mb-4">
         <!-- Header Card -->
@@ -22,28 +23,28 @@
                         <ul class="dropdown-menu shadow-sm">
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ !request('status') ? 'active fw-bold' : '' }}"
-                                href="{{ route('courses.index', request()->except('status')) }}">
+                                   href="{{ route('courses.index', request()->except('status')) }}">
                                     Total
                                     <span class="badge bg-primary text-white ms-2 px-2 py-1 rounded-pill">{{ $countTotal }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ request('status') == 'active' ? 'active fw-bold' : '' }}"
-                                href="?status=active">
+                                   href="{{ route('courses.index', array_merge(request()->except('status'), ['status' => 'active'])) }}">
                                     Aktif
                                     <span class="badge bg-success text-white ms-2 px-2 py-1 rounded-pill">{{ $countActive }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ request('status') == 'expired' ? 'active fw-bold' : '' }}"
-                                href="?status=expired">
+                                   href="{{ route('courses.index', array_merge(request()->except('status'), ['status' => 'expired'])) }}">
                                     Expired
                                     <span class="badge bg-danger text-white ms-2 px-2 py-1 rounded-pill">{{ $countExpired }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between align-items-center status-filter-link {{ request('status') == 'unpaid' ? 'active fw-bold' : '' }}"
-                                href="?status=unpaid">
+                                   href="{{ route('courses.index', array_merge(request()->except('status'), ['status' => 'unpaid'])) }}">
                                     Unpaid
                                     <span class="badge bg-warning text-dark ms-2 px-2 py-1 rounded-pill">{{ $countUnpaid }}</span>
                                 </a>
@@ -64,6 +65,9 @@
                         </button>
                         <div class="dropdown-menu p-4 shadow-lg" style="min-width:320px;">
                             <form method="GET" id="advancedFilterForm">
+                                @if(request('status'))
+                                    <input type="hidden" name="status" value="{{ request('status') }}">
+                                @endif
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">Nama Pelatih</label>
                                     <select name="trainer_id" class="form-select">
@@ -99,6 +103,7 @@
                 </div>
             </div>
         </div>
+       
 
         <!-- Course List -->
         <div id="courseList">
@@ -131,6 +136,3 @@
     @include('courses.partials.invoice-course-modal')
 </x-default-layout>
 
-@push('scripts')
-    <script src="{{ asset('assets/js/courses-index.js') }}"></script>
-@endpush

@@ -72,7 +72,7 @@ class Course extends Model
         $isWithinDate = $today->lte(Carbon::parse($this->valid_until));
 
         // Periksa apakah jumlah sesi yang dilakukan belum melebihi batas
-        $isWithinSessions = $this->sessions_completed < $this->max_sessions;
+       $isWithinSessions = $this->sessions()->where('status', 'completed')->count() < $this->max_sessions;
 
         return $isWithinDate && $isWithinSessions;
     }

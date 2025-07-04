@@ -4,15 +4,14 @@
         <div class="modal-content rounded-3 shadow-sm">
             <div class="modal-header bg-light-info border-0 pb-2">
                 <h5 class="modal-title fw-bold" id="sessionsModalLabel-{{ $course->id }}">
-                    <div><i class="bi bi-calendar-event me-2 text-info"></i>
-                    Jadwal Sesi
-                    </div>
-                    <div><span class="text-dark fs-8">{{ $course->name }}</span>
-                    <span class="text-dark">
-                        <a href="{{ route('courses.show', $course->id) }}" class="bi-eye ms-1 text-decoration-none text-dark" title="Lihat Detail Kursus">
-                            <span class="badge badge-light-primary"> lihat detail</span>
-                        </a>
-                    </span>
+                    <div><i class="bi bi-calendar-event me-2 text-info"></i> Jadwal Sesi</div>
+                    <div>
+                        <span class="text-dark fs-8">{{ $course->name }}</span>
+                        <span class="text-dark">
+                            <a href="{{ route('courses.show', $course->id) }}" class="bi-eye ms-1 text-decoration-none text-dark" title="Lihat Detail Kursus">
+                                <span class="badge badge-light-primary"> lihat detail</span>
+                            </a>
+                        </span>
                     </div>
                 </h5>
                 <button type="button" class="btn btn-icon btn-sm btn-light" data-bs-dismiss="modal" aria-label="Tutup">
@@ -44,7 +43,7 @@
                             {{ $course->start_date ? \Carbon\Carbon::parse($course->start_date)->translatedFormat('d F Y') : '-' }}
                             -
                             {{ $course->valid_until ? \Carbon\Carbon::parse($course->valid_until)->translatedFormat('d F Y') : '-' }}
-                        </span></span></span>
+                        </span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-geo-alt-fill text-danger fs-5"></i>
@@ -53,7 +52,11 @@
                 </div>
                 <!-- Tabel Sesi -->
                 @php
-                    $sessions = ($course->sessions ?? collect())->sortBy('date');
+                    // Query langsung ke database untuk mengambil sesi kursus
+                    $sessions = \DB::table('course_sessions')
+                        ->where('course_id', $course->id)
+                        ->orderBy('session_date')
+                        ->get();
                 @endphp
                 @if($sessions->count())
                     <div class="table-responsive">
@@ -61,7 +64,9 @@
                             <thead class="bg-light">
                                 <tr>
                                     <th class="text-center" style="width:40px;">#</th>
-                                    <th>Tanggal &amp; Waktu</th>
+                                    <th>Tanggal</th>
+                                    <th>start time</th>
+                                    <th>end time</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -71,7 +76,15 @@
                                         <td class="text-center text-gray-600 fw-bold">{{ $idx+1 }}</td>
                                         <td class="text-nowrap">
                                             <i class="bi bi-clock me-1 text-primary"></i>
-                                            {{ \Carbon\Carbon::parse($session->date)->format('d M Y H:i') }}
+                                            {{ \Carbon\Carbon::parse($session->session_date)->format('d M Y H:i') }}
+                                        </td>
+                                        <td class="text-nowrap">
+                                            <i class="bi bi-clock me-1 text-success"></i>
+                                            {{ \Carbon\Carbon::parse($session->start_time)->format('H:i') }}
+                                        </td>
+                                        <td class="text-nowrap">
+                                            <i class="bi bi-clock me-1 text-danger"></i>
+                                            {{ \Carbon\Carbon::parse($session->end_time)->format('H:i') }}
                                         </td>
                                         <td>
                                             <span class="badge 
