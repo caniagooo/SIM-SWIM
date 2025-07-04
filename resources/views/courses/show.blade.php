@@ -208,9 +208,9 @@
             font-weight: 500;
         }
     </style>
-</x-default-layout>
 
 @push('scripts')
     
     <script src="{{ asset('assets/js/courses-show.js') }}"></script>
 @endpush
+</x-default-layout>
