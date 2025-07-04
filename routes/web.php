@@ -77,6 +77,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Course AJAX (letakkan sebelum resource!)
     Route::get('/courses/ajax', [CourseController::class, 'ajaxIndex'])->name('courses.ajax');
+    Route::get('/courses/{course}/sessions/table', [CourseSessionController::class, 'ajaxTable'])->name('sessions.ajaxTable');
 
     // Courses
     Route::resource('courses', CourseController::class);

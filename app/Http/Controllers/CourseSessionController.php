@@ -84,4 +84,10 @@ class CourseSessionController extends Controller
             'message' => 'Session deleted successfully.',
         ]);
     }
+
+    public function ajaxTable(Course $course)
+    {
+        $sessions = $course->sessions()->orderBy('session_date')->get();
+        return view('courses.partials.show-sessions', compact('sessions', 'course'))->render();
+    }
 }

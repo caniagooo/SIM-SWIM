@@ -116,3 +116,12 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Aktifkan tooltip untuk elemen di dalam modal
+    $(document).ready(function() {
+        $('#sessionsModal-{{ $course->id }}').on('shown.bs.modal', function () {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+    });
+</script>
