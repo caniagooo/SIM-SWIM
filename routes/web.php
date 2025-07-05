@@ -22,6 +22,8 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\GeneralScheduleController;
 use App\Http\Controllers\CoursePaymentController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\StudentDashboardController;
 
 // Route login (GET dan POST)
 Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -35,26 +37,46 @@ Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->
 Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
 Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.update');
 
-// Semua route di-protect auth & role:Super Admin|Admin
+// Socialite Auth
+Route::get('/auth/redirect/{provider}', [SocialiteController::class, 'redirect']);
+
+// Semua route di-protect auth
 Route::middleware(['auth'])->group(function () {
 
-    // User Management: hanya untuk super admin & admin
-    Route::middleware(['role:Super Admin|Admin'])->prefix('user-management')->name('user-management.')->group(function () {
-        Route::resource('users', UserManagementController::class);
-        Route::resource('roles', RoleManagementController::class);
-        Route::resource('permissions', PermissionManagementController::class);
+    // Dashboard khusus Murid
+    Route::middleware(['role:Murid'])->group(function () {
+        Route::get('/home', [StudentDashboardController::class, 'index'])->name('student.dashboard');
+        // Profil murid sendiri
+        Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+        Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::post('/user-management/users/{user}/update-password', [UserController::class, 'updatePassword'])->name('user-management.users.update-password');
+        // Update profile pribadi
+        Route::put('/students/{student}', [StudentController::class, 'update'])->name('students.update');
+        // Lihat detail kursus yang diikuti murid
+        Route::get('/my-courses', [StudentController::class, 'myCourses'])->name('students.my-courses');
+        // Lihat detail materi & nilai
+        Route::get('/my-material-grades', [StudentController::class, 'myMaterialGrades'])->name('students.my-material-grades');
+        // Logout
+        Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     });
 
-    // Route lain: super admin, admin, pelatih
+    // Dashboard dan fitur untuk Super Admin, Admin, Pelatih
     Route::middleware(['role:Super Admin|Admin|Pelatih'])->group(function () {
-        // Dashboard
+        // Dashboard utama
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard', [DashboardController::class, 'index']);
 
-        // Profile (lihat catatan di bawah untuk murid)
+        // User Management: hanya untuk super admin & admin
+        Route::middleware(['role:Super Admin|Admin'])->prefix('user-management')->name('user-management.')->group(function () {
+            Route::resource('users', UserManagementController::class);
+            Route::resource('roles', RoleManagementController::class);
+            Route::resource('permissions', PermissionManagementController::class);
+        });
+
+        // Profile
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
         Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
+        Route::post('/user-management/users/{user}/update-password', [UserController::class, 'updatePassword'])->name('user-management.users.update-password');
         // Logout
         Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
@@ -64,7 +86,6 @@ Route::middleware(['auth'])->group(function () {
         // Trainer, Student, Payment
         Route::resource('trainers', TrainerController::class);
         Route::resource('students', StudentController::class);
-        
 
         // Student Payments
         Route::get('students/{student}/payments', [StudentController::class, 'payments'])->name('students.payments');
@@ -94,7 +115,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/payments/{payment}/edit', [CoursePaymentController::class, 'edit'])->name('payments.edit');
         Route::put('/payments/{payment}', [CoursePaymentController::class, 'update'])->name('payments.update');
         Route::get('/payments', [CoursePaymentController::class, 'index'])->name('payments.index');
-        
 
         // Course Sessions
         Route::prefix('courses/{course}/sessions')->group(function () {
@@ -106,7 +126,6 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{session}', [CourseSessionController::class, 'destroy'])->name('sessions.destroy');
             Route::post('/{session}/attendance', [AttendanceController::class, 'saveAttendance'])->name('sessions.attendance.save');
         });
-
 
         // Grade
         Route::post('/courses/{course}/students/{student}/grades', [GradeController::class, 'store'])->name('grades.store');
@@ -125,23 +144,4 @@ Route::middleware(['auth'])->group(function () {
             abort(500);
         });
     });
-
-    // Route khusus untuk Murid
-    Route::middleware(['role:Super Admin|Murid'])->group(function () {
-        // Profil murid sendiri
-        Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-        Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        
-        // Update profile pribadi
-        Route::put('/students/{student}', [StudentController::class, 'update'])->name('students.update');
-
-        // Lihat detail kursus yang diikuti murid
-        Route::get('/my-courses', [StudentController::class, 'myCourses'])->name('students.my-courses');
-        // Lihat detail materi & nilai
-        Route::get('/my-material-grades', [StudentController::class, 'myMaterialGrades'])->name('students.my-material-grades');
-        // Tambahkan route lain yang memang boleh diakses murid di sini
-    });
 });
-
-// Socialite Auth
-Route::get('/auth/redirect/{provider}', [SocialiteController::class, 'redirect']);

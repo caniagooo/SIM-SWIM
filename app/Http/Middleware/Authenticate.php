@@ -18,4 +18,12 @@ class Authenticate extends Middleware
             return route('login');
         }
     }
+    
+    protected function authenticated($request, $user)
+    {
+        if ($user->hasRole('Murid')) {
+            return redirect()->route('student.dashboard');
+        }
+        // else redirect sesuai role lain
+    }
 }

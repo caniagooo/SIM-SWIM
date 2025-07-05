@@ -41,7 +41,7 @@ class AuthenticatedSessionController extends Controller
             'last_login_ip' => $request->getClientIp()
         ]);
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        return $this->authenticated($request, $request->user());
     }
 
     /**
@@ -60,5 +60,22 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    /**
+     * Get the post-authentication redirect path for the user.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\User  $user
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    protected function authenticated($request, $user)
+    {
+        if ($user->hasRole('Murid')) {
+            return redirect()->route('student.dashboard'); // ke /home
+        }
+        // Super Admin & Admin ke dashboard
+        return redirect()->route('dashboard');
     }
 }

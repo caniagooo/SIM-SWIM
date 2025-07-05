@@ -36,6 +36,9 @@
                     <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_update_details">
                         <i class="bi bi-pencil"></i> Edit
                     </button>
+                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_update_password">
+                        <i class="bi bi-key"></i> Update Password
+                    </button>
                 </div>
             </div>
             <div class="card-body py-4 px-4">
@@ -119,4 +122,6 @@
 
     {{-- Modal Update User --}}
     @include('pages.apps.user-management.users.modals._update-details', ['user' => $user])
+    {{-- Modal Update Password --}}
+    @include('pages.apps.user-management.users.modals._update-password', ['user' => $user])
 </x-default-layout>
