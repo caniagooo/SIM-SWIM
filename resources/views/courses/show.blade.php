@@ -89,11 +89,11 @@
         </div>
 
         <!-- Tabs -->
-        <ul class="nav nav-pills nav-pills-custom mb-3" id="courseTabs" role="tablist" style="background: #f5f8fa; border-radius: 0.2rem; overflow: hidden;">
+        <ul class="nav nav-pills nav-pills-custom mb-3" id="courseTabs" role="tablist">
             @foreach($tabList as $tabKey => $tab)
-                <li class="nav-item flex-fill text-center" role="presentation" style="min-width: 110px;">
+                <li class="nav-item flex-fill text-center" role="presentation">
                     <button
-                        class="nav-link w-100 py-2 px-1 {{ $activeTab === $tabKey ? 'active' : '' }}"
+                        class="nav-link w-100 {{ $activeTab === $tabKey ? 'active' : '' }}"
                         id="{{ $tabKey }}-tab"
                         data-bs-toggle="pill"
                         data-bs-target="#{{ $tabKey }}"
@@ -102,64 +102,12 @@
                         aria-controls="{{ $tabKey }}"
                         aria-selected="{{ $activeTab === $tabKey ? 'true' : 'false' }}"
                         tabindex="{{ $activeTab === $tabKey ? '0' : '-1' }}"
-                        style="font-size: 1rem; font-weight: 500; border: none; background: none;"
                     >
                         <i class="bi {{ $tab['icon'] }} me-1"></i> {{ $tab['label'] }}
                     </button>
                 </li>
             @endforeach
         </ul>
-        <style>
-            .nav-pills-custom {
-                background: #f5f8fa;
-                border-radius: 0.5rem;
-                overflow: hidden;
-                border: 1px solid #e4e6ef;
-                margin-bottom: 1rem;
-            }
-            .nav-pills-custom .nav-link {
-                border-radius: 0;
-                font-weight: 500;
-                color: #5e6278;
-                transition: background 0.2s, color 0.2s, border-bottom 0.2s;
-                border: none;
-                background: none;
-                padding: 0.85rem 0.5rem;
-                font-size: 1rem;
-                position: relative;
-            }
-            .nav-pills-custom .nav-link.active,
-            .nav-pills-custom .nav-link:focus,
-            .nav-pills-custom .nav-link:hover {
-                background: #fff !important;
-                color: #009ef7 !important;
-                border-bottom: 2.5px solid #009ef7;
-                z-index: 2;
-            }
-            .nav-pills-custom .nav-link:not(.active):hover {
-                background: #f1faff !important;
-                color: #009ef7 !important;
-            }
-            .nav-pills-custom .nav-link i {
-                font-size: 1.1em;
-                vertical-align: middle;
-                margin-right: 0.25em;
-            }
-            .nav-pills-custom .nav-link.active i {
-                color: #009ef7;
-            }
-            .nav-pills-custom .nav-link:disabled {
-                color: #b5b5c3 !important;
-                background: none !important;
-                cursor: not-allowed;
-            }
-            @media (max-width: 576px) {
-                .nav-pills-custom .nav-link {
-                    font-size: 0.95rem;
-                    padding: .5rem .1rem;
-                }
-            }
-        </style>
         
         <div class="tab-content" id="courseTabsContent">
             <!-- Siswa Tab -->
@@ -188,26 +136,6 @@
         @endforeach
         @include('courses.partials.add-schedule-modal', ['course' => $course])
     </div>
-    <style>
-        @media (max-width: 576px) {
-            .card-body, .card-header { padding: 1rem !important; }
-            .table { font-size: 0.92rem; }
-            .nav-pills .nav-link { font-size: 0.95rem; padding: .5rem .25rem; }
-            .symbol-30px { width: 28px !important; height: 28px !important; }
-        }
-        .symbol-30px { width: 30px; height: 30px; }
-        .fs-7 { font-size: 0.95rem !important; }
-        .fs-8 { font-size: 0.88rem !important; }
-        .nav-pills-custom .nav-link.active {
-            background: #f5f8fa;
-            color: #009ef7;
-            border-bottom: 2px solid #009ef7;
-        }
-        .nav-pills-custom .nav-link {
-            border-radius: 0;
-            font-weight: 500;
-        }
-    </style>
 
 @push('scripts')
     

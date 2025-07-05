@@ -49,7 +49,17 @@ class Student extends Model
 
     public function sessions()
     {
-        return $this->belongsToMany(CourseSession::class, 'course_session_student');
+        // Mendapatkan semua sesi dari kursus yang diikuti murid
+        return $this->hasManyThrough(
+            \App\Models\CourseSession::class, // Model sesi
+            \App\Models\Course::class,        // Model course perantara
+            'id',                             // Foreign key di courses (courses.id)
+            'course_id',                      // Foreign key di course_sessions (course_sessions.course_id)
+            'id',                             // Local key di students (students.id)
+            'id'                              // Local key di courses (courses.id)
+        )->whereHas('students', function($q) {
+            $q->where('student_id', $this->id);
+        });
     }
     
     public function attendances()
@@ -57,6 +67,7 @@ class Student extends Model
         return $this->hasMany(Attendance::class, 'student_id', 'id');
     }
 
+    
     public function gradeScores()
     {
         return $this->hasMany(StudentGrade::class, 'student_id', 'id');
@@ -78,6 +89,15 @@ class Student extends Model
     public function getAttendancesCountAttribute()
     {
         return $this->attendances()->count();
+    }
+
+
+    // usia dalam bilangan bulat
+    public function age()
+    {
+        return $this->user && $this->user->birth_date
+            ? Carbon::parse($this->user->birth_date)->age
+            : null;
     }
 
     // Kelompok usia berdasarkan birth_date user
@@ -110,4 +130,18 @@ class Student extends Model
         $grade = $this->gradeScores()->where('material_id', $materialId)->first();
         return $grade ? $grade->remarks : null;
     }
+
+
+    public function getCumulativeScoreAttribute()
+    {
+        // Rata-rata nilai
+        return $this->gradeScores()->avg('score');
+        // Jika ingin total, ganti avg() menjadi sum()
+    }
+
+    public function getMaterialsCountAttribute()
+    {
+        return $this->gradeScores()->distinct('material_id')->count('material_id');
+    }
+
 }

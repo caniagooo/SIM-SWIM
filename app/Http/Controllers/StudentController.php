@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use App\Models\User;
+use App\Models\StudentGrade;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use App\Models\CourseSession;
 
 class StudentController extends Controller
 {
@@ -97,17 +99,25 @@ class StudentController extends Controller
             'gender' => 'required|in:pria,wanita',
             'phone' => 'nullable',
             'alamat' => 'nullable',
-            
+            'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Tambahkan validasi avatar
         ]);
 
         // Update data user terkait
         $user = User::find($request->user_id);
+
+        // Handle upload avatar jika ada
+        if ($request->hasFile('avatar')) {
+            $avatar = $request->file('avatar');
+            $avatarPath = $avatar->store('avatars', 'public');
+            $user->profile_photo_path = $avatarPath;
+        }
+
         $user->update([
             'birth_date' => $request->birth_date,
             'gender' => $request->gender,
             'phone' => $request->phone,
             'alamat' => $request->alamat,
-            
+            // 'profile_photo_path' => $user->profile_photo_path, // Sudah di-set di atas jika ada avatar baru
         ]);
 
         // Hitung ulang age_group
@@ -136,6 +146,11 @@ class StudentController extends Controller
 
     public function show(Student $student)
     {
+        $student->load([
+            'gradeScores.material',
+            'gradeScores.course'
+        ]);
+        
         $payments = $student->coursePayments()->with('course')->get();
         return view('students.show', compact('student', 'payments'));
     }

@@ -125,6 +125,22 @@ Route::middleware(['auth'])->group(function () {
             abort(500);
         });
     });
+
+    // Route khusus untuk Murid
+    Route::middleware(['role:Super Admin|Murid'])->group(function () {
+        // Profil murid sendiri
+        Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+        Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        
+        // Update profile pribadi
+        Route::put('/students/{student}', [StudentController::class, 'update'])->name('students.update');
+
+        // Lihat detail kursus yang diikuti murid
+        Route::get('/my-courses', [StudentController::class, 'myCourses'])->name('students.my-courses');
+        // Lihat detail materi & nilai
+        Route::get('/my-material-grades', [StudentController::class, 'myMaterialGrades'])->name('students.my-material-grades');
+        // Tambahkan route lain yang memang boleh diakses murid di sini
+    });
 });
 
 // Socialite Auth
